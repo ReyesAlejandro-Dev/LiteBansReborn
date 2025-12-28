@@ -1,0 +1,299 @@
+name: LiteBansReborn
+version: ${project.version}
+main: com.nuvik.litebansreborn.LiteBansReborn
+api-version: '1.20'
+author: Nuvik
+description: Advanced punishment management system - Better than LiteBans
+website: https://nuvik.com
+softdepend:
+  - PlaceholderAPI
+  - LuckPerms
+
+commands:
+  # Ban Commands
+  ban:
+    description: Ban a player from the server
+    usage: /<command> <player> [duration] [reason]
+    permission: litebansreborn.ban
+  tempban:
+    description: Temporarily ban a player
+    usage: /<command> <player> <duration> [reason]
+    permission: litebansreborn.ban.temp
+  ipban:
+    description: Ban a player's IP address
+    usage: /<command> <player|ip> [duration] [reason]
+    permission: litebansreborn.ban.ip
+  unban:
+    description: Unban a player
+    usage: /<command> <player>
+    permission: litebansreborn.unban
+  unbanip:
+    description: Unban an IP address
+    usage: /<command> <player|ip>
+    permission: litebansreborn.unban.ip
+
+  # Mute Commands
+  mute:
+    description: Mute a player
+    usage: /<command> <player> [duration] [reason]
+    permission: litebansreborn.mute
+  tempmute:
+    description: Temporarily mute a player
+    usage: /<command> <player> <duration> [reason]
+    permission: litebansreborn.mute.temp
+  ipmute:
+    description: Mute a player's IP address
+    usage: /<command> <player|ip> [duration] [reason]
+    permission: litebansreborn.mute.ip
+  unmute:
+    description: Unmute a player
+    usage: /<command> <player>
+    permission: litebansreborn.unmute
+  unmuteip:
+    description: Unmute an IP address
+    usage: /<command> <player|ip>
+    permission: litebansreborn.unmute.ip
+
+  # Kick Commands
+  kick:
+    description: Kick a player from the server
+    usage: /<command> <player> [reason]
+    permission: litebansreborn.kick
+  kickall:
+    description: Kick all players from the server
+    usage: /<command> [reason]
+    permission: litebansreborn.kick.all
+
+  # Warn Commands
+  warn:
+    description: Warn a player
+    usage: /<command> <player> [reason]
+    permission: litebansreborn.warn
+  unwarn:
+    description: Remove a warning from a player
+    usage: /<command> <player> [id]
+    permission: litebansreborn.unwarn
+  warnings:
+    description: View a player's warnings
+    usage: /<command> <player>
+    permission: litebansreborn.warnings
+
+  # Freeze Commands
+  freeze:
+    description: Freeze a player in place
+    usage: /<command> <player> [reason]
+    permission: litebansreborn.freeze
+  unfreeze:
+    description: Unfreeze a player
+    usage: /<command> <player>
+    permission: litebansreborn.unfreeze
+
+  # History Commands
+  history:
+    description: View a player's punishment history
+    usage: /<command> <player>
+    permission: litebansreborn.history
+  staffhistory:
+    description: View punishments issued by a staff member
+    usage: /<command> <staff>
+    permission: litebansreborn.staffhistory
+  banlist:
+    description: View all active bans
+    usage: /<command> [page]
+    permission: litebansreborn.banlist
+  mutelist:
+    description: View all active mutes
+    usage: /<command> [page]
+    permission: litebansreborn.mutelist
+
+  # Check Commands
+  checkban:
+    description: Check if a player is banned
+    usage: /<command> <player>
+    permission: litebansreborn.checkban
+  checkmute:
+    description: Check if a player is muted
+    usage: /<command> <player>
+    permission: litebansreborn.checkmute
+
+  # Utility Commands
+  clearchat:
+    description: Clear the server chat
+    usage: /<command>
+    permission: litebansreborn.clearchat
+  mutechat:
+    description: Toggle server-wide chat mute
+    usage: /<command>
+    permission: litebansreborn.mutechat
+  staffchat:
+    description: Toggle staff chat mode
+    usage: /<command> [message]
+    aliases: [sc]
+    permission: litebansreborn.staffchat
+
+  # Report System
+  report:
+    description: Report a player
+    usage: /<command> <player> <reason>
+    permission: litebansreborn.report
+  reports:
+    description: View pending reports
+    usage: /<command> [page]
+    permission: litebansreborn.reports.view
+  handlereport:
+    description: Handle a report
+    usage: /<command> <id> <action>
+    permission: litebansreborn.reports.handle
+
+  # Appeal System
+  appeal:
+    description: Appeal a punishment
+    usage: /<command> [message]
+    permission: litebansreborn.appeal
+  appeals:
+    description: View pending appeals
+    usage: /<command> [page]
+    permission: litebansreborn.appeals.view
+  handleappeal:
+    description: Handle an appeal
+    usage: /<command> <id> <accept|deny> [reason]
+    permission: litebansreborn.appeals.handle
+
+  # Alt Detection
+  alts:
+    description: Check for alt accounts
+    usage: /<command> <player>
+    permission: litebansreborn.alts
+  dupeip:
+    description: Check for players with same IP
+    usage: /<command> <player|ip>
+    permission: litebansreborn.dupeip
+
+  # Admin Commands
+  litebansreborn:
+    description: Main plugin command
+    usage: /<command> <reload|info|import|export|gui|stats>
+    aliases: [lbr, lb]
+    permission: litebansreborn.admin
+
+  # Notes System
+  note:
+    description: Add a note to a player
+    usage: /<command> <player> <note>
+    permission: litebansreborn.note
+  notes:
+    description: View notes for a player
+    usage: /<command> <player>
+    permission: litebansreborn.notes
+  delnote:
+    description: Delete a note
+    usage: /<command> <id>
+    permission: litebansreborn.delnote
+
+  # Rollback
+  rollback:
+    description: Rollback all punishments by a staff member
+    usage: /<command> <staff> [duration]
+    permission: litebansreborn.rollback
+
+  # GeoIP
+  geoip:
+    description: Check player's country
+    usage: /<command> <player>
+    permission: litebansreborn.geoip
+
+  # Allow bypass
+  allowplayer:
+    description: Allow a player to bypass IP ban
+    usage: /<command> <player>
+    permission: litebansreborn.allow
+
+  # Punishment GUI
+  punish:
+    description: Open punishment GUI for a player
+    usage: /<command> <player>
+    permission: litebansreborn.punish
+
+permissions:
+  litebansreborn.*:
+    description: All LiteBansReborn permissions
+    default: op
+    children:
+      litebansreborn.admin: true
+      litebansreborn.ban: true
+      litebansreborn.ban.temp: true
+      litebansreborn.ban.ip: true
+      litebansreborn.ban.permanent: true
+      litebansreborn.unban: true
+      litebansreborn.unban.ip: true
+      litebansreborn.mute: true
+      litebansreborn.mute.temp: true
+      litebansreborn.mute.ip: true
+      litebansreborn.mute.permanent: true
+      litebansreborn.unmute: true
+      litebansreborn.unmute.ip: true
+      litebansreborn.kick: true
+      litebansreborn.kick.all: true
+      litebansreborn.warn: true
+      litebansreborn.unwarn: true
+      litebansreborn.warnings: true
+      litebansreborn.freeze: true
+      litebansreborn.unfreeze: true
+      litebansreborn.history: true
+      litebansreborn.staffhistory: true
+      litebansreborn.banlist: true
+      litebansreborn.mutelist: true
+      litebansreborn.checkban: true
+      litebansreborn.checkmute: true
+      litebansreborn.clearchat: true
+      litebansreborn.mutechat: true
+      litebansreborn.staffchat: true
+      litebansreborn.report: true
+      litebansreborn.reports.view: true
+      litebansreborn.reports.handle: true
+      litebansreborn.appeal: true
+      litebansreborn.appeals.view: true
+      litebansreborn.appeals.handle: true
+      litebansreborn.alts: true
+      litebansreborn.dupeip: true
+      litebansreborn.note: true
+      litebansreborn.notes: true
+      litebansreborn.delnote: true
+      litebansreborn.rollback: true
+      litebansreborn.geoip: true
+      litebansreborn.allow: true
+      litebansreborn.punish: true
+      litebansreborn.silent: true
+      litebansreborn.notify: true
+      litebansreborn.bypass.mute: true
+      litebansreborn.bypass.ban: true
+      litebansreborn.bypass.freeze: true
+
+  litebansreborn.staff:
+    description: Basic staff permissions
+    default: false
+    children:
+      litebansreborn.ban.temp: true
+      litebansreborn.mute.temp: true
+      litebansreborn.kick: true
+      litebansreborn.warn: true
+      litebansreborn.freeze: true
+      litebansreborn.history: true
+      litebansreborn.checkban: true
+      litebansreborn.checkmute: true
+      litebansreborn.staffchat: true
+      litebansreborn.reports.view: true
+      litebansreborn.notify: true
+      litebansreborn.punish: true
+
+  litebansreborn.notify:
+    description: Receive punishment notifications
+    default: op
+
+  litebansreborn.silent:
+    description: Use silent punishments
+    default: op
+
+  litebansreborn.report:
+    description: Allows reporting players
+    default: true
