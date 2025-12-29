@@ -7,50 +7,50 @@ Welcome to the official documentation for LiteBansReborn v4.5.
 ### Getting Started
 | Guide | Description |
 |-------|-------------|
-| [Installation](INSTALLATION.md) | How to install and set up the plugin |
-| [Configuration](CONFIGURATION.md) | Complete configuration guide |
-| [Commands](COMMANDS.md) | All available commands |
-| [Permissions](PERMISSIONS.md) | Permission reference |
-| [FAQ](FAQ.md) | Frequently asked questions |
+| [Installation](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/INSTALLATION.md) | How to install and set up the plugin |
+| [Configuration](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/CONFIGURATION.md) | Complete configuration guide |
+| [Commands](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/COMMANDS.md) | All available commands |
+| [Permissions](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/PERMISSIONS.md) | Permission reference |
+| [FAQ](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/FAQ.md) | Frequently asked questions |
 
 ### Core Features
 | Guide | Description |
 |-------|-------------|
-| [Database](DATABASE.md) | Database setup and migration |
-| [Anti-VPN](ANTIVPN.md) | Anti-VPN system setup |
-| [Placeholders](PLACEHOLDERS.md) | PlaceholderAPI placeholders |
-| [Migration](MIGRATION.md) | Migrate from other plugins |
+| [Database](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/DATABASE.md) | Database setup and migration |
+| [Anti-VPN](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/ANTIVPN.md) | Anti-VPN system setup |
+| [Placeholders](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/PLACEHOLDERS.md) | PlaceholderAPI placeholders |
+| [Migration](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/MIGRATION.md) | Migrate from other plugins |
 
 ### v4.0 Features
 | Guide | Description |
 |-------|-------------|
-| [Web Panel](WEBPANEL.md) | Web panel and REST API |
-| [HWID](HWID.md) | Hardware ID banning |
-| [Evidence](EVIDENCE.md) | Evidence system |
-| [Redemption](REDEMPTION.md) | Redemption minigames |
+| [Web Panel](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/WEBPANEL.md) | Web panel and REST API |
+| [HWID](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/HWID.md) | Hardware ID banning |
+| [Evidence](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/EVIDENCE.md) | Evidence system |
+| [Redemption](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/REDEMPTION.md) | Redemption minigames |
 
 ### v4.5 Features (NEW!)
 | Guide | Description |
 |-------|-------------|
-| [Discord Bot](DISCORD.md) | Native Discord bot setup |
-| [Tickets](TICKETS.md) | Support ticket system |
-| [Verification](VERIFICATION.md) | MC-Discord account linking |
-| [Chat Filter](CHATFILTER.md) | Chat protection system |
+| [Discord Bot](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/DISCORD.md) | Native Discord bot setup |
+| [Tickets](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/TICKETS.md) | Support ticket system |
+| [Verification](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/VERIFICATION.md) | MC-Discord account linking |
+| [Chat Filter](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/CHATFILTER.md) | Chat protection system |
 
 ### Developer
 | Guide | Description |
 |-------|-------------|
-| [API](API.md) | Developer API documentation |
-| [Changelog](CHANGELOG.md) | Version history |
+| [API](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/API.md) | Developer API documentation |
+| [Changelog](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/CHANGELOG.md) | Version history |
 
 ---
 
 ## Getting Started
 
-1. **Install the plugin** - See [Installation Guide](INSTALLATION.md)
-2. **Configure basics** - See [Configuration Guide](CONFIGURATION.md)
-3. **Set up permissions** - See [Permissions Reference](PERMISSIONS.md)
-4. **Start punishing!** - See [Commands Reference](COMMANDS.md)
+1. **Install the plugin** - See [Installation Guide](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/INSTALLATION.md)
+2. **Configure basics** - See [Configuration Guide](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/CONFIGURATION.md)
+3. **Set up permissions** - See [Permissions Reference](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/PERMISSIONS.md)
+4. **Start punishing!** - See [Commands Reference](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/COMMANDS.md)
 
 ---
 
@@ -86,7 +86,7 @@ Previous v4.0 features:
 ## Support
 
 - **Discord**: [Join our Discord](https://discord.gg/nuvik)
-- **GitHub**: [Report Issues](https://github.com/nuvik/litebansreborn/issues)
+- **GitHub**: [Report Issues](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/issues)
 - **SpigotMC**: [Discussion Forum](https://spigotmc.org/resources/litebansreborn)
 
 ---
@@ -104,5 +104,5 @@ We welcome contributions! See our guidelines:
 
 <p align="center">
   <b>LiteBansReborn v4.5.0</b><br>
-  Made with ❤️ by Nuvik
+  Made with ❤️ by ReyesAlejandro-Dev
 </p>
