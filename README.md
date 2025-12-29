@@ -1,6 +1,6 @@
 # 📚 LiteBansReborn Documentation
 
-Welcome to the official documentation for LiteBansReborn v4.5.
+Welcome to the official documentation for LiteBansReborn v5.0.
 
 ## Quick Links
 
@@ -21,21 +21,24 @@ Welcome to the official documentation for LiteBansReborn v4.5.
 | [Placeholders](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/PLACEHOLDERS.md) | PlaceholderAPI placeholders |
 | [Migration](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/MIGRATION.md) | Migrate from other plugins |
 
-### v4.0 Features
+### Advanced Features
 | Guide | Description |
 |-------|-------------|
 | [Web Panel](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/WEBPANEL.md) | Web panel and REST API |
 | [HWID](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/HWID.md) | Hardware ID banning |
 | [Evidence](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/EVIDENCE.md) | Evidence system |
 | [Redemption](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/REDEMPTION.md) | Redemption minigames |
-
-### v4.5 Features (NEW!)
-| Guide | Description |
-|-------|-------------|
 | [Discord Bot](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/DISCORD.md) | Native Discord bot setup |
 | [Tickets](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/TICKETS.md) | Support ticket system |
 | [Verification](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/VERIFICATION.md) | MC-Discord account linking |
 | [Chat Filter](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/CHATFILTER.md) | Chat protection system |
+
+### v5.0 Features (NEW!)
+| Guide | Description |
+|-------|-------------|
+| [AI Integration](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/AI.md) | AI moderation setup |
+| [Role Sync](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/ROLESYNC.md) | LuckPerms ↔ Discord Sync |
+| [Maintenance](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/MAINTENANCE.md) | Maintenance mode guide |
 
 ### Developer
 | Guide | Description |
@@ -45,41 +48,14 @@ Welcome to the official documentation for LiteBansReborn v4.5.
 
 ---
 
-## Getting Started
+## What's New in v5.0
 
-1. **Install the plugin** - See [Installation Guide](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/INSTALLATION.md)
-2. **Configure basics** - See [Configuration Guide](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/CONFIGURATION.md)
-3. **Set up permissions** - See [Permissions Reference](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/PERMISSIONS.md)
-4. **Start punishing!** - See [Commands Reference](https://github.com/ReyesAlejandro-Dev/LiteBansReborn/blob/main/docs/COMMANDS.md)
+LiteBansReborn v5.0.0 brings intelligence to your server:
 
----
-
-## What's New in v4.5
-
-LiteBansReborn v4.5.0 introduces major new features:
-
-- 🤖 **Discord Bot** - Native JDA bot with slash commands
-- 🎫 **Ticket System** - Support tickets with categories
-- 🔗 **Verification** - Link MC and Discord accounts
-- 💬 **Chat Filter** - Complete chat protection
-
-Previous v4.0 features:
-- 🔐 **HWID Banning** - Ban by hardware ID
-- 📸 **Evidence System** - Attach proof to punishments
-- 🎮 **Redemption System** - Minigames to reduce punishment
-- 📊 **Web Panel** - REST API and dashboard
-
----
-
-## Documentation Stats
-
-| Metric | Value |
-|--------|-------|
-| Total Guides | **20 files** |
-| Total Size | **125+ KB** |
-| Commands Documented | **50+** |
-| Permissions Documented | **80+** |
-| Placeholders Documented | **50+** |
+- 🧠 **AI Integration** - Toxicity detection & appeal analysis
+- 🔄 **Role Sync** - Sync LuckPerms groups with Discord roles
+- 🚧 **Maintenance Mode** - Native maintenance system
+- 💻 **Modern Web Panel** - Complete React dashboard
 
 ---
 
@@ -91,18 +67,7 @@ Previous v4.0 features:
 
 ---
 
-## Contributing
-
-We welcome contributions! See our guidelines:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
----
-
 <p align="center">
-  <b>LiteBansReborn v4.5.0</b><br>
+  <b>LiteBansReborn v5.0.0</b><br>
   Made with ❤️ by ReyesAlejandro-Dev
 </p>
