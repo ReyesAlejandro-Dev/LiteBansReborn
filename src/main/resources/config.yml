@@ -1,0 +1,1057 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                           LiteBansReborn Configuration                         ║
+# ║                    Advanced Punishment Management System                       ║
+# ║                              Version 5.1.0                                    ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              General Settings                                   │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+general:
+  # Server name (used for multi-server sync)
+  server-name: "server"
+  
+  # Debug mode - enables detailed logging
+  debug: false
+  
+  # Default language
+  language: "en"
+  
+  # Date format for messages
+  date-format: "dd/MM/yyyy HH:mm:ss"
+  
+  # Timezone
+  timezone: "America/Mexico_City"
+  
+  # Enable bStats metrics
+  metrics: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                                  Ghost Mute                                    │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+ghost-mute:
+  enabled: true
+  # Show messages to self? (Essential for trolling)
+  show-to-self: true
+  # Staff with permission 'litebansreborn.ghostmute.view' can see messages
+  staff-can-see: true
+  # Prefix for staff to identify ghost messages
+  staff-prefix: "&7[👻] "
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                                Chat Snapshots                                  │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+snapshots:
+  enabled: true
+  # Lines to keep in memory buffer
+  buffer-size: 100
+  # Lines to save on punishment
+  lines-to-save: 20
+  # Types to snapshot
+  trigger-types:
+    - BAN
+    - MUTE
+    - WARN
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                                 Auto Rollback                                  │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+rollback:
+  enabled: true
+  # Check if CoreProtect is installed
+  require-coreprotect: true
+  # Rollback time
+  time: "24h"
+  # Show button in GUI?
+  gui-button: true
+  # Command to execute
+  command: "co rollback u:{player} t:{time} #silent"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Evidence System                                     │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+evidence:
+  enabled: true
+  # Storage type: local, s3, cloudinary
+  storage: "local"
+  # Auto-capture inventory when banning
+  auto-capture-inventory: true
+  # Allowed evidence types
+  types:
+    - screenshots
+    - video-links
+    - replay-links
+    - chat-logs
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                           Smart Rate Limiting                                    │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+smart-limits:
+  enabled: true
+  
+  # Staff rate limiting (prevent abuse)
+  staff:
+    max-bans-per-hour: 20
+    max-permanent-per-day: 5
+    # Require confirmation code for permanent bans
+    require-2fa-for-perma: true
+  
+  # Player rate limiting
+  players:
+    report-cooldown: "5m"
+    appeal-cooldown: "24h"
+    max-reports-per-day: 10
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                           Redemption System                                      │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+redemption:
+  enabled: true
+  # Allow banned players to reduce punishment via challenges
+  
+  minigames:
+    captcha-math:
+      enabled: true
+      reduction: 10        # % reduction
+      max-attempts: 3
+      one-time: false
+    
+    typing-test:
+      enabled: true
+      reduction: 15
+      max-attempts: 2
+      one-time: true
+    
+    quiz:
+      enabled: true
+      reduction: 20
+      max-attempts: 1
+      one-time: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                           Hardware ID Banning                                    │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+hardware-ban:
+  enabled: false
+  # Requires optional client mod for full HWID tracking
+  client-mod: "LiteBansClient"
+  # Track these identifiers
+  track:
+    - hardware-id
+    - mac-address-hash
+    - gpu-signature
+  # Fingerprint similarity threshold for alt detection (0-100)
+  alt-detection-threshold: 70
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Web Panel                                           │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+web-panel:
+  enabled: false
+  port: 8080
+  ssl: false
+  # keystore-password: "changeit"  # For SSL
+  
+  # API keys for authentication (generate your own!)
+  api-keys:
+    - "your-secret-api-key-here"
+  
+  # Features
+  features:
+    real-time-dashboard: true
+    punishment-management: true
+    player-search: true
+    staff-statistics: true
+    appeal-handling: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Database Settings                                  │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+database:
+  # Database type: MYSQL, MARIADB, POSTGRESQL, SQLITE, H2, MONGODB
+  type: "H2"
+  
+  # For SQL databases
+  host: "localhost"
+  port: 3306
+  database: "litebansreborn"
+  username: "root"
+  password: "password"
+  
+  # Table prefix
+  table-prefix: "lbr_"
+  
+  # Connection pool settings
+  pool:
+    maximum-pool-size: 10
+    minimum-idle: 5
+    idle-timeout: 300000
+    max-lifetime: 600000
+    connection-timeout: 10000
+  
+  # Enable SSL for connection
+  ssl: false
+  
+  # For MongoDB
+  mongodb:
+    uri: "mongodb://localhost:27017"
+    database: "litebansreborn"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Punishment Settings                                │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+punishments:
+  # Default reasons when none is provided
+  default-reasons:
+    ban: "Banned by an administrator"
+    mute: "Muted by an administrator"
+    kick: "Kicked by an administrator"
+    warn: "Warned by an administrator"
+    freeze: "Frozen by an administrator"
+  
+  # Ban settings
+  ban:
+    # Broadcast when someone is banned
+    broadcast: true
+    # Allow permanent bans
+    allow-permanent: true
+    # Maximum ban duration (in days, 0 = unlimited)
+    max-duration: 0
+    # Kick banned player immediately
+    kick-on-ban: true
+    
+    # Wipe player data on ban (Reset progress)
+    # WARNING: This can be destructive. Use with caution.
+    wipe-data:
+      enabled: false
+      # Only wipe data on permanent bans?
+      only-permanent: true
+      # Delete the player .dat file (Inventories, EC, Location, XP, Stats, Advancements)
+      # Works for OFFLINE players too. Highly effective for resetting vanilla data.
+      delete-world-data: false
+      # Execute commands to clear external plugin data
+      # Placeholders: {player}, {uuid}
+      commands:
+        - "lp user {player} clear"
+        - "eco reset {player}"
+        #- "cmi deletehome {player} all"
+        #- "essentials:delhome {player} all"
+  
+  # Mute settings
+  mute:
+    broadcast: true
+    allow-permanent: true
+    max-duration: 0
+    # Commands blocked while muted
+    blocked-commands:
+      - "msg"
+      - "tell"
+      - "whisper"
+      - "r"
+      - "reply"
+      - "me"
+      - "say"
+      - "shout"
+      - "helpop"
+  
+  # Kick settings
+  kick:
+    broadcast: true
+  
+  # Warn settings
+  warn:
+    broadcast: true
+    # Maximum warnings before auto-action
+    max-warnings: 3
+    # Auto-action when max warnings reached
+    auto-action:
+      enabled: true
+      action: "ban"
+      duration: "7d"
+      reason: "Exceeded maximum warnings"
+    # Warning expiry (in days, 0 = never expire)
+    expiry: 30
+  
+  # Freeze settings
+  freeze:
+    broadcast: true
+    # Block commands while frozen
+    block-commands: true
+    # Block movement
+    block-movement: true
+    # Block interactions
+    block-interactions: true
+    # Block chat
+    block-chat: false
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Alt Detection Settings                             │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+alt-detection:
+  # Enable alt account detection
+  enabled: true
+  
+  # Notify staff when alt detected
+  notify-staff: true
+  
+  # Auto-action for detected alts of banned players
+  auto-action:
+    enabled: false
+    action: "ban"
+    reason: "Alt account of banned player"
+  
+  # Check for alt accounts on login
+  check-on-join: true
+  
+  # Methods for alt detection
+  detection-methods:
+    ip-address: true
+    # Additional methods (future feature)
+    # fingerprint: false
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Report System Settings                             │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+reports:
+  # Enable report system
+  enabled: true
+  
+  # Cooldown between reports (in seconds)
+  cooldown: 60
+  
+  # Maximum reports per player per day
+  max-daily-reports: 5
+  
+  # Notify staff when report is created
+  notify-staff: true
+  
+  # Report categories
+  categories:
+    - "cheating"
+    - "chat-abuse"
+    - "griefing"
+    - "spam"
+    - "other"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Appeal System Settings                             │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+appeals:
+  # Enable appeal system
+  enabled: true
+  
+  # Allow appeal for permanent bans
+  allow-permanent-appeals: true
+  
+  # Cooldown between appeals (in hours)
+  cooldown: 24
+  
+  # Maximum appeals per punishment
+  max-appeals: 2
+  
+  # Notify staff when appeal is created
+  notify-staff: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Staff Chat Settings                                │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+staff-chat:
+  # Enable staff chat
+  enabled: true
+  
+  # Staff chat format
+  format: "&8[&cStaff&8] &c%player%&8: &f%message%"
+  
+  # Toggle mode vs prefix mode
+  # toggle: Must use /staffchat to toggle on/off
+  # prefix: Use # at start of message
+  mode: "toggle"
+  prefix: "#"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Discord Integration                                │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+discord:
+  # Enable Discord webhook
+  enabled: false
+  
+  # Webhook URL
+  webhook-url: "https://discord.com/api/webhooks/..."
+  
+  # Bot name
+  bot-name: "LiteBansReborn"
+  
+  # Bot avatar URL
+  avatar-url: ""
+  
+  # Events to send to Discord
+  events:
+    ban: true
+    unban: true
+    mute: true
+    unmute: true
+    kick: true
+    warn: true
+    freeze: true
+    report: true
+    appeal: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Telegram Integration                               │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+telegram:
+  # Enable Telegram notifications
+  enabled: false
+  
+  # Bot token
+  bot-token: ""
+  
+  # Chat ID
+  chat-id: ""
+  
+  # Events to send to Telegram
+  events:
+    ban: true
+    unban: true
+    mute: true
+    unmute: true
+    kick: true
+    warn: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Punishment Templates                               │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+# Templates allow you to create punishment "ladders" for escalating punishments
+templates:
+  cheating:
+    name: "Cheating"
+    description: "For players using unfair advantages"
+    punishments:
+      - type: "ban"
+        duration: "7d"
+        reason: "Cheating - First Offense"
+      - type: "ban"
+        duration: "30d"
+        reason: "Cheating - Second Offense"
+      - type: "ban"
+        duration: "permanent"
+        reason: "Cheating - Permanent"
+  
+  chat-abuse:
+    name: "Chat Abuse"
+    description: "For chat violations"
+    punishments:
+      - type: "warn"
+        reason: "Chat Abuse - Warning"
+      - type: "mute"
+        duration: "1h"
+        reason: "Chat Abuse - 1 Hour Mute"
+      - type: "mute"
+        duration: "1d"
+        reason: "Chat Abuse - 1 Day Mute"
+      - type: "mute"
+        duration: "7d"
+        reason: "Chat Abuse - 7 Day Mute"
+      - type: "ban"
+        duration: "7d"
+        reason: "Chat Abuse - 7 Day Ban"
+  
+  advertising:
+    name: "Advertising"
+    description: "For server advertising"
+    punishments:
+      - type: "mute"
+        duration: "1d"
+        reason: "Advertising - First Offense"
+      - type: "mute"
+        duration: "7d"
+        reason: "Advertising - Second Offense"
+      - type: "ban"
+        duration: "permanent"
+        reason: "Advertising - Permanent"
+  
+  griefing:
+    name: "Griefing"
+    description: "For destruction of property"
+    punishments:
+      - type: "warn"
+        reason: "Griefing - Warning"
+      - type: "ban"
+        duration: "1d"
+        reason: "Griefing - 1 Day Ban"
+      - type: "ban"
+        duration: "7d"
+        reason: "Griefing - 7 Day Ban"
+      - type: "ban"
+        duration: "30d"
+        reason: "Griefing - 30 Day Ban"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Point System                                       │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+# Points accumulate and can trigger automatic punishments
+points:
+  # Enable point system
+  enabled: true
+  
+  # Points per punishment type
+  punishment-points:
+    warn: 1
+    mute: 2
+    kick: 3
+    tempban: 5
+    ban: 10
+  
+  # Point decay (points removed per day)
+  decay-per-day: 0.5
+  
+  # Automatic actions at point thresholds
+  thresholds:
+    - points: 5
+      action: "mute"
+      duration: "1h"
+      reason: "Accumulated 5 punishment points"
+    - points: 10
+      action: "ban"
+      duration: "1d"
+      reason: "Accumulated 10 punishment points"
+    - points: 20
+      action: "ban"
+      duration: "7d"
+      reason: "Accumulated 20 punishment points"
+    - points: 50
+      action: "ban"
+      duration: "permanent"
+      reason: "Accumulated 50 punishment points"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              GUI Settings                                       │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+gui:
+  # Enable punishment GUI
+  enabled: true
+  
+  # GUI title format
+  title-format: "&8Punish: &c%player%"
+  
+  # Use sounds
+  sounds:
+    enabled: true
+    click: "UI_BUTTON_CLICK"
+    open: "BLOCK_CHEST_OPEN"
+    close: "BLOCK_CHEST_CLOSE"
+    success: "ENTITY_PLAYER_LEVELUP"
+    error: "ENTITY_VILLAGER_NO"
+  
+  # Filler item for empty slots
+  filler:
+    enabled: true
+    material: "GRAY_STAINED_GLASS_PANE"
+    name: " "
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              GeoIP Settings                                     │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+geoip:
+  # Enable GeoIP lookup
+  enabled: true
+  
+  # API provider: "ip-api", "ipinfo", "ipdata"
+  provider: "ip-api"
+  
+  # API key (required for some providers)
+  api-key: ""
+  
+  # Cache results (in minutes)
+  cache-duration: 60
+  
+  # Show country on join
+  show-on-join: false
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Anti-VPN Settings                                  │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+# Advanced VPN/Proxy detection with multiple API providers
+anti-vpn:
+  # Enable Anti-VPN system
+  enabled: true
+  
+  # Action when VPN is detected: KICK, WARN, ALLOW, NONE
+  # KICK - Kick the player with a message
+  # WARN - Only send warning to staff (player can join)
+  # ALLOW - Allow but log the detection
+  # NONE - Do nothing
+  action: "WARN"
+  
+  # Check players on join
+  check-on-join: true
+  
+  # API providers to use (in order of priority)
+  # Available: proxycheck, ip-api, vpnapi, iphub, iphunter, ipqualityscore
+  # The system will rotate between these if one fails
+  providers:
+    - "proxycheck"
+    - "ip-api"
+    - "vpnapi"
+    - "iphub"
+  
+  # API keys for premium providers (optional but recommended for higher limits)
+  api-keys:
+    proxycheck: ""           # proxycheck.io - 100 free/day, unlimited with key
+    vpnapi: ""               # vpnapi.io - 1000 free/day
+    iphub: ""                # iphub.info - 1000 free/day (key required)
+    iphunter: ""             # iphunter.info - free tier available
+    ipqualityscore: ""       # ipqualityscore.com - premium, very accurate
+  
+  # Cache duration for VPN results (in minutes)
+  cache-duration: 60
+  
+  # Block different types of connections
+  block-types:
+    vpn: true
+    proxy: true
+    hosting: true       # Datacenter/cloud hosting IPs
+    tor: true           # Tor exit nodes
+  
+  # Whitelist configuration
+  whitelist:
+    # Whitelisted IPs (never checked)
+    ips:
+      - "127.0.0.1"
+    # Whitelisted countries (country codes, players from these won't be kicked)
+    countries: []
+      # - "US"
+      # - "MX"
+  
+  # Notification settings
+  notifications:
+    # Notify staff when VPN is detected
+    notify-staff: true
+    # Log detections to console
+    log-to-console: true
+    # Send to Discord webhook
+    discord: true
+  
+  # Messages
+  messages:
+    # Kick message when VPN is detected
+    kick: |
+      &c&lVPN/Proxy Detected!
+      
+      &7You cannot join this server using a VPN or proxy.
+      &7Please disable your VPN and try again.
+      
+      &7If you believe this is an error, contact staff.
+      &7Your IP: &f%ip%
+    
+    # Warning message to staff
+    staff-warning: "&c[AntiVPN] &e%player% &7is using a &c%type% &7(%provider%)"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Client Detection Settings                          │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+# Detects what client/launcher players are using (Forge, Fabric, Lunar, etc.)
+client-detection:
+  # Enable client detection
+  enabled: true
+  
+  # Log client info when player joins
+  log-on-join: true
+  
+  # Notify staff about suspicious clients (Fabric, Forge that can load cheats)
+  notify-suspicious: true
+  
+  # Warn about modded clients specifically
+  warn-modded: true
+  
+  # List of "safe" clients that won't trigger warnings
+  # Players using these are considered trusted
+  safe-clients:
+    - "Lunar Client"
+    - "Badlion Client"
+    - "LabyMod"
+    - "Vanilla"
+    - "Feather Client"
+  
+  # Blocked clients (these will be kicked)
+  # Note: Cheaters can spoof their client brand, so this is not 100% reliable
+  blocked-clients:
+    enabled: false
+    clients:
+      - "Wurst"
+      - "Impact"
+      - "Aristois"
+      - "Future"
+      - "Sigma"
+    kick-message: "&cYou are using a banned client. Please use vanilla or an approved client."
+  
+  # Action for modded clients (Forge/Fabric): NONE, WARN, KICK
+  modded-action: "WARN"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Web Panel Settings                                 │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+web-panel:
+  # Enable Web Panel (Dashboard)
+  enabled: true
+  
+  # Port for the web server
+  port: 8080
+  
+  # Use SSL (HTTPS)
+  ssl: false
+  keystore-password: "changeit"
+  
+  # API keys for authentication
+  api-keys:
+    - "admin"
+    
+  # Allow connections from any origin (CORS)
+  cors: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Broadcast Settings                                 │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+broadcasts:
+  # Silent prefix for broadcasts (only visible to staff)
+  silent-prefix: "&8[&7Silent&8] "
+  
+  # Formats for broadcast messages
+  formats:
+    ban: "&c%player% &7has been banned by &c%executor%&7: &f%reason%"
+    tempban: "&c%player% &7has been banned for &e%duration% &7by &c%executor%&7: &f%reason%"
+    unban: "&a%player% &7has been unbanned by &a%executor%"
+    mute: "&c%player% &7has been muted by &c%executor%&7: &f%reason%"
+    tempmute: "&c%player% &7has been muted for &e%duration% &7by &c%executor%&7: &f%reason%"
+    unmute: "&a%player% &7has been unmuted by &a%executor%"
+    kick: "&c%player% &7has been kicked by &c%executor%&7: &f%reason%"
+    warn: "&e%player% &7has been warned by &e%executor%&7: &f%reason%"
+    freeze: "&b%player% &7has been frozen by &b%executor%"
+    unfreeze: "&a%player% &7has been unfrozen by &a%executor%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Import Settings                                    │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+import:
+  # Supported import sources
+  supported:
+    - "vanilla"
+    - "essentials"
+    - "advancedban"
+    - "maxbans"
+    - "banmanager"
+    - "litebans"
+
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                           v4.5 - NEW FEATURES                                  ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Discord Bot (JDA)                                  │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+discord-bot:
+  # Enable Discord bot
+  enabled: false
+  
+  # Bot token from Discord Developer Portal
+  token: "YOUR_BOT_TOKEN_HERE"
+  
+  # Channels
+  channels:
+    # Channel for punishment logs
+    logs: ""
+    # Channel for tickets
+    tickets: ""
+    # Channel for verification
+    verification: ""
+  
+  # Role IDs that can use staff commands
+  staff-roles:
+    - ""
+  
+  # Role to assign on verification
+  verified-role: ""
+  
+  # Sync punishments from Discord
+  sync-punishments: true
+  
+  # Slash commands
+  commands:
+    ban: true
+    unban: true
+    mute: true
+    unmute: true
+    kick: true
+    history: true
+    checkban: true
+    stats: true
+    lookup: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Ticket System                                      │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+tickets:
+  # Enable ticket system
+  enabled: true
+  
+  # Max open tickets per player
+  max-open-per-player: 3
+  
+  # Cooldown between tickets (minutes)
+  cooldown: 5
+  
+  # Auto-close after inactivity (hours)
+  auto-close-hours: 72
+  
+  # Notify on new ticket
+  notify-staff: true
+  
+  # Create Discord thread for tickets
+  discord-threads: true
+  
+  # Categories
+  categories:
+    appeal:
+      enabled: true
+      icon: "BOOK"
+      description: "Appeal a punishment"
+    report:
+      enabled: true
+      icon: "PAPER"
+      description: "Report a player"
+    support:
+      enabled: true
+      icon: "COMPASS"
+      description: "General support"
+    bug:
+      enabled: true
+      icon: "BARRIER"
+      description: "Report a bug"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                           Discord Verification                                  │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+verification:
+  # Enable account linking
+  enabled: true
+  
+  # Code expiry time (minutes)
+  code-expiry: 10
+  
+  # Require verification to play
+  required: false
+  
+  # Kick message if not verified
+  kick-message: "&cYou must verify your Discord account to play!"
+  
+  # Benefits for verified players
+  benefits:
+    # Extra homes
+    extra-homes: 0
+    # Permission to add on verification
+    permissions:
+      - "essentials.nick"
+  
+  # Update Minecraft name on join
+  sync-names: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Chat Filter                                        │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+chat-filter:
+  # Enable chat filter
+  enabled: true
+  
+  # Block advertisements (IPs, domains)
+  block-ads: true
+  
+  # Block all links
+  block-links: false
+  
+  # Block excessive caps
+  block-caps: true
+  
+  # Caps threshold (%)
+  caps-threshold: 70
+  
+  # Min message length for caps check
+  min-caps-length: 5
+  
+  # Block spam (rapid messages)
+  block-spam: true
+  
+  # Max messages in time window
+  spam-message-limit: 5
+  
+  # Time window (seconds)
+  spam-time-window: 10
+  
+  # Block flood (repeated messages)
+  block-flood: true
+  
+  # Similarity threshold for flood (%)
+  flood-similarity: 80
+  
+  # Block character spam (aaaaaaa)
+  block-char-spam: true
+  
+  # Repeated char threshold
+  char-spam-threshold: 4
+  
+  # Auto-mute after X warnings
+  auto-mute-threshold: 5
+  
+  # Auto-mute duration
+  auto-mute-duration: "10m"
+  
+  # Blocked words (case insensitive)
+  blocked-words:
+    - "example_bad_word"
+  
+  # Blocked patterns (regex)
+  blocked-patterns:
+    - "discord\\.gg\\/[a-zA-Z0-9]+"
+  
+  # Whitelisted domains
+  whitelist-domains:
+    - "youtube.com"
+    - "youtu.be"
+    - "imgur.com"
+    - "twitter.com"
+    - "twitch.tv"
+
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                           v5.0 - NEW FEATURES                                  ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Maintenance Mode                                   │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+maintenance:
+  # Enable maintenance mode on startup
+  enabled: false
+  
+  # Default reason
+  reason: "Server maintenance in progress"
+  
+  # Whitelisted UUIDs (staff who can join during maintenance)
+  whitelist: []
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Role Synchronization                              │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+role-sync:
+  # Enable Discord ↔ LuckPerms role sync
+  enabled: false
+  
+  # Sync direction: discord-to-minecraft, minecraft-to-discord, bidirectional
+  direction: "discord-to-minecraft"
+  
+  # Auto-sync on player join
+  sync-on-join: true
+  
+  # Role mappings: Discord Role ID -> LuckPerms Group
+  # Example: "1234567890123456789": "vip"
+  mappings: {}
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              AI Integration                                     │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+ai:
+  # Enable AI features (requires API key)
+  enabled: false
+  
+  # Provider: openrouter, venice, openai, deepseek, claude
+  provider: "openrouter"
+  
+  # API key for the selected provider
+  api-key: "YOUR_API_KEY_HERE"
+  
+  # Model to use (depends on provider)
+  # OpenRouter: deepseek/deepseek-chat, anthropic/claude-3-haiku, etc.
+  # Venice: llama-3.1-70b, etc.
+  # OpenAI: gpt-4o-mini, gpt-4, etc.
+  model: "deepseek/deepseek-chat"
+  
+  # Features to enable
+  features:
+    # Analyze chat toxicity
+    toxicity-detection: true
+    
+    # Analyze player behavior
+    behavior-analysis: false
+    
+    # AI-assisted appeal review
+    appeal-review: true
+
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                           v5.1 - INTELLIGENCE UPDATE                          ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Social Network Analysis                           │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+social-network:
+  # Enable alt detection and relationship tracking
+  enabled: true
+  
+  # Alert staff when player with banned associates joins
+  alert-banned-associates: true
+  
+  # Minimum connection score to trigger alert
+  alert-threshold: 50
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Automatic Case Files                              │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+case-files:
+  # Enable automatic case file creation
+  enabled: true
+  
+  # Auto-create case file when /freeze is used
+  auto-create-on-freeze: true
+  
+  # Track chat history (for case files)
+  track-chat: true
+  
+  # Track movements (for case files)
+  track-movement: true
+  
+  # Maximum chat messages to store per player
+  max-chat-history: 200
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Cross-Server Intelligence                         │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+cross-server:
+  # Enable cross-server sync (requires BungeeCord/Velocity)
+  enabled: false
+  
+  # Sync mode: plugin-messaging (recommended), redis, mysql
+  mode: "plugin-messaging"
+  
+  # This server's name (must be unique across network)
+  server-name: "server1"
+  
+  # Broadcast bans to other servers
+  sync-bans: true
+  
+  # Alert about high-risk players joining other servers
+  sync-alerts: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Predictive Moderation                             │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+predictive:
+  # Enable predictive moderation
+  enabled: true
+  
+  # Alert staff about high-risk players
+  alert-high-risk: true
+  
+  # Risk threshold for alerts (0-100)
+  alert-threshold: 70
+  
+  # Learn from bans to improve predictions
+  learn-from-bans: true
+

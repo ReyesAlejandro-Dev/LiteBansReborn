@@ -6,14 +6,14 @@
 
     <groupId>com.nuvik</groupId>
     <artifactId>LiteBansReborn</artifactId>
-    <version>1.0.0</version>
+    <version>5.1.0</version>
     <packaging>jar</packaging>
 
     <name>LiteBansReborn</name>
     <description>Advanced punishment management system for Minecraft servers - Better than LiteBans</description>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -25,29 +25,53 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
-        <!-- Paper Repository -->
         <repository>
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
-        <!-- PlaceholderAPI -->
         <repository>
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
-        <!-- JitPack for Discord Webhooks -->
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <!-- JDA Repository -->
+        <repository>
+            <id>dv8tion</id>
+            <url>https://m2.dv8tion.net/releases</url>
+        </repository>
     </repositories>
 
     <dependencies>
+        <!-- JDA (Discord Bot) -->
+        <dependency>
+            <groupId>net.dv8tion</groupId>
+            <artifactId>JDA</artifactId>
+            <version>5.0.0-beta.20</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>opus-java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        
+        <!-- Spigot API -->
         <!-- Spigot API -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.20.4-R0.1-SNAPSHOT</version>
+            <version>1.21.1-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- LuckPerms API -->
+        <dependency>
+            <groupId>net.luckperms</groupId>
+            <artifactId>api</artifactId>
+            <version>5.4</version>
             <scope>provided</scope>
         </dependency>
 

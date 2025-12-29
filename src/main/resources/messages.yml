@@ -1,0 +1,735 @@
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                           LiteBansReborn Messages                              ║
+# ║                    All plugin messages are customizable                        ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+prefix: "&8[&c&lLiteBans&8] "
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              General Messages                                   │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+general:
+  no-permission: "&cYou don't have permission to use this command."
+  player-not-found: "&cPlayer &e%player% &cnot found."
+  player-only: "&cThis command can only be used by players."
+  console-only: "&cThis command can only be used from console."
+  invalid-syntax: "&cInvalid syntax. Usage: &e%usage%"
+  invalid-duration: "&cInvalid duration format. Examples: 1d, 2h, 30m, 1w"
+  reload-success: "&aConfiguration reloaded successfully!"
+  reload-failed: "&cFailed to reload configuration. Check console for errors."
+  database-error: "&cA database error occurred. Please try again later."
+  cooldown: "&cPlease wait &e%time% &cbefore using this command again."
+  cannot-punish-self: "&cYou cannot punish yourself."
+  cannot-punish-exempt: "&cYou cannot punish this player."
+  already-punished: "&cThis player is already %punishment%."
+  not-punished: "&cThis player is not %punishment%."
+  
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Ban Messages                                       │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+ban:
+  usage: "&cUsage: /ban <player> [duration] [reason]"
+  success: "&aSuccessfully banned &e%player%&a."
+  success-temp: "&aSuccessfully banned &e%player% &afor &e%duration%&a."
+  
+  # Ban screen shown to the banned player
+  screen:
+    - ""
+    - "&c&l⚠ YOU HAVE BEEN BANNED ⚠"
+    - ""
+    - "&7Reason: &f%reason%"
+    - "&7Banned by: &f%executor%"
+    - "&7Date: &f%date%"
+    - "&7Duration: &f%duration%"
+    - "&7Expires: &f%expires%"
+    - ""
+    - "&7Ban ID: &8#%id%"
+    - ""
+    - "&eAppeal at: &b&nhttps://your-server.com/appeal"
+    - ""
+  
+  # IP Ban
+  ip:
+    usage: "&cUsage: /ipban <player|ip> [duration] [reason]"
+    success: "&aSuccessfully IP banned &e%target%&a."
+    invalid-ip: "&cInvalid IP address format."
+  
+  # Broadcast formats
+  broadcast:
+    permanent: "&c%player% &7has been &cpermanently banned &7by &c%executor%&7: &f%reason%"
+    temporary: "&c%player% &7has been &cbanned for %duration% &7by &c%executor%&7: &f%reason%"
+    silent: "&8[&7Silent&8] %message%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Unban Messages                                     │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+unban:
+  usage: "&cUsage: /unban <player>"
+  success: "&aSuccessfully unbanned &e%player%&a."
+  not-banned: "&c%player% &cis not banned."
+  broadcast: "&a%player% &7has been &aunbanned &7by &a%executor%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Mute Messages                                      │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+mute:
+  usage: "&cUsage: /mute <player> [duration] [reason]"
+  success: "&aSuccessfully muted &e%player%&a."
+  success-temp: "&aSuccessfully muted &e%player% &afor &e%duration%&a."
+  
+  # Message shown when muted player tries to chat
+  denied:
+    - "&c&l⚠ YOU ARE MUTED ⚠"
+    - "&7Reason: &f%reason%"
+    - "&7Remaining: &f%remaining%"
+    - "&7Mute ID: &8#%id%"
+  
+  # IP Mute
+  ip:
+    usage: "&cUsage: /ipmute <player|ip> [duration] [reason]"
+    success: "&aSuccessfully IP muted &e%target%&a."
+  
+  broadcast:
+    permanent: "&c%player% &7has been &cpermanently muted &7by &c%executor%&7: &f%reason%"
+    temporary: "&c%player% &7has been &cmuted for %duration% &7by &c%executor%&7: &f%reason%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Unmute Messages                                    │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+unmute:
+  usage: "&cUsage: /unmute <player>"
+  success: "&aSuccessfully unmuted &e%player%&a."
+  not-muted: "&c%player% &cis not muted."
+  broadcast: "&a%player% &7has been &aunmuted &7by &a%executor%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Kick Messages                                      │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+kick:
+  usage: "&cUsage: /kick <player> [reason]"
+  success: "&aSuccessfully kicked &e%player%&a."
+  not-online: "&c%player% &cis not online."
+  
+  screen:
+    - ""
+    - "&c&l⚠ YOU HAVE BEEN KICKED ⚠"
+    - ""
+    - "&7Reason: &f%reason%"
+    - "&7Kicked by: &f%executor%"
+    - ""
+  
+  broadcast: "&c%player% &7has been &ckicked &7by &c%executor%&7: &f%reason%"
+  
+  # Kick all
+  all:
+    usage: "&cUsage: /kickall [reason]"
+    success: "&aSuccessfully kicked &e%count% &aplayers."
+    broadcast: "&cAll players have been kicked by &c%executor%&7: &f%reason%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Warn Messages                                      │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+warn:
+  usage: "&cUsage: /warn <player> [reason]"
+  success: "&aSuccessfully warned &e%player%&a. They now have &e%count% &awarnings."
+  
+  # Message shown to warned player
+  received:
+    - ""
+    - "&e&l⚠ YOU HAVE BEEN WARNED ⚠"
+    - ""
+    - "&7Reason: &f%reason%"
+    - "&7Warned by: &f%executor%"
+    - "&7Warning #%count%"
+    - ""
+    - "&c&lContinued violations may result in a ban!"
+    - ""
+  
+  broadcast: "&e%player% &7has been &ewarned &7by &e%executor%&7: &f%reason% &8(&e%count%&8)"
+  
+  # Unwarn
+  unwarn:
+    usage: "&cUsage: /unwarn <player> [warning_id]"
+    success: "&aSuccessfully removed warning &e#%id% &afrom &e%player%&a."
+    no-warnings: "&c%player% &chas no warnings."
+    not-found: "&cWarning #%id% not found."
+  
+  # Auto-action message
+  auto-action: "&c%player% &7has received an automatic &c%action% &7for exceeding maximum warnings."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Freeze Messages                                    │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+freeze:
+  usage: "&cUsage: /freeze <player> [reason]"
+  success: "&aSuccessfully froze &e%player%&a."
+  
+  # Message shown to frozen player
+  frozen-message:
+    - ""
+    - "&b&l❄ YOU HAVE BEEN FROZEN ❄"
+    - ""
+    - "&7You have been frozen by a staff member."
+    - "&7Reason: &f%reason%"
+    - ""
+    - "&c&lDO NOT LOG OUT!"
+    - "&7Logging out will result in a ban."
+    - ""
+  
+  # Periodic reminder to frozen player
+  reminder: "&b&l❄ &7You are &bfrozen&7. Please wait for staff."
+  
+  # Blocked action messages
+  blocked:
+    movement: "&cYou cannot move while frozen!"
+    chat: "&cYou cannot chat while frozen!"
+    command: "&cYou cannot use commands while frozen!"
+    interact: "&cYou cannot interact while frozen!"
+  
+  logout-ban: "&c%player% &7was &cbanned &7for logging out while frozen."
+  
+  broadcast: "&b%player% &7has been &bfrozen &7by &b%executor%"
+  
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Unfreeze Messages                                  │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+unfreeze:
+  usage: "&cUsage: /unfreeze <player>"
+  success: "&aSuccessfully unfroze &e%player%&a."
+  not-frozen: "&c%player% &cis not frozen."
+  unfrozen-message: "&a&l✓ &aYou have been unfrozen!"
+  broadcast: "&a%player% &7has been &aunfrozen &7by &a%executor%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              History Messages                                   │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+history:
+  usage: "&cUsage: /history <player>"
+  header: "&8&m--------&r &eHistory for &f%player% &8&m--------"
+  footer: "&8&m----------------------------------"
+  no-history: "&7No punishment history found for &e%player%&7."
+  
+  entry:
+    ban: "&c[BAN] &7%date% &8- &f%reason% &7by &f%executor% &8(%duration%)"
+    mute: "&e[MUTE] &7%date% &8- &f%reason% &7by &f%executor% &8(%duration%)"
+    kick: "&6[KICK] &7%date% &8- &f%reason% &7by &f%executor%"
+    warn: "&d[WARN] &7%date% &8- &f%reason% &7by &f%executor%"
+    freeze: "&b[FREEZE] &7%date% &8- &f%reason% &7by &f%executor%"
+  
+  active: "&a[ACTIVE]"
+  expired: "&7[EXPIRED]"
+  removed: "&c[REMOVED]"
+  
+  staff:
+    usage: "&cUsage: /staffhistory <staff>"
+    header: "&8&m--------&r &ePunishments by &f%staff% &8&m--------"
+    no-history: "&7No punishments issued by &e%staff%&7."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Check Commands                                     │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+check:
+  ban:
+    usage: "&cUsage: /checkban <player>"
+    banned: "&c%player% &7is banned!"
+    details:
+      - "&7Reason: &f%reason%"
+      - "&7Banned by: &f%executor%"
+      - "&7Date: &f%date%"
+      - "&7Duration: &f%duration%"
+      - "&7Expires: &f%expires%"
+      - "&7Ban ID: &8#%id%"
+    not-banned: "&a%player% &7is not banned."
+  
+  mute:
+    usage: "&cUsage: /checkmute <player>"
+    muted: "&c%player% &7is muted!"
+    details:
+      - "&7Reason: &f%reason%"
+      - "&7Muted by: &f%executor%"
+      - "&7Date: &f%date%"
+      - "&7Duration: &f%duration%"
+      - "&7Expires: &f%expires%"
+      - "&7Mute ID: &8#%id%"
+    not-muted: "&a%player% &7is not muted."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Lists                                              │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+lists:
+  banlist:
+    header: "&8&m--------&r &cActive Bans &8(&7Page %page%/%total%&8) &8&m--------"
+    entry: "&c%player% &8- &f%reason% &8(&e%remaining%&8)"
+    empty: "&7No active bans."
+    footer: "&8← Page %page% of %total% →"
+  
+  mutelist:
+    header: "&8&m--------&r &eMute Mutes &8(&7Page %page%/%total%&8) &8&m--------"
+    entry: "&e%player% &8- &f%reason% &8(&e%remaining%&8)"
+    empty: "&7No active mutes."
+    footer: "&8← Page %page% of %total% →"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Reports                                            │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+reports:
+  usage: "&cUsage: /report <player> <reason>"
+  success: "&aYour report has been submitted successfully!"
+  confirm: "&7Thank you for reporting &e%player%&7. Staff will review this shortly."
+  cannot-report-self: "&cYou cannot report yourself."
+  already-reported: "&cYou have already reported this player recently."
+  max-daily: "&cYou have reached your daily report limit."
+  offline: "&cYou can only report online players."
+  
+  notify: "&8[&cReport&8] &e%reporter% &7reported &e%reported%&7: &f%reason%"
+  
+  list:
+    header: "&8&m--------&r &cPending Reports &8(&7Page %page%/%total%&8) &8&m--------"
+    entry: "&8#%id% &7- &e%reporter% &8→ &e%reported%&7: &f%reason%"
+    empty: "&7No pending reports."
+  
+  handle:
+    usage: "&cUsage: /handlereport <id> <accept|deny|resolve>"
+    not-found: "&cReport #%id% not found."
+    accepted: "&aReport #%id% has been accepted."
+    denied: "&cReport #%id% has been denied."
+    resolved: "&eReport #%id% has been marked as resolved."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Appeals                                            │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+appeals:
+  usage: "&cUsage: /appeal <message>"
+  success: "&aYour appeal has been submitted successfully!"
+  no-punishment: "&cYou don't have any active punishment to appeal."
+  max-appeals: "&cYou have reached the maximum number of appeals for this punishment."
+  cooldown: "&cPlease wait before submitting another appeal."
+  
+  notify: "&8[&aAppeal&8] &e%player% &7submitted an appeal for their %type%."
+  
+  list:
+    header: "&8&m--------&r &aPending Appeals &8(&7Page %page%/%total%&8) &8&m--------"
+    entry: "&8#%id% &7- &e%player% &8(&e%type%&8)&7: &f%message%"
+    empty: "&7No pending appeals."
+  
+  handle:
+    usage: "&cUsage: /handleappeal <id> <accept|deny> [reason]"
+    not-found: "&cAppeal #%id% not found."
+    accepted: "&aAppeal #%id% has been accepted. The player has been unpunished."
+    denied: "&cAppeal #%id% has been denied."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Alt Detection                                      │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+alts:
+  usage: "&cUsage: /alts <player>"
+  header: "&8&m--------&r &eAlt Accounts for &f%player% &8&m--------"
+  entry: "&7- &e%alt% &8(&7Last seen: %lastseen%&8)"
+  no-alts: "&7No alt accounts found for &e%player%&7."
+  
+  notify:
+    join: "&8[&eAlt&8] &e%player% &7may be an alt of &c%banned% &7(banned)."
+    detected: "&8[&eAlt&8] &e%player% &7shares IP with &e%count% &7other accounts."
+  
+  dupeip:
+    usage: "&cUsage: /dupeip <player|ip>"
+    header: "&8&m--------&r &ePlayers with IP &f%ip% &8&m--------"
+    entry: "&7- &e%player% &8(&7Last seen: %lastseen%&8)"
+    no-duplicates: "&7No other players found with this IP."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Notes                                              │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+notes:
+  add:
+    usage: "&cUsage: /note <player> <note>"
+    success: "&aNote added to &e%player%&a."
+  
+  list:
+    usage: "&cUsage: /notes <player>"
+    header: "&8&m--------&r &eNotes for &f%player% &8&m--------"
+    entry: "&8#%id% &7[%date%] by &e%author%&7: &f%note%"
+    empty: "&7No notes for &e%player%&7."
+  
+  delete:
+    usage: "&cUsage: /delnote <id>"
+    success: "&aNote #%id% deleted successfully."
+    not-found: "&cNote #%id% not found."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Utility Commands                                   │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+utility:
+  clearchat:
+    success: "&aChat has been cleared by &e%executor%&a."
+    cleared: " "
+  
+  mutechat:
+    enabled: "&cServer chat has been &cmuted &7by &c%executor%&7."
+    disabled: "&aServer chat has been &aunmuted &7by &a%executor%&7."
+    denied: "&cChat is currently muted. Only staff can speak."
+  
+  staffchat:
+    enabled: "&aStaff chat mode &aenabled&a."
+    disabled: "&cStaff chat mode &cdisabled&c."
+    format: "&8[&cStaff&8] &c%player%&8: &f%message%"
+  
+  rollback:
+    usage: "&cUsage: /rollback <staff> [duration]"
+    success: "&aRolled back &e%count% &apunishments from &e%staff%&a."
+    no-punishments: "&7No punishments found from &e%staff%&7."
+    confirm: "&eRollback will affect &c%count% &epunishments. Type command again to confirm."
+  
+  geoip:
+    usage: "&cUsage: /geoip <player>"
+    result: "&e%player% &7is from &e%country% &8(&7%city%&8)"
+    unknown: "&7Could not determine location for &e%player%&7."
+  
+  allow:
+    usage: "&cUsage: /allowplayer <player>"
+    success: "&aPlayer &e%player% &acan now bypass IP bans."
+    already-allowed: "&c%player% &cis already allowed."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Time Formats                                       │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+time:
+  permanent: "Permanent"
+  expired: "Expired"
+  never: "Never"
+  
+  years: "%d year(s)"
+  months: "%d month(s)"
+  weeks: "%d week(s)"
+  days: "%d day(s)"
+  hours: "%d hour(s)"
+  minutes: "%d minute(s)"
+  seconds: "%d second(s)"
+  
+  format-short: "%dd %hh %mm %ss"
+  format-long: "%d days, %h hours, %m minutes, %s seconds"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              GUI Messages                                       │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+gui:
+  main:
+    title: "&8Punish: &c%player%"
+    player-info: "&ePlayer Information"
+    
+  ban:
+    title: "&8Ban %player%"
+    permanent: "&c&lPermanent Ban"
+    temporary: "&e&lTemporary Ban"
+    ip: "&4&lIP Ban"
+  
+  mute:
+    title: "&8Mute %player%"
+    permanent: "&c&lPermanent Mute"
+    temporary: "&e&lTemporary Mute"
+    ip: "&4&lIP Mute"
+  
+  warn:
+    title: "&8Warn %player%"
+  
+  history:
+    title: "&8History: %player%"
+    next-page: "&aNext Page →"
+    prev-page: "&c← Previous Page"
+  
+  templates:
+    title: "&8Select Template"
+    
+  duration:
+    title: "&8Select Duration"
+    custom: "&6Custom Duration"
+  
+  confirm:
+    title: "&8Confirm Punishment"
+    confirm: "&a&lCONFIRM"
+    cancel: "&c&lCANCEL"
+    
+  reports:
+    title: "&8Reports &7(Page %page%)"
+  
+  appeals:
+    title: "&8Appeals &7(Page %page%)"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Anti-VPN Messages                                  │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+anti-vpn:
+  # Kick screen for VPN users
+  kick-screen:
+    - ""
+    - "&c&l⚠ VPN/PROXY DETECTED ⚠"
+    - ""
+    - "&7You cannot join this server using a VPN or Proxy."
+    - "&7Please disable your VPN and try again."
+    - ""
+    - "&7Detected: &c%type%"
+    - "&7Provider: &f%provider%"
+    - "&7Your IP: &f%ip%"
+    - ""
+    - "&7If you believe this is an error, contact staff."
+    - "&eAppeal at: &bhttps://your-server.com/appeal"
+    - ""
+  
+  # Staff notification when VPN is detected
+  staff-notify: "&8[&cAntiVPN&8] &e%player% &7is using a &c%type% &7(&f%provider%&7) from &f%country%"
+  
+  # Log message to console
+  console-log: "[AntiVPN] %player% (%ip%) - VPN detected: %type% (%provider%) - Action: %action%"
+  
+  # Player allowed (WARN/ALLOW action)
+  allowed-warning: "&e[!] &7Your connection was flagged as a VPN/Proxy but you were allowed to join."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Client Detection Messages                          │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+client-detection:
+  # Suspicious client notification to staff
+  suspicious: "&8[&eClient&8] &e%player% &7is using a &csuspicious client&7: &f%client% &7(%reason%)"
+  
+  # Modded client notification
+  modded: "&8[&eClient&8] &e%player% &7is using a &emodded client&7: &f%client% &7(Brand: %brand%)"
+  
+  # Known cheat client detected
+  cheat-detected: "&8[&c⚠ ALERT&8] &e%player% &7is using a &c&lKNOWN CHEAT CLIENT&7: &c%client%"
+  
+  # Safe client notification (optional)
+  safe: "&8[&aClient&8] &e%player% &7is using a trusted client: &a%client%"
+  
+  # Kick message for blocked clients
+  blocked-kick:
+    - ""
+    - "&c&l⚠ BLOCKED CLIENT DETECTED ⚠"
+    - ""
+    - "&7You are using a client that is not allowed on this server."
+    - "&7Detected client: &c%client%"
+    - ""
+    - "&7Please use Vanilla, Lunar Client, Badlion, or LabyMod."
+    - ""
+  
+  # Join log message
+  join-log: "[Client] %player% joined with client: %client% (Brand: %brand%)"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              HWID BAN Messages                                  │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+hwid:
+  # Command usage
+  usage: "&cUsage: /hwid <ban|unban|check|alts> <player>"
+  
+  # Ban messages
+  banned: "&aSuccessfully banned HWID of &e%player%&a."
+  unbanned: "&aSuccessfully unbanned HWID of &e%player%&a."
+  already-banned: "&c%player%'s HWID is already banned."
+  not-banned: "&c%player%'s HWID is not banned."
+  
+  # Check messages
+  checking: "&7Scanning HWID history for &e%player%&7..."
+  not-found: "&cNo HWID data found for that player."
+  check-result:
+    - "&8&m----------------------------------------"
+    - "&6🖥️ HWID Info for &f%player%"
+    - "&8&m----------------------------------------"
+    - "  &7HWID: &e%hwid%"
+    - "  &7First seen: &f%first_seen%"
+    - "  &7Last seen: &f%last_seen%"
+    - "  &7Status: %status%"
+    - "&8&m----------------------------------------"
+  
+  # Alt detection
+  alts-found: "&e[HWID] &f%player% &7has &c%count% &7other accounts with same HWID!"
+  alts-list-header: "&6Accounts sharing HWID with &f%player%&6:"
+  alts-list-entry: "  &7- &f%alt_name% &8(Last: %last_seen%)"
+  no-alts: "&aNo other accounts found with that HWID."
+  
+  # Broadcast
+  ban-broadcast: "&c%player%'s computer &7has been &cpermanently banned &7by &c%executor%&7."
+  unban-broadcast: "&a%player%'s computer &7has been &aunbanned &7by &a%executor%&7."
+  
+  # Kick screen
+  kick-message:
+    - ""
+    - "&c&l⚠ HARDWARE BAN ⚠"
+    - ""
+    - "&7Your computer has been permanently banned."
+    - "&7This affects all accounts on this device."
+    - ""
+    - "&7Reason: &f%reason%"
+    - "&7Banned by: &f%executor%"
+    - "&7Date: &f%date%"
+    - ""
+    - "&7Ban ID: &8#%id%"
+    - ""
+    - "&eAppeal at: &b&nhttps://your-server.com/appeal"
+    - ""
+  
+  # Join attempt when HWID banned
+  join-blocked: "&8[&cHWID&8] &cBlocked &e%player% &8(HWID matches banned account: &c%banned_name%&8)"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Evidence System                                    │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+evidence:
+  added: "&aEvidence added successfully! ID: &e#%id%"
+  usage: "&cUsage: /evidence <add|view|list> <player> [args...]"
+  invalid-url: "&cInvalid URL provided."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Redemption System                                  │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+redemption:
+  usage: "&cUsage: /redemption <start|info> <player>"
+  started: "&aPunishment redemption started for &e%player%&a!"
+  completed: "&a&l%player% has successfully redeemed their punishment!"
+  failed: "&c&l%player% failed the redemption challenge."
+  broadcast: "&e%player% &7is attempting to redeem their ban! Spectate with /spec %player%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Ticket System                                      │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+ticket:
+  created: "&aTicket created! ID: &e#%id%"
+  closed: "&aTicket &e#%id% &ahas been closed."
+  usage: "&cUsage: /ticket <create|list|view|close|respond>"
+  not-found: "&cTicket not found."
+  response-added: "&aResponse added."
+  new-ticket-staff: "&e[Ticket] &fNew ticket from &e%player%&f: %subject%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                           Discord Verification                                  │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+verify:
+  success: "&aSuccessfully linked with Discord user &e%user%&a!"
+  already-linked: "&cYou are already linked to a Discord account."
+  code-generated: "&aYour verification code is: &e%code%\n&7Send this code to the Discord bot to verify."
+  usage: "&cUsage: /verify [code]"
+  unlinked: "&aSuccessfully unlinked your Discord account."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Chat Filter                                        │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+filter:
+  blocked: "&cMessage blocked: %reason%"
+  warn: "&cPlease do not use that language."
+  caps: "&cPlease turn off caps lock."
+  spam: "&cPlease do not spam."
+  advertisement: "&cAdvertising is not allowed."
+
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                           v5.0 - NEW MESSAGES                                  ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Maintenance Mode                                   │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+maintenance:
+  enabled: "&c⚠ Maintenance mode ENABLED!"
+  disabled: "&a✓ Maintenance mode DISABLED!"
+  kick-reason: "&cServer is currently in maintenance mode.\n&7Reason: %reason%\n&7Time remaining: %time%"
+  already-enabled: "&cMaintenance mode is already enabled."
+  not-enabled: "&cMaintenance mode is not enabled."
+  whitelisted: "&aAdded &e%player% &ato maintenance whitelist."
+  unwhitelisted: "&cRemoved &e%player% &cfrom maintenance whitelist."
+  list-header: "&6Maintenance Whitelist &7(%count%):"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Role Synchronization                              │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+rolesync:
+  synced: "&aSuccessfully synced roles for &e%player%&a."
+  failed: "&cFailed to sync roles. Is Discord linked?"
+  mapping-added: "&aAdded role mapping: &e%role% &7-> &a%group%"
+  mapping-removed: "&cRemoved role mapping for &e%role%"
+  usage: "&cUsage: /rolesync <sync|add|remove|list>"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              AI Integration                                     │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+ai:
+  # Status
+  disabled: "&cAI is not enabled. Configure it in config.yml"
+  analyzing: "&7Analyzing with AI..."
+  
+  # Toxicity
+  toxicity-alert: "&8[&cAI&8] &cHigh toxicity detected from &e%player% &7(%score%): &f%message%"
+  toxicity-result:
+    - "&8&m----------------------------------------"
+    - "&6🔍 Toxicity Analysis"
+    - "&8&m----------------------------------------"
+    - "  &7Message: &f\"%message%\""
+    - "  &7Toxic: %is_toxic%"
+    - "  &7Score: %score%"
+    - "  &7Reason: &f%reason%"
+    - "&8&m----------------------------------------"
+  
+  # Behavior analysis
+  behavior-result:
+    - "&8&m----------------------------------------"
+    - "&6🤖 AI Behavior Analysis: &f%player%"
+    - "&8&m----------------------------------------"
+    - "  &7Risk Level: %risk_level%"
+    - "  &7Risk Score: %score%"
+    - "  &7Summary: &f%summary%"
+    - "&8&m----------------------------------------"
+  
+  # Appeal review
+  appeal-verdict: "&8[&cAI&8] &7Appeal analysis for &e%player%&7:\n&7Verdict: %verdict% &8(%confidence%%)\n&7Reason: &f%reason%"
+  appeal-result:
+    - "&8&m----------------------------------------"
+    - "&6⚖️ AI Appeal Review"
+    - "&8&m----------------------------------------"
+    - "  &7Player: &f%player%"
+    - "  &7Punishment: &f%reason%"
+    - "  &7Appeal: &f\"%appeal_text%\""
+    - ""
+    - "  &7AI Recommendation: %recommendation%"
+    - "  &7Confidence: &f%confidence%%"
+    - "  &7Reasoning: &f%reasoning%"
+    - "&8&m----------------------------------------"
+    - "&8Note: This is AI-assisted. Final decision is yours."
+  
+  # Auto-moderation
+  auto-mute: "&8[&cAI&8] &e%player% &7auto-muted for &c%duration% &7(%reason%)"
+  auto-warn: "&8[&cAI&8] &e%player% &7auto-warned: &f%reason%"
+
+# ╔═══════════════════════════════════════════════════════════════════════════════╗
+# ║                           v5.1 - NEW MESSAGES                                  ║
+# ╚═══════════════════════════════════════════════════════════════════════════════╝
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Social Network Analysis                           │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+network:
+  alt-detected: "&8[&cNetwork&8] &e%player% &7is a potential alt of &c%alt%"
+  banned-associate: "&8[&cNetwork&8] &e%player% &7has connections to banned players!"
+  high-risk-join: "&8[&cNetwork&8] &cHigh-risk player joined: &e%player% &7(Score: &c%score%&7)"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Case Files                                        │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+case:
+  created: "&a✓ Case file created! ID: &e#%id%"
+  not-found: "&cCase file not found: %id%"
+  evidence-collected: "&7Collected evidence: %types%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Cross-Server                                      │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+crossserver:
+  ban-synced: "&c[%server%] &f%player% &7was banned by &f%executor%&7: &f%reason%"
+  unban-synced: "&a[%server%] &f%player% &7was unbanned by &f%executor%"
+  alert: "&b[%server%] %message%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                              Predictive Moderation                             │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+predictive:
+  high-risk-alert: "&8[&cPredictive&8] &e%player% &7has &c%risk%% &7risk score!"
+  prediction-alert: "&8[&cPredictive&8] &e%player% &7has &c%prediction%% &7chance of ban in 7 days"
+  analysis-complete: "&a✓ Analysis complete for &e%player%"
+
+
