@@ -2,6 +2,38 @@
 
 All notable changes to LiteBansReborn.
 
+## [6.0.0] - 2025-12-31
+
+### 🎉 Complete Web Panel & Stability
+
+This update finalizes the Web Panel and brings critical stability improvements.
+
+### Added
+- **Web Panel Reports**: View and manage player reports from the browser
+- **Web Panel Appeals**: View and manage ban appeals from the browser
+- **Backend Filtering**: Advanced filtering for punishments, reports, and appeals via API
+
+### Fixed
+- **Player Lookup**: Resolved "Player not found" errors for case-insensitive names
+- **Configuration**: Fixed missing `reports.usage` message causing console errors
+- **Database**: Fixed thread starvation warnings in HikariCP pool
+- **Stability**: Optimized async database queries for the web panel
+
+---
+
+## [6.0.0] - 2025-12-31
+
+### Added
+- **Minimalist Web Panel**: New black & white design
+- **Smart URL Detection**: Localhost/LAN/Public IP display
+- **Semantic Versioning**: Improved update checker
+
+### Fixed
+- **Console Logging**: Fixed color codes appearing in logs
+- **Dependency Conflicts**: Fixed AdvancedDetectionAPI type issues
+
+---
+
 ## [4.5.0] - 2024-12-28
 
 ### 🎉 Major Release - "Discord Integration"

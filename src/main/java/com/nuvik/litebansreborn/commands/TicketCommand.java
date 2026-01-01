@@ -6,6 +6,7 @@ import com.nuvik.litebansreborn.managers.TicketManager.Ticket;
 import com.nuvik.litebansreborn.managers.TicketManager.TicketCategory;
 import com.nuvik.litebansreborn.managers.TicketManager.TicketStatus;
 import com.nuvik.litebansreborn.utils.ColorUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -99,43 +100,47 @@ public class TicketCommand implements CommandExecutor, TabCompleter {
             category,
             subject
         ).thenAccept(ticket -> {
-            if (ticket != null) {
-                player.sendMessage(ColorUtil.translate("&a&l✓ Ticket created successfully!"));
-                player.sendMessage(ColorUtil.translate("&7Ticket ID: &f#" + ticket.getId()));
-                player.sendMessage(ColorUtil.translate("&7Staff will respond as soon as possible."));
-                player.sendMessage(ColorUtil.translate("&7Use &e/ticket respond " + ticket.getId() + " <message> &7to add more info."));
-            } else {
-                player.sendMessage(ColorUtil.translate("&cFailed to create ticket. Please try again."));
-            }
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (ticket != null) {
+                    player.sendMessage(ColorUtil.translate("&a&l✓ Ticket created successfully!"));
+                    player.sendMessage(ColorUtil.translate("&7Ticket ID: &f#" + ticket.getId()));
+                    player.sendMessage(ColorUtil.translate("&7Staff will respond as soon as possible."));
+                    player.sendMessage(ColorUtil.translate("&7Use &e/ticket respond " + ticket.getId() + " <message> &7to add more info."));
+                } else {
+                    player.sendMessage(ColorUtil.translate("&cFailed to create ticket. Please try again."));
+                }
+            });
         });
     }
 
     private void handleList(Player player) {
         plugin.getTicketManager().getPlayerTickets(player.getUniqueId()).thenAccept(tickets -> {
-            if (tickets.isEmpty()) {
-                player.sendMessage(ColorUtil.translate("&7You don't have any tickets."));
-                player.sendMessage(ColorUtil.translate("&7Use &e/ticket create <category> <subject> &7to create one."));
-                return;
-            }
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (tickets.isEmpty()) {
+                    player.sendMessage(ColorUtil.translate("&7You don't have any tickets."));
+                    player.sendMessage(ColorUtil.translate("&7Use &e/ticket create <category> <subject> &7to create one."));
+                    return;
+                }
 
-            player.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            player.sendMessage(ColorUtil.translate("&6&lYour Tickets"));
-            player.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                player.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                player.sendMessage(ColorUtil.translate("&6&lYour Tickets"));
+                player.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
 
-            for (Ticket ticket : tickets) {
-                String statusColor = switch (ticket.getStatus()) {
-                    case OPEN -> "&a";
-                    case CLAIMED -> "&e";
-                    case WAITING_RESPONSE -> "&b";
-                    case CLOSED, RESOLVED -> "&7";
-                };
-                
-                player.sendMessage(ColorUtil.translate(
-                    "&f#" + ticket.getId() + " " + statusColor + "[" + ticket.getStatus() + "] &f" + ticket.getSubject()
-                ));
-            }
+                for (Ticket ticket : tickets) {
+                    String statusColor = switch (ticket.getStatus()) {
+                        case OPEN -> "&a";
+                        case CLAIMED -> "&e";
+                        case WAITING_RESPONSE -> "&b";
+                        case CLOSED, RESOLVED -> "&7";
+                    };
+                    
+                    player.sendMessage(ColorUtil.translate(
+                        "&f#" + ticket.getId() + " " + statusColor + "[" + ticket.getStatus() + "] &f" + ticket.getSubject()
+                    ));
+                }
 
-            player.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                player.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+            });
         });
     }
 
@@ -154,36 +159,38 @@ public class TicketCommand implements CommandExecutor, TabCompleter {
         }
 
         plugin.getTicketManager().getTicket(ticketId).thenAccept(ticket -> {
-            if (ticket == null) {
-                player.sendMessage(ColorUtil.translate("&cTicket not found."));
-                return;
-            }
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (ticket == null) {
+                    player.sendMessage(ColorUtil.translate("&cTicket not found."));
+                    return;
+                }
 
-            // Check permission
-            if (!ticket.getPlayerUUID().equals(player.getUniqueId()) && 
-                !player.hasPermission("litebansreborn.tickets.view")) {
-                player.sendMessage(ColorUtil.translate("&cYou don't have permission to view this ticket."));
-                return;
-            }
+                // Check permission
+                if (!ticket.getPlayerUUID().equals(player.getUniqueId()) && 
+                    !player.hasPermission("litebansreborn.tickets.view")) {
+                    player.sendMessage(ColorUtil.translate("&cYou don't have permission to view this ticket."));
+                    return;
+                }
 
-            player.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            player.sendMessage(ColorUtil.translate("&6&lTicket #" + ticket.getId()));
-            player.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            player.sendMessage(ColorUtil.translate("&7Category: &f" + ticket.getCategory().getDisplayName()));
-            player.sendMessage(ColorUtil.translate("&7Status: &f" + ticket.getStatus()));
-            player.sendMessage(ColorUtil.translate("&7Player: &f" + ticket.getPlayerName()));
-            player.sendMessage(ColorUtil.translate("&7Claimed by: &f" + 
-                (ticket.getClaimedByName() != null ? ticket.getClaimedByName() : "None")));
-            player.sendMessage(ColorUtil.translate("&7Subject: &f" + ticket.getSubject()));
-            player.sendMessage("");
-            player.sendMessage(ColorUtil.translate("&7&lMessages:"));
-            
-            for (var msg : ticket.getMessages()) {
-                String prefix = msg.isStaff() ? "&c[Staff] " : "&a[Player] ";
-                player.sendMessage(ColorUtil.translate(prefix + "&f" + msg.getAuthorName() + "&7: " + msg.getMessage()));
-            }
+                player.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                player.sendMessage(ColorUtil.translate("&6&lTicket #" + ticket.getId()));
+                player.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                player.sendMessage(ColorUtil.translate("&7Category: &f" + ticket.getCategory().getDisplayName()));
+                player.sendMessage(ColorUtil.translate("&7Status: &f" + ticket.getStatus()));
+                player.sendMessage(ColorUtil.translate("&7Player: &f" + ticket.getPlayerName()));
+                player.sendMessage(ColorUtil.translate("&7Claimed by: &f" + 
+                    (ticket.getClaimedByName() != null ? ticket.getClaimedByName() : "None")));
+                player.sendMessage(ColorUtil.translate("&7Subject: &f" + ticket.getSubject()));
+                player.sendMessage("");
+                player.sendMessage(ColorUtil.translate("&7&lMessages:"));
+                
+                for (var msg : ticket.getMessages()) {
+                    String prefix = msg.isStaff() ? "&c[Staff] " : "&a[Player] ";
+                    player.sendMessage(ColorUtil.translate(prefix + "&f" + msg.getAuthorName() + "&7: " + msg.getMessage()));
+                }
 
-            player.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                player.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+            });
         });
     }
 
@@ -204,37 +211,41 @@ public class TicketCommand implements CommandExecutor, TabCompleter {
         String message = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
 
         plugin.getTicketManager().getTicket(ticketId).thenAccept(ticket -> {
-            if (ticket == null) {
-                player.sendMessage(ColorUtil.translate("&cTicket not found."));
-                return;
-            }
-
-            // Check permission
-            boolean isOwner = ticket.getPlayerUUID().equals(player.getUniqueId());
-            boolean isStaff = player.hasPermission("litebansreborn.tickets.respond");
-            
-            if (!isOwner && !isStaff) {
-                player.sendMessage(ColorUtil.translate("&cYou don't have permission to respond to this ticket."));
-                return;
-            }
-
-            if (ticket.getStatus() == TicketStatus.CLOSED || ticket.getStatus() == TicketStatus.RESOLVED) {
-                player.sendMessage(ColorUtil.translate("&cThis ticket is closed."));
-                return;
-            }
-
-            plugin.getTicketManager().addMessage(
-                ticketId,
-                player.getUniqueId(),
-                player.getName(),
-                message,
-                isStaff && !isOwner
-            ).thenAccept(success -> {
-                if (success) {
-                    player.sendMessage(ColorUtil.translate("&aMessage added to ticket #" + ticketId));
-                } else {
-                    player.sendMessage(ColorUtil.translate("&cFailed to add message."));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (ticket == null) {
+                    player.sendMessage(ColorUtil.translate("&cTicket not found."));
+                    return;
                 }
+
+                // Check permission
+                boolean isOwner = ticket.getPlayerUUID().equals(player.getUniqueId());
+                boolean isStaff = player.hasPermission("litebansreborn.tickets.respond");
+                
+                if (!isOwner && !isStaff) {
+                    player.sendMessage(ColorUtil.translate("&cYou don't have permission to respond to this ticket."));
+                    return;
+                }
+
+                if (ticket.getStatus() == TicketStatus.CLOSED || ticket.getStatus() == TicketStatus.RESOLVED) {
+                    player.sendMessage(ColorUtil.translate("&cThis ticket is closed."));
+                    return;
+                }
+
+                plugin.getTicketManager().addMessage(
+                    ticketId,
+                    player.getUniqueId(),
+                    player.getName(),
+                    message,
+                    isStaff && !isOwner
+                ).thenAccept(success -> {
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (success) {
+                            player.sendMessage(ColorUtil.translate("&aMessage added to ticket #" + ticketId));
+                        } else {
+                            player.sendMessage(ColorUtil.translate("&cFailed to add message."));
+                        }
+                    });
+                });
             });
         });
     }
@@ -254,26 +265,30 @@ public class TicketCommand implements CommandExecutor, TabCompleter {
         }
 
         plugin.getTicketManager().getTicket(ticketId).thenAccept(ticket -> {
-            if (ticket == null) {
-                player.sendMessage(ColorUtil.translate("&cTicket not found."));
-                return;
-            }
-
-            // Check permission
-            boolean isOwner = ticket.getPlayerUUID().equals(player.getUniqueId());
-            boolean isStaff = player.hasPermission("litebansreborn.tickets.close");
-            
-            if (!isOwner && !isStaff) {
-                player.sendMessage(ColorUtil.translate("&cYou don't have permission to close this ticket."));
-                return;
-            }
-
-            plugin.getTicketManager().closeTicket(ticketId, TicketStatus.CLOSED).thenAccept(success -> {
-                if (success) {
-                    player.sendMessage(ColorUtil.translate("&aTicket #" + ticketId + " has been closed."));
-                } else {
-                    player.sendMessage(ColorUtil.translate("&cFailed to close ticket."));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (ticket == null) {
+                    player.sendMessage(ColorUtil.translate("&cTicket not found."));
+                    return;
                 }
+
+                // Check permission
+                boolean isOwner = ticket.getPlayerUUID().equals(player.getUniqueId());
+                boolean isStaff = player.hasPermission("litebansreborn.tickets.close");
+                
+                if (!isOwner && !isStaff) {
+                    player.sendMessage(ColorUtil.translate("&cYou don't have permission to close this ticket."));
+                    return;
+                }
+
+                plugin.getTicketManager().closeTicket(ticketId, TicketStatus.CLOSED).thenAccept(success -> {
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (success) {
+                            player.sendMessage(ColorUtil.translate("&aTicket #" + ticketId + " has been closed."));
+                        } else {
+                            player.sendMessage(ColorUtil.translate("&cFailed to close ticket."));
+                        }
+                    });
+                });
             });
         });
     }
@@ -302,11 +317,13 @@ public class TicketCommand implements CommandExecutor, TabCompleter {
             player.getUniqueId(),
             player.getName()
         ).thenAccept(success -> {
-            if (success) {
-                player.sendMessage(ColorUtil.translate("&aYou have claimed ticket #" + ticketId));
-            } else {
-                player.sendMessage(ColorUtil.translate("&cFailed to claim ticket."));
-            }
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (success) {
+                    player.sendMessage(ColorUtil.translate("&aYou have claimed ticket #" + ticketId));
+                } else {
+                    player.sendMessage(ColorUtil.translate("&cFailed to claim ticket."));
+                }
+            });
         });
     }
 

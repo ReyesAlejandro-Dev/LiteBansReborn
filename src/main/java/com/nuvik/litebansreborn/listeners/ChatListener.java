@@ -98,9 +98,7 @@ public class ChatListener implements Listener {
             return;
         }
         
-        // Chat Filter (v4.5)
-        checkChatFilter(event, player, message);
-        // Check for IP mute
+        // Check for IP mute (Priority check before filter)
         String ip = PlayerUtil.getPlayerIP(player);
         if (ip != null) {
             Punishment ipMute = plugin.getCacheManager().getIPMute(ip);
@@ -111,18 +109,24 @@ public class ChatListener implements Listener {
             }
         }
         
-        // Async check in database if not in cache
+        // Check database async if not in cache (for future messages)
+        // Can't cancel current event safely from async callback, but helps sync cache
         plugin.getMuteManager().getActiveMute(uuid).thenAccept(dbMute -> {
             if (dbMute != null && dbMute.isActiveAndValid()) {
-                // Cancel the message (it's too late, but cache for next time)
-                plugin.getCacheManager().cacheMute(dbMute);
+                // Sync back to main thread for thread safety when modifying cache
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    plugin.getCacheManager().cacheMute(dbMute);
+                });
             }
+        }).exceptionally(ex -> {
+            plugin.debug("Error checking mute from DB: " + ex.getMessage());
+            return null;
         });
+        
+        // Chat Filter (v4.5)
+        checkChatFilter(event, player, message);
     }
     
-    /**
-     * Send a message to staff chat
-     */
     /**
      * Send a message to staff chat
      */
@@ -156,20 +160,16 @@ public class ChatListener implements Listener {
         if (result.isBlocked()) {
             event.setCancelled(true);
             
-            // Send warning message
-            String warn = switch (result.getReason()) {
-                case SPAM -> "&cPlease don't spam!";
-                case FLOOD -> "&cPlease don't repeat your messages!";
-                case CAPS -> "&cPlease don't use excessive caps!";
-                case ADVERTISEMENT -> "&cAdvertising is not allowed!";
-                case LINK -> "&cLinks are not allowed!";
-                case PROFANITY, BLOCKED_WORD -> "&cPlease watch your language!";
-                case CHAR_SPAM -> "&cPlease don't spam characters!";
-                default -> "&cYour message was blocked!";
+            // Send warning message using configurable messages
+            String warnKey = switch (result.getReason()) {
+                case SPAM, FLOOD, CHAR_SPAM -> "filter.spam";
+                case CAPS -> "filter.caps";
+                case ADVERTISEMENT, LINK -> "filter.advertisement";
+                case PROFANITY, BLOCKED_WORD -> "filter.warn";
+                default -> "filter.blocked";
             };
             
-            player.sendMessage(plugin.getMessagesManager().getPrefix() + 
-                com.nuvik.litebansreborn.utils.ColorUtil.translate(warn));
+            plugin.getMessagesManager().send(player, warnKey, "reason", result.getReason().name());
             
             // Handle violation (count warnings, auto-mute)
             plugin.getChatFilterManager().handleViolation(player, result.getReason());

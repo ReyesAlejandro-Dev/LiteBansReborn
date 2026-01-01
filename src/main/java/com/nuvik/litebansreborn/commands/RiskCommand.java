@@ -95,15 +95,17 @@ public class RiskCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(ColorUtil.translate("&7Analyzing &e" + target.getName() + "&7..."));
         
         plugin.getPredictiveManager().analyzePlayer(target.getUniqueId()).thenAccept(profile -> {
-            String riskLevel = plugin.getPredictiveManager().getRiskLevel(profile.riskScore());
-            
-            sender.sendMessage(ColorUtil.translate("&a✓ Analysis complete!"));
-            sender.sendMessage(ColorUtil.translate("  &7Risk: " + riskLevel + " &7(" + profile.riskScore() + "%)"));
-            sender.sendMessage(ColorUtil.translate("  &7Ban Prediction: &e" + profile.banPrediction() + "%"));
-            
-            if (profile.riskScore() >= 70) {
-                sender.sendMessage(ColorUtil.translate("  &c⚠ HIGH RISK - Recommend increased monitoring!"));
-            }
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                String riskLevel = plugin.getPredictiveManager().getRiskLevel(profile.riskScore());
+                
+                sender.sendMessage(ColorUtil.translate("&a✓ Analysis complete!"));
+                sender.sendMessage(ColorUtil.translate("  &7Risk: " + riskLevel + " &7(" + profile.riskScore() + "%)"));
+                sender.sendMessage(ColorUtil.translate("  &7Ban Prediction: &e" + profile.banPrediction() + "%"));
+                
+                if (profile.riskScore() >= 70) {
+                    sender.sendMessage(ColorUtil.translate("  &c⚠ HIGH RISK - Recommend increased monitoring!"));
+                }
+            });
         });
     }
 

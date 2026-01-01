@@ -37,8 +37,9 @@ public abstract class BaseGUI implements InventoryHolder, Listener {
     public abstract void initializeItems();
 
     public void open() {
-        if (inventory.firstEmpty() == 0) { // If empty, initialize
-           initializeItems();
+        // Check if inventory needs initialization (first slot is empty/null)
+        if (inventory.getItem(0) == null) {
+            initializeItems();
         }
         player.openInventory(inventory);
     }

@@ -150,12 +150,14 @@ public class VerifyCommand implements CommandExecutor, TabCompleter {
         }
 
         manager.unlinkAccounts(player.getUniqueId()).thenAccept(success -> {
-            if (success) {
-                player.sendMessage(ColorUtil.translate("&aYour Discord account has been unlinked."));
-                player.sendMessage(ColorUtil.translate("&7Use &e/verify &7to link a new account."));
-            } else {
-                player.sendMessage(ColorUtil.translate("&cFailed to unlink account. Please try again."));
-            }
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (success) {
+                    player.sendMessage(ColorUtil.translate("&aYour Discord account has been unlinked."));
+                    player.sendMessage(ColorUtil.translate("&7Use &e/verify &7to link a new account."));
+                } else {
+                    player.sendMessage(ColorUtil.translate("&cFailed to unlink account. Please try again."));
+                }
+            });
         });
     }
 

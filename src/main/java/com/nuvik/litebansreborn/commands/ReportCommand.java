@@ -59,13 +59,17 @@ public class ReportCommand implements CommandExecutor, TabCompleter {
         // Create Report
         if (plugin.getReportManager() != null) {
             plugin.getReportManager().createReport(reporter, target, reason).thenAccept(v -> {
-                plugin.getMessagesManager().send(reporter, "reports.success");
-                plugin.getMessagesManager().send(reporter, "reports.confirm", "player", target.getName());
-                
-                // Notify Staff
-                notifyStaff(reporter.getName(), target.getName(), reason);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    plugin.getMessagesManager().send(reporter, "reports.success");
+                    plugin.getMessagesManager().send(reporter, "reports.confirm", "player", target.getName());
+                    
+                    // Notify Staff
+                    notifyStaff(reporter.getName(), target.getName(), reason);
+                });
             }).exceptionally(ex -> {
-                reporter.sendMessage(ColorUtil.translate("&cError submitting report: " + ex.getMessage()));
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    reporter.sendMessage(ColorUtil.translate("&cError submitting report: " + ex.getMessage()));
+                });
                 return null;
             });
         } else {

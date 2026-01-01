@@ -120,6 +120,8 @@ All require `Authorization: Bearer <api-key>` header.
   "maxPlayers": 100,
   "serverName": "MyServer",
   "uptime": 3600000,
+  "publicIP": "200.110.106.56",
+  "port": 8080,
   "cachedBans": 150,
   "cachedMutes": 45,
   "frozenPlayers": 2,
@@ -151,18 +153,66 @@ All require `Authorization: Bearer <api-key>` header.
 | GET | `/api/staff/stats` | Staff statistics |
 | GET | `/api/staff/online` | Online staff |
 
+#### Reports
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/reports` | List reports |
+
+**Query Parameters:**
+- `page`, `limit`
+- `status` (pending, accepted, denied, all)
+
+#### Appeals
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/appeals` | List appeals |
+
+**Query Parameters:**
+- `page`, `limit`
+- `status` (pending, accepted, denied, all)
+
 #### Actions
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/actions/ban` | Ban a player |
-| POST | `/api/actions/unban` | Unban a player |
+| POST | `/api/actions/execute` | Execute any punishment action |
+| POST | `/api/actions/ban` | Ban a player (legacy) |
+| POST | `/api/actions/unban` | Unban a player (legacy) |
 
-**Ban Request:**
+**Execute Action Request:**
 ```json
 {
+  "action": "ban",
   "player": "Notch",
   "reason": "Hacking",
   "duration": "7d"
+}
+```
+
+**Available Actions:**
+| Action | Description | Requires Duration |
+|--------|-------------|-------------------|
+| `ban` | Permanent ban | No |
+| `tempban` | Temporary ban | Yes |
+| `banip` | Ban player's IP | No |
+| `hwidban` | Hardware ID ban | No |
+| `unban` | Remove ban | No |
+| `unbanip` | Remove IP ban | No |
+| `unbanhwid` | Remove HWID ban | No |
+| `mute` | Permanent mute | No |
+| `tempmute` | Temporary mute | Yes |
+| `unmute` | Remove mute | No |
+| `warn` | Issue warning | No |
+| `kick` | Kick player | No |
+| `freeze` | Freeze player | No |
+| `unfreeze` | Unfreeze player | No |
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Command executed: /ban Notch Hacking",
+  "action": "ban",
+  "player": "Notch"
 }
 ```
 

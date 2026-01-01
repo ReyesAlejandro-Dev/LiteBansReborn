@@ -63,53 +63,68 @@ public class AICommand implements CommandExecutor, TabCompleter {
     private void handleStatus(CommandSender sender) {
         AIManager ai = plugin.getAIManager();
         
-        sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-        sender.sendMessage(ColorUtil.translate("&6🤖 AI Status"));
-        sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-        sender.sendMessage(ColorUtil.translate("  &7Status: " + (ai.isEnabled() ? "&aEnabled" : "&cDisabled")));
-        sender.sendMessage(ColorUtil.translate("  &7Provider: &f" + ai.getProvider()));
-        sender.sendMessage(ColorUtil.translate("  &7Model: &f" + ai.getModel()));
-        sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+        List<String> statusMsg = plugin.getMessagesManager().getList("ai.status.info", 
+             com.nuvik.litebansreborn.config.MessagesManager.placeholders(
+                 "enabled", ai.isEnabled() ? "&aEnabled" : "&cDisabled",
+                 "provider", ai.getProvider(),
+                 "model", ai.getModel()
+             ));
+        
+        if (statusMsg == null || statusMsg.isEmpty()) {
+             // Fallback if message key missing
+             sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+             sender.sendMessage(ColorUtil.translate("&6🤖 AI Status"));
+             sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+             sender.sendMessage(ColorUtil.translate("  &7Status: " + (ai.isEnabled() ? "&aEnabled" : "&cDisabled")));
+             sender.sendMessage(ColorUtil.translate("  &7Provider: &f" + ai.getProvider()));
+             sender.sendMessage(ColorUtil.translate("  &7Model: &f" + ai.getModel()));
+             sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+        } else {
+             for (String line : statusMsg) {
+                 sender.sendMessage(line);
+             }
+        }
     }
 
     private void handleToxicity(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.translate("&cUsage: /ai toxicity <message>"));
+            sender.sendMessage(plugin.getMessagesManager().get("ai.usage.toxicity", "prefix", plugin.getMessagesManager().getPrefix()));
             return;
         }
 
         String message = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
         String playerName = sender instanceof Player ? sender.getName() : "Console";
         
-        sender.sendMessage(ColorUtil.translate("&7Analyzing message for toxicity..."));
+        sender.sendMessage(plugin.getMessagesManager().get("ai.analyzing"));
         
         plugin.getAIManager().analyzeToxicity(message, playerName).thenAccept(result -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
-                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-                sender.sendMessage(ColorUtil.translate("&6🔍 Toxicity Analysis"));
-                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-                sender.sendMessage(ColorUtil.translate("  &7Message: &f\"" + message + "\""));
-                sender.sendMessage(ColorUtil.translate("  &7Toxic: " + (result.toxic() ? "&cYES" : "&aNO")));
-                sender.sendMessage(ColorUtil.translate("  &7Score: " + getScoreColor(result.score()) + result.score() + "%"));
-                sender.sendMessage(ColorUtil.translate("  &7Reason: &f" + result.reason()));
-                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                List<String> msg = plugin.getMessagesManager().getList("ai.toxicity-result",
+                    com.nuvik.litebansreborn.config.MessagesManager.placeholders(
+                        "message", message,
+                        "is_toxic", result.toxic() ? "&cYES" : "&aNO",
+                        "score", getScoreColor(result.score()) + result.score() + "%",
+                        "reason", result.reason()
+                    )
+                );
+                for (String line : msg) sender.sendMessage(line);
             });
         });
     }
 
     private void handleAnalyze(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.translate("&cUsage: /ai analyze <player>"));
+            sender.sendMessage(plugin.getMessagesManager().get("ai.usage.analyze", "prefix", plugin.getMessagesManager().getPrefix()));
             return;
         }
 
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
-            sender.sendMessage(ColorUtil.translate("&cPlayer not found or not online."));
+            sender.sendMessage(plugin.getMessagesManager().get("general.player-not-found"));
             return;
         }
         
-        sender.sendMessage(ColorUtil.translate("&7Analyzing &e" + target.getName() + "&7's behavior..."));
+        sender.sendMessage(plugin.getMessagesManager().get("ai.analyzing"));
         
         // Get recent chat from case file manager
         List<String> recentActions = new ArrayList<>();
@@ -133,29 +148,31 @@ public class AICommand implements CommandExecutor, TabCompleter {
         
         plugin.getAIManager().analyzeBehavior(target.getName(), recentActions).thenAccept(result -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
-                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-                sender.sendMessage(ColorUtil.translate("&6🤖 AI Behavior Analysis: &f" + target.getName()));
-                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-                sender.sendMessage(ColorUtil.translate("  &7Risk Level: " + getRiskColor(result.riskLevel()) + result.riskLevel().toUpperCase()));
-                sender.sendMessage(ColorUtil.translate("  &7Risk Score: " + getScoreColor(result.riskScore()) + result.riskScore() + "%"));
-                sender.sendMessage(ColorUtil.translate("  &7Summary: &f" + result.summary()));
-                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                List<String> msg = plugin.getMessagesManager().getList("ai.behavior-result",
+                    com.nuvik.litebansreborn.config.MessagesManager.placeholders(
+                        "player", target.getName(),
+                        "risk_level", getRiskColor(result.riskLevel()) + result.riskLevel().toUpperCase(),
+                        "score", getScoreColor(result.riskScore()) + result.riskScore() + "%",
+                        "summary", result.summary()
+                    )
+                );
+                for (String line : msg) sender.sendMessage(line);
             });
         });
     }
 
     private void handleAppeal(CommandSender sender, String[] args) {
         if (args.length < 4) {
-            sender.sendMessage(ColorUtil.translate("&cUsage: /ai appeal <player> <punishment_reason> <appeal_text>"));
-            sender.sendMessage(ColorUtil.translate("&7Example: /ai appeal Steve \"Cheating\" \"I wasn't cheating, I use OptiFine\""));
-            return;
+             sender.sendMessage(plugin.getMessagesManager().get("ai.usage.appeal", "prefix", plugin.getMessagesManager().getPrefix()));
+             sender.sendMessage(ColorUtil.translate("&7Example: /ai appeal Steve \"Cheating\" \"I wasn't cheating, I use OptiFine\""));
+             return;
         }
 
         String playerName = args[1];
         String reason = args[2];
         String appealText = String.join(" ", Arrays.copyOfRange(args, 3, args.length));
         
-        sender.sendMessage(ColorUtil.translate("&7Reviewing appeal with AI..."));
+        sender.sendMessage(plugin.getMessagesManager().get("ai.analyzing"));
         
         plugin.getAIManager().reviewAppeal(playerName, reason, appealText).thenAccept(result -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
@@ -165,18 +182,17 @@ public class AICommand implements CommandExecutor, TabCompleter {
                     default -> "&e";
                 };
                 
-                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-                sender.sendMessage(ColorUtil.translate("&6⚖️ AI Appeal Review"));
-                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-                sender.sendMessage(ColorUtil.translate("  &7Player: &f" + playerName));
-                sender.sendMessage(ColorUtil.translate("  &7Punishment: &f" + reason));
-                sender.sendMessage(ColorUtil.translate("  &7Appeal: &f\"" + appealText + "\""));
-                sender.sendMessage(ColorUtil.translate(""));
-                sender.sendMessage(ColorUtil.translate("  &7AI Recommendation: " + recColor + result.recommendation().toUpperCase()));
-                sender.sendMessage(ColorUtil.translate("  &7Confidence: &f" + result.confidence() + "%"));
-                sender.sendMessage(ColorUtil.translate("  &7Reasoning: &f" + result.reasoning()));
-                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-                sender.sendMessage(ColorUtil.translate("&8Note: This is AI-assisted. Final decision is yours."));
+                List<String> msg = plugin.getMessagesManager().getList("ai.appeal-result",
+                    com.nuvik.litebansreborn.config.MessagesManager.placeholders(
+                        "player", playerName,
+                        "reason", reason,
+                        "appeal_text", appealText,
+                        "recommendation", recColor + result.recommendation().toUpperCase(),
+                        "confidence", String.valueOf(result.confidence()),
+                        "reasoning", result.reasoning()
+                    )
+                );
+                for (String line : msg) sender.sendMessage(line);
             });
         });
     }
@@ -198,14 +214,19 @@ public class AICommand implements CommandExecutor, TabCompleter {
     }
 
     private void showHelp(CommandSender sender) {
-        sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-        sender.sendMessage(ColorUtil.translate("&6🤖 AI Commands"));
-        sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-        sender.sendMessage(ColorUtil.translate("  &e/ai status &7- Check AI status"));
-        sender.sendMessage(ColorUtil.translate("  &e/ai toxicity <message> &7- Analyze toxicity"));
-        sender.sendMessage(ColorUtil.translate("  &e/ai analyze <player> &7- Analyze player"));
-        sender.sendMessage(ColorUtil.translate("  &e/ai appeal <player> <reason> <text> &7- Review appeal"));
-        sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+        List<String> help = plugin.getMessagesManager().getList("ai.help");
+        if (help == null || help.isEmpty()) {
+             sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+             sender.sendMessage(ColorUtil.translate("&6🤖 AI Commands"));
+             sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+             sender.sendMessage(ColorUtil.translate("  &e/ai status &7- Check AI status"));
+             sender.sendMessage(ColorUtil.translate("  &e/ai toxicity <message> &7- Analyze toxicity"));
+             sender.sendMessage(ColorUtil.translate("  &e/ai analyze <player> &7- Analyze player"));
+             sender.sendMessage(ColorUtil.translate("  &e/ai appeal <player> <reason> <text> &7- Review appeal"));
+             sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+        } else {
+             for (String line : help) sender.sendMessage(line);
+        }
     }
 
     @Override

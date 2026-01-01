@@ -61,23 +61,25 @@ public class NetworkCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(ColorUtil.translate("&7Scanning for alt accounts..."));
         
         plugin.getSocialNetworkManager().getAlts(target.getUniqueId()).thenAccept(alts -> {
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            sender.sendMessage(ColorUtil.translate("&6🔗 Alt Accounts for &f" + target.getName()));
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            
-            if (alts.isEmpty()) {
-                sender.sendMessage(ColorUtil.translate("&7No alt accounts detected."));
-            } else {
-                for (UUID altUuid : alts) {
-                    OfflinePlayer alt = Bukkit.getOfflinePlayer(altUuid);
-                    boolean isBanned = plugin.getBanManager().getActiveBan(altUuid).join() != null;
-                    String status = isBanned ? "&c[BANNED]" : "&a[OK]";
-                    sender.sendMessage(ColorUtil.translate("  &7- &f" + alt.getName() + " " + status));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                sender.sendMessage(ColorUtil.translate("&6🔗 Alt Accounts for &f" + target.getName()));
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                
+                if (alts.isEmpty()) {
+                    sender.sendMessage(ColorUtil.translate("&7No alt accounts detected."));
+                } else {
+                    for (UUID altUuid : alts) {
+                        OfflinePlayer alt = Bukkit.getOfflinePlayer(altUuid);
+                        boolean isBanned = plugin.getBanManager().getActiveBan(altUuid).join() != null;
+                        String status = isBanned ? "&c[BANNED]" : "&a[OK]";
+                        sender.sendMessage(ColorUtil.translate("  &7- &f" + alt.getName() + " " + status));
+                    }
                 }
-            }
-            
-            sender.sendMessage(ColorUtil.translate("&7Total: &e" + alts.size() + " &7alt(s) found"));
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                
+                sender.sendMessage(ColorUtil.translate("&7Total: &e" + alts.size() + " &7alt(s) found"));
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+            });
         });
     }
 
@@ -91,32 +93,34 @@ public class NetworkCommand implements CommandExecutor, TabCompleter {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         
         plugin.getSocialNetworkManager().getRelationships(target.getUniqueId()).thenAccept(relations -> {
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            sender.sendMessage(ColorUtil.translate("&6🕸️ Connections for &f" + target.getName()));
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            
-            if (relations.isEmpty()) {
-                sender.sendMessage(ColorUtil.translate("&7No connections found."));
-            } else {
-                int shown = 0;
-                for (var rel : relations) {
-                    if (shown++ >= 15) {
-                        sender.sendMessage(ColorUtil.translate("&7... and " + (relations.size() - 15) + " more"));
-                        break;
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                sender.sendMessage(ColorUtil.translate("&6🕸️ Connections for &f" + target.getName()));
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                
+                if (relations.isEmpty()) {
+                    sender.sendMessage(ColorUtil.translate("&7No connections found."));
+                } else {
+                    int shown = 0;
+                    for (var rel : relations) {
+                        if (shown++ >= 15) {
+                            sender.sendMessage(ColorUtil.translate("&7... and " + (relations.size() - 15) + " more"));
+                            break;
+                        }
+                        OfflinePlayer other = Bukkit.getOfflinePlayer(rel.player());
+                        String typeColor = switch (rel.type()) {
+                            case ALT_ACCOUNT -> "&c";
+                            case BANNED_ASSOCIATE -> "&4";
+                            case FREQUENT_PARTNER -> "&e";
+                            case SAME_SESSION -> "&7";
+                        };
+                        sender.sendMessage(ColorUtil.translate("  " + typeColor + "● &f" + other.getName() + 
+                            " &8(" + rel.type().getDescription() + ", strength: " + rel.strength() + ")"));
                     }
-                    OfflinePlayer other = Bukkit.getOfflinePlayer(rel.player());
-                    String typeColor = switch (rel.type()) {
-                        case ALT_ACCOUNT -> "&c";
-                        case BANNED_ASSOCIATE -> "&4";
-                        case FREQUENT_PARTNER -> "&e";
-                        case SAME_SESSION -> "&7";
-                    };
-                    sender.sendMessage(ColorUtil.translate("  " + typeColor + "● &f" + other.getName() + 
-                        " &8(" + rel.type().getDescription() + ", strength: " + rel.strength() + ")"));
                 }
-            }
-            
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+            });
         });
     }
 
@@ -133,21 +137,23 @@ public class NetworkCommand implements CommandExecutor, TabCompleter {
         
         plugin.getSocialNetworkManager().getRelationships(target.getUniqueId()).thenAccept(relations -> {
             plugin.getSocialNetworkManager().getBannedConnectionScore(target.getUniqueId()).thenAccept(score -> {
-                long alts = relations.stream()
-                    .filter(r -> r.type() == SocialNetworkManager.RelationType.ALT_ACCOUNT)
-                    .count();
-                long bannedAssociates = relations.stream()
-                    .filter(r -> r.type() == SocialNetworkManager.RelationType.BANNED_ASSOCIATE)
-                    .count();
-                
-                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-                sender.sendMessage(ColorUtil.translate("&6📊 Network Analysis: &f" + target.getName()));
-                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-                sender.sendMessage(ColorUtil.translate("  &7Alt Accounts: &e" + alts));
-                sender.sendMessage(ColorUtil.translate("  &7Connections: &e" + relations.size()));
-                sender.sendMessage(ColorUtil.translate("  &7Banned Associates: &c" + bannedAssociates));
-                sender.sendMessage(ColorUtil.translate("  &7Risk Score: " + getRiskColor(score) + score + "%"));
-                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    long alts = relations.stream()
+                        .filter(r -> r.type() == SocialNetworkManager.RelationType.ALT_ACCOUNT)
+                        .count();
+                    long bannedAssociates = relations.stream()
+                        .filter(r -> r.type() == SocialNetworkManager.RelationType.BANNED_ASSOCIATE)
+                        .count();
+                    
+                    sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                    sender.sendMessage(ColorUtil.translate("&6📊 Network Analysis: &f" + target.getName()));
+                    sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                    sender.sendMessage(ColorUtil.translate("  &7Alt Accounts: &e" + alts));
+                    sender.sendMessage(ColorUtil.translate("  &7Connections: &e" + relations.size()));
+                    sender.sendMessage(ColorUtil.translate("  &7Banned Associates: &c" + bannedAssociates));
+                    sender.sendMessage(ColorUtil.translate("  &7Risk Score: " + getRiskColor(score) + score + "%"));
+                    sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                });
             });
         });
     }
@@ -162,21 +168,23 @@ public class NetworkCommand implements CommandExecutor, TabCompleter {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         
         plugin.getSocialNetworkManager().getBannedAssociates(target.getUniqueId()).thenAccept(associates -> {
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            sender.sendMessage(ColorUtil.translate("&c⚠ Banned Associates of &f" + target.getName()));
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            
-            if (associates.isEmpty()) {
-                sender.sendMessage(ColorUtil.translate("&aNo banned associates found."));
-            } else {
-                for (var assoc : associates) {
-                    OfflinePlayer other = Bukkit.getOfflinePlayer(assoc.player());
-                    sender.sendMessage(ColorUtil.translate("  &c● &f" + other.getName() + 
-                        " &7(Relation: " + assoc.type().getDescription() + ")"));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                sender.sendMessage(ColorUtil.translate("&c⚠ Banned Associates of &f" + target.getName()));
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                
+                if (associates.isEmpty()) {
+                    sender.sendMessage(ColorUtil.translate("&aNo banned associates found."));
+                } else {
+                    for (var assoc : associates) {
+                        OfflinePlayer other = Bukkit.getOfflinePlayer(assoc.player());
+                        sender.sendMessage(ColorUtil.translate("  &c● &f" + other.getName() + 
+                            " &7(Relation: " + assoc.type().getDescription() + ")"));
+                    }
                 }
-            }
-            
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+            });
         });
     }
 

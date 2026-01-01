@@ -19,6 +19,7 @@ public class VPNDatabase {
     private final LiteBansReborn plugin;
     private Connection connection;
     private final File databaseFile;
+    private final Object dbLock = new Object(); // Lock for SQLite thread safety
 
     public VPNDatabase(LiteBansReborn plugin) {
         this.plugin = plugin;
@@ -136,28 +137,30 @@ public class VPNDatabase {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             """;
 
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setString(1, result.getIp());
-                ps.setString(2, playerUUID != null ? playerUUID.toString() : null);
-                ps.setString(3, playerName);
-                ps.setBoolean(4, result.isVPN());
-                ps.setBoolean(5, result.isProxy());
-                ps.setBoolean(6, result.isHosting());
-                ps.setBoolean(7, result.isTor());
-                ps.setString(8, result.getVpnProvider());
-                ps.setString(9, result.getIsp());
-                ps.setString(10, result.getOrg());
-                ps.setString(11, result.getAsn());
-                ps.setString(12, result.getCountry());
-                ps.setString(13, result.getCountryCode());
-                ps.setString(14, result.getCity());
-                ps.setString(15, result.getRealIP());
-                ps.setDouble(16, result.getRiskScore());
-                ps.setString(17, result.getApiProvider());
-                ps.setString(18, actionTaken);
-                ps.executeUpdate();
-            } catch (SQLException e) {
-                plugin.log(Level.WARNING, "Failed to log VPN detection: " + e.getMessage());
+            synchronized (dbLock) {
+                try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                    ps.setString(1, result.getIp());
+                    ps.setString(2, playerUUID != null ? playerUUID.toString() : null);
+                    ps.setString(3, playerName);
+                    ps.setBoolean(4, result.isVPN());
+                    ps.setBoolean(5, result.isProxy());
+                    ps.setBoolean(6, result.isHosting());
+                    ps.setBoolean(7, result.isTor());
+                    ps.setString(8, result.getVpnProvider());
+                    ps.setString(9, result.getIsp());
+                    ps.setString(10, result.getOrg());
+                    ps.setString(11, result.getAsn());
+                    ps.setString(12, result.getCountry());
+                    ps.setString(13, result.getCountryCode());
+                    ps.setString(14, result.getCity());
+                    ps.setString(15, result.getRealIP());
+                    ps.setDouble(16, result.getRiskScore());
+                    ps.setString(17, result.getApiProvider());
+                    ps.setString(18, actionTaken);
+                    ps.executeUpdate();
+                } catch (SQLException e) {
+                    plugin.log(Level.WARNING, "Failed to log VPN detection: " + e.getMessage());
+                }
             }
 
             // Update VPN provider tracking
@@ -182,14 +185,16 @@ public class VPNDatabase {
                     login_count = login_count + 1
             """;
 
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-                ps.setString(1, playerUUID.toString());
-                ps.setString(2, playerName);
-                ps.setString(3, ip);
-                ps.setBoolean(4, isVPN);
-                ps.executeUpdate();
-            } catch (SQLException e) {
-                plugin.log(Level.WARNING, "Failed to track IP: " + e.getMessage());
+            synchronized (dbLock) {
+                try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                    ps.setString(1, playerUUID.toString());
+                    ps.setString(2, playerName);
+                    ps.setString(3, ip);
+                    ps.setBoolean(4, isVPN);
+                    ps.executeUpdate();
+                } catch (SQLException e) {
+                    plugin.log(Level.WARNING, "Failed to track IP: " + e.getMessage());
+                }
             }
         });
     }
@@ -206,11 +211,13 @@ public class VPNDatabase {
                 last_detected = CURRENT_TIMESTAMP
         """;
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, providerName);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            plugin.log(Level.WARNING, "Failed to update VPN provider: " + e.getMessage());
+        synchronized (dbLock) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setString(1, providerName);
+                ps.executeUpdate();
+            } catch (SQLException e) {
+                plugin.log(Level.WARNING, "Failed to update VPN provider: " + e.getMessage());
+            }
         }
     }
 

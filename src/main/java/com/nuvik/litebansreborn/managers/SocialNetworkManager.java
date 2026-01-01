@@ -19,7 +19,7 @@ import java.util.logging.Level;
  * - Network of banned players
  * 
  * @author Nuvik
- * @version 5.1.0
+ * @version 5.4.0
  */
 public class SocialNetworkManager {
 
@@ -159,19 +159,32 @@ public class SocialNetworkManager {
     
     private void recordIP(UUID uuid, String ip) {
         CompletableFuture.runAsync(() -> {
-            String sql = """
-                INSERT INTO player_ips (uuid, ip_address, times_seen) 
-                VALUES (?, ?, 1)
-                ON DUPLICATE KEY UPDATE 
-                    times_seen = times_seen + 1,
-                    last_seen = CURRENT_TIMESTAMP
-                """;
+            // Check if exists first
+            String checkSql = "SELECT times_seen FROM player_ips WHERE uuid = ? AND ip_address = ?";
+            String insertSql = "INSERT INTO player_ips (uuid, ip_address, times_seen) VALUES (?, ?, 1)";
+            String updateSql = "UPDATE player_ips SET times_seen = times_seen + 1, last_seen = CURRENT_TIMESTAMP WHERE uuid = ? AND ip_address = ?";
             
-            try (Connection conn = plugin.getDatabaseManager().getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, uuid.toString());
-                pstmt.setString(2, ip);
-                pstmt.executeUpdate();
+            try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+                boolean exists = false;
+                try (PreparedStatement check = conn.prepareStatement(checkSql)) {
+                    check.setString(1, uuid.toString());
+                    check.setString(2, ip);
+                    exists = check.executeQuery().next();
+                }
+                
+                if (exists) {
+                    try (PreparedStatement update = conn.prepareStatement(updateSql)) {
+                        update.setString(1, uuid.toString());
+                        update.setString(2, ip);
+                        update.executeUpdate();
+                    }
+                } else {
+                    try (PreparedStatement insert = conn.prepareStatement(insertSql)) {
+                        insert.setString(1, uuid.toString());
+                        insert.setString(2, ip);
+                        insert.executeUpdate();
+                    }
+                }
             } catch (SQLException e) {
                 plugin.log(Level.WARNING, "Failed to record IP: " + e.getMessage());
             }
@@ -215,20 +228,35 @@ public class SocialNetworkManager {
         UUID second = player1.compareTo(player2) < 0 ? player2 : player1;
         
         CompletableFuture.runAsync(() -> {
-            String sql = """
-                INSERT INTO player_relationships (player1_uuid, player2_uuid, relation_type, strength)
-                VALUES (?, ?, ?, 1)
-                ON DUPLICATE KEY UPDATE 
-                    strength = strength + 1,
-                    last_seen = CURRENT_TIMESTAMP
-                """;
+            // Check if exists first
+            String checkSql = "SELECT strength FROM player_relationships WHERE player1_uuid = ? AND player2_uuid = ? AND relation_type = ?";
+            String insertSql = "INSERT INTO player_relationships (player1_uuid, player2_uuid, relation_type, strength) VALUES (?, ?, ?, 1)";
+            String updateSql = "UPDATE player_relationships SET strength = strength + 1, last_seen = CURRENT_TIMESTAMP WHERE player1_uuid = ? AND player2_uuid = ? AND relation_type = ?";
             
-            try (Connection conn = plugin.getDatabaseManager().getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, first.toString());
-                pstmt.setString(2, second.toString());
-                pstmt.setString(3, type.name());
-                pstmt.executeUpdate();
+            try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+                boolean exists = false;
+                try (PreparedStatement check = conn.prepareStatement(checkSql)) {
+                    check.setString(1, first.toString());
+                    check.setString(2, second.toString());
+                    check.setString(3, type.name());
+                    exists = check.executeQuery().next();
+                }
+                
+                if (exists) {
+                    try (PreparedStatement update = conn.prepareStatement(updateSql)) {
+                        update.setString(1, first.toString());
+                        update.setString(2, second.toString());
+                        update.setString(3, type.name());
+                        update.executeUpdate();
+                    }
+                } else {
+                    try (PreparedStatement insert = conn.prepareStatement(insertSql)) {
+                        insert.setString(1, first.toString());
+                        insert.setString(2, second.toString());
+                        insert.setString(3, type.name());
+                        insert.executeUpdate();
+                    }
+                }
             } catch (SQLException e) {
                 plugin.log(Level.WARNING, "Failed to add relationship: " + e.getMessage());
             }

@@ -168,9 +168,12 @@ public class AltManager {
      */
     public void recordPlayerIP(UUID uuid, String ip) {
         plugin.getDatabaseManager().executeAsync(conn -> {
-            String sql = "INSERT INTO " + plugin.getDatabaseManager().getTable("player_ips") +
-                    " (uuid, ip, first_seen, last_seen) VALUES (?, ?, ?, ?) " +
-                    "ON DUPLICATE KEY UPDATE last_seen = ?";
+            String sql = plugin.getDatabaseManager().getUpsertSQL(
+                "player_ips",
+                new String[]{"uuid", "ip", "first_seen", "last_seen"},
+                new String[]{"last_seen"},
+                new String[]{"uuid", "ip"}
+            );
             
             Timestamp now = Timestamp.from(Instant.now());
             
@@ -179,7 +182,10 @@ public class AltManager {
                 stmt.setString(2, ip);
                 stmt.setTimestamp(3, now);
                 stmt.setTimestamp(4, now);
-                stmt.setTimestamp(5, now);
+                // For MySQL/MariaDB, we need the update parameter
+                if (sql.contains("ON DUPLICATE KEY UPDATE")) {
+                    stmt.setTimestamp(5, now);
+                }
                 
                 stmt.executeUpdate();
             }
@@ -192,10 +198,12 @@ public class AltManager {
     public void updatePlayerData(UUID uuid, String name, String ip) {
         plugin.getDatabaseManager().executeAsync(conn -> {
             // Update or insert player data
-            String sql = "INSERT INTO " + plugin.getDatabaseManager().getTable("players") +
-                    " (uuid, last_known_name, last_known_ip, first_join, last_seen) " +
-                    "VALUES (?, ?, ?, ?, ?) " +
-                    "ON DUPLICATE KEY UPDATE last_known_name = ?, last_known_ip = ?, last_seen = ?";
+            String sql = plugin.getDatabaseManager().getUpsertSQL(
+                "players",
+                new String[]{"uuid", "last_known_name", "last_known_ip", "first_join", "last_seen"},
+                new String[]{"last_known_name", "last_known_ip", "last_seen"},
+                new String[]{"uuid"}
+            );
             
             Timestamp now = Timestamp.from(Instant.now());
             
@@ -205,24 +213,33 @@ public class AltManager {
                 stmt.setString(3, ip);
                 stmt.setTimestamp(4, now);
                 stmt.setTimestamp(5, now);
-                stmt.setString(6, name);
-                stmt.setString(7, ip);
-                stmt.setTimestamp(8, now);
+                // For MySQL/MariaDB, we need the update parameters
+                if (sql.contains("ON DUPLICATE KEY UPDATE")) {
+                    stmt.setString(6, name);
+                    stmt.setString(7, ip);
+                    stmt.setTimestamp(8, now);
+                }
                 
                 stmt.executeUpdate();
             }
             
             // Record name history
-            sql = "INSERT INTO " + plugin.getDatabaseManager().getTable("player_names") +
-                    " (uuid, name, first_seen, last_seen) VALUES (?, ?, ?, ?) " +
-                    "ON DUPLICATE KEY UPDATE last_seen = ?";
+            String nameSql = plugin.getDatabaseManager().getUpsertSQL(
+                "player_names",
+                new String[]{"uuid", "name", "first_seen", "last_seen"},
+                new String[]{"last_seen"},
+                new String[]{"uuid", "name"}
+            );
             
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement stmt = conn.prepareStatement(nameSql)) {
                 stmt.setString(1, uuid.toString());
                 stmt.setString(2, name);
                 stmt.setTimestamp(3, now);
                 stmt.setTimestamp(4, now);
-                stmt.setTimestamp(5, now);
+                // For MySQL/MariaDB, we need the update parameter
+                if (nameSql.contains("ON DUPLICATE KEY UPDATE")) {
+                    stmt.setTimestamp(5, now);
+                }
                 
                 stmt.executeUpdate();
             }

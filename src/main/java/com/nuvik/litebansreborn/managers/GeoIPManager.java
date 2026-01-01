@@ -130,13 +130,32 @@ public class GeoIPManager {
             
             JsonObject json = JsonParser.parseString(response.body().string()).getAsJsonObject();
             
+            // ipinfo.io returns country as ISO code (e.g., "US"), so we need to handle this
+            String countryCode = json.has("country") ? json.get("country").getAsString() : "??";
+            // Get country name from country code, or use code as fallback
+            String countryName = getCountryNameFromCode(countryCode);
+            
             return new GeoIPResult(
-                    json.has("country") ? json.get("country").getAsString() : "Unknown",
-                    json.has("country") ? json.get("country").getAsString() : "??",
+                    countryName,
+                    countryCode,
                     json.has("region") ? json.get("region").getAsString() : "",
                     json.has("city") ? json.get("city").getAsString() : "",
                     json.has("org") ? json.get("org").getAsString() : ""
             );
+        }
+    }
+    
+    /**
+     * Convert ISO country code to full name (basic mapping)
+     */
+    private String getCountryNameFromCode(String code) {
+        if (code == null || code.length() != 2) return "Unknown";
+        try {
+            java.util.Locale locale = new java.util.Locale("", code);
+            String name = locale.getDisplayCountry();
+            return name.isEmpty() ? code : name;
+        } catch (Exception e) {
+            return code;
         }
     }
     

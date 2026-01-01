@@ -24,7 +24,7 @@ import java.util.logging.Level;
  * - Network-wide statistics
  * 
  * @author Nuvik
- * @version 5.1.0
+ * @version 5.4.0
  */
 public class CrossServerManager implements PluginMessageListener {
 

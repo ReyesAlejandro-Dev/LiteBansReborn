@@ -20,7 +20,7 @@ import java.util.logging.Level;
  * - Generates risk scores and predictions
  * 
  * @author Nuvik
- * @version 5.1.0
+ * @version 5.4.0
  */
 public class PredictiveManager {
 
@@ -46,37 +46,39 @@ public class PredictiveManager {
     }
     
     private void createTables() {
-        String sql = """
-            CREATE TABLE IF NOT EXISTS player_risk_scores (
-                uuid VARCHAR(36) PRIMARY KEY,
-                risk_score INT DEFAULT 50,
-                prediction_confidence INT DEFAULT 0,
-                last_analysis TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                total_messages INT DEFAULT 0,
-                toxic_messages INT DEFAULT 0,
-                total_warnings INT DEFAULT 0,
-                total_mutes INT DEFAULT 0,
-                total_bans INT DEFAULT 0,
-                playtime_hours DOUBLE DEFAULT 0,
-                first_join TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-            
-            CREATE TABLE IF NOT EXISTS behavior_patterns (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                pattern_type VARCHAR(32) NOT NULL,
-                pattern_value TEXT NOT NULL,
-                weight INT DEFAULT 1,
-                source VARCHAR(32) DEFAULT 'learned'
-            );
-            """;
-        
         try (Connection conn = plugin.getDatabaseManager().getConnection();
              Statement stmt = conn.createStatement()) {
-            for (String query : sql.split(";")) {
-                if (!query.trim().isEmpty()) {
-                    stmt.execute(query.trim());
-                }
-            }
+            
+            // Player risk scores table - compatible with all databases
+            String riskScoresSQL = """
+                CREATE TABLE IF NOT EXISTS player_risk_scores (
+                    uuid VARCHAR(36) PRIMARY KEY,
+                    risk_score INTEGER DEFAULT 50,
+                    prediction_confidence INTEGER DEFAULT 0,
+                    last_analysis TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    total_messages INTEGER DEFAULT 0,
+                    toxic_messages INTEGER DEFAULT 0,
+                    total_warnings INTEGER DEFAULT 0,
+                    total_mutes INTEGER DEFAULT 0,
+                    total_bans INTEGER DEFAULT 0,
+                    playtime_hours REAL DEFAULT 0,
+                    first_join TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """;
+            stmt.execute(riskScoresSQL.trim());
+            
+            // Behavior patterns table
+            String behaviorPatternsSQL = """
+                CREATE TABLE IF NOT EXISTS behavior_patterns (
+                    id INTEGER PRIMARY KEY,
+                    pattern_type VARCHAR(32) NOT NULL,
+                    pattern_value TEXT NOT NULL,
+                    weight INTEGER DEFAULT 1,
+                    source VARCHAR(32) DEFAULT 'learned'
+                )
+                """;
+            stmt.execute(behaviorPatternsSQL.trim());
+            
         } catch (SQLException e) {
             plugin.log(Level.SEVERE, "Failed to create predictive tables: " + e.getMessage());
         }
@@ -224,35 +226,70 @@ public class PredictiveManager {
     }
     
     private void saveProfile(PlayerRiskProfile profile) {
-        String sql = """
+        // Use INSERT OR REPLACE for cross-database compatibility
+        // SQLite and H2 support this, MySQL/MariaDB we handle with a try-catch delete+insert
+        String checkSql = "SELECT COUNT(*) FROM player_risk_scores WHERE uuid = ?";
+        String insertSql = """
             INSERT INTO player_risk_scores 
                 (uuid, risk_score, prediction_confidence, total_messages, toxic_messages, 
                  total_warnings, total_mutes, total_bans, playtime_hours, last_analysis)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-            ON DUPLICATE KEY UPDATE
-                risk_score = VALUES(risk_score),
-                prediction_confidence = VALUES(prediction_confidence),
-                total_messages = VALUES(total_messages),
-                toxic_messages = VALUES(toxic_messages),
-                total_warnings = VALUES(total_warnings),
-                total_mutes = VALUES(total_mutes),
-                total_bans = VALUES(total_bans),
-                playtime_hours = VALUES(playtime_hours),
+            """;
+        String updateSql = """
+            UPDATE player_risk_scores SET
+                risk_score = ?,
+                prediction_confidence = ?,
+                total_messages = ?,
+                toxic_messages = ?,
+                total_warnings = ?,
+                total_mutes = ?,
+                total_bans = ?,
+                playtime_hours = ?,
                 last_analysis = CURRENT_TIMESTAMP
+            WHERE uuid = ?
             """;
         
-        try (Connection conn = plugin.getDatabaseManager().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, profile.uuid().toString());
-            pstmt.setInt(2, profile.riskScore());
-            pstmt.setInt(3, profile.banPrediction());
-            pstmt.setInt(4, profile.totalMessages());
-            pstmt.setInt(5, profile.toxicMessages());
-            pstmt.setInt(6, profile.totalWarnings());
-            pstmt.setInt(7, profile.totalMutes());
-            pstmt.setInt(8, profile.totalBans());
-            pstmt.setDouble(9, profile.playtimeHours());
-            pstmt.executeUpdate();
+        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+            // Check if record exists
+            boolean exists = false;
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setString(1, profile.uuid().toString());
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next()) {
+                        exists = rs.getInt(1) > 0;
+                    }
+                }
+            }
+            
+            if (exists) {
+                // Update existing record
+                try (PreparedStatement pstmt = conn.prepareStatement(updateSql)) {
+                    pstmt.setInt(1, profile.riskScore());
+                    pstmt.setInt(2, profile.banPrediction());
+                    pstmt.setInt(3, profile.totalMessages());
+                    pstmt.setInt(4, profile.toxicMessages());
+                    pstmt.setInt(5, profile.totalWarnings());
+                    pstmt.setInt(6, profile.totalMutes());
+                    pstmt.setInt(7, profile.totalBans());
+                    pstmt.setDouble(8, profile.playtimeHours());
+                    pstmt.setString(9, profile.uuid().toString());
+                    pstmt.executeUpdate();
+                }
+            } else {
+                // Insert new record
+                try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
+                    pstmt.setString(1, profile.uuid().toString());
+                    pstmt.setInt(2, profile.riskScore());
+                    pstmt.setInt(3, profile.banPrediction());
+                    pstmt.setInt(4, profile.totalMessages());
+                    pstmt.setInt(5, profile.toxicMessages());
+                    pstmt.setInt(6, profile.totalWarnings());
+                    pstmt.setInt(7, profile.totalMutes());
+                    pstmt.setInt(8, profile.totalBans());
+                    pstmt.setDouble(9, profile.playtimeHours());
+                    pstmt.executeUpdate();
+                }
+            }
         } catch (SQLException e) {
             plugin.log(Level.WARNING, "Failed to save risk profile: " + e.getMessage());
         }

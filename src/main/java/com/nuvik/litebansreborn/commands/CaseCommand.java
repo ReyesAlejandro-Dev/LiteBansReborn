@@ -58,20 +58,22 @@ public class CaseCommand implements CommandExecutor, TabCompleter {
         String caseId = args[1].toUpperCase();
         
         plugin.getCaseFileManager().getCaseFile(caseId).thenAccept(caseFile -> {
-            if (caseFile == null) {
-                sender.sendMessage(ColorUtil.translate("&cCase file not found: " + caseId));
-                return;
-            }
-            
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            sender.sendMessage(ColorUtil.translate("&6📁 Case File: &f#" + caseFile.caseId()));
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            sender.sendMessage(ColorUtil.translate("  &7Target: &f" + caseFile.targetName()));
-            sender.sendMessage(ColorUtil.translate("  &7Created by: &f" + caseFile.creatorName()));
-            sender.sendMessage(ColorUtil.translate("  &7Date: &f" + dateFormat.format(new Date(caseFile.createdAt()))));
-            sender.sendMessage(ColorUtil.translate(""));
-            sender.sendMessage(ColorUtil.translate("  &7Use &e/case evidence " + caseId + " &7to view evidence."));
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (caseFile == null) {
+                    sender.sendMessage(ColorUtil.translate("&cCase file not found: " + caseId));
+                    return;
+                }
+                
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                sender.sendMessage(ColorUtil.translate("&6📁 Case File: &f#" + caseFile.caseId()));
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                sender.sendMessage(ColorUtil.translate("  &7Target: &f" + caseFile.targetName()));
+                sender.sendMessage(ColorUtil.translate("  &7Created by: &f" + caseFile.creatorName()));
+                sender.sendMessage(ColorUtil.translate("  &7Date: &f" + dateFormat.format(new Date(caseFile.createdAt()))));
+                sender.sendMessage(ColorUtil.translate(""));
+                sender.sendMessage(ColorUtil.translate("  &7Use &e/case evidence " + caseId + " &7to view evidence."));
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+            });
         });
     }
 
@@ -85,22 +87,24 @@ public class CaseCommand implements CommandExecutor, TabCompleter {
         OfflinePlayer target = Bukkit.getOfflinePlayer(args[1]);
         
         plugin.getCaseFileManager().getCasesForPlayer(target.getUniqueId()).thenAccept(cases -> {
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            sender.sendMessage(ColorUtil.translate("&6📁 Cases for &f" + target.getName()));
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            
-            if (cases.isEmpty()) {
-                sender.sendMessage(ColorUtil.translate("&7No case files found."));
-            } else {
-                for (var caseFile : cases) {
-                    sender.sendMessage(ColorUtil.translate("  &e#" + caseFile.caseId() + " &7- " + 
-                        dateFormat.format(new Date(caseFile.createdAt())) + 
-                        " by &f" + caseFile.creatorName()));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                sender.sendMessage(ColorUtil.translate("&6📁 Cases for &f" + target.getName()));
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                
+                if (cases.isEmpty()) {
+                    sender.sendMessage(ColorUtil.translate("&7No case files found."));
+                } else {
+                    for (var caseFile : cases) {
+                        sender.sendMessage(ColorUtil.translate("  &e#" + caseFile.caseId() + " &7- " + 
+                            dateFormat.format(new Date(caseFile.createdAt())) + 
+                            " by &f" + caseFile.creatorName()));
+                    }
                 }
-            }
-            
-            sender.sendMessage(ColorUtil.translate("&7Total: &e" + cases.size() + " &7case(s)"));
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                
+                sender.sendMessage(ColorUtil.translate("&7Total: &e" + cases.size() + " &7case(s)"));
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+            });
         });
     }
 
@@ -114,36 +118,38 @@ public class CaseCommand implements CommandExecutor, TabCompleter {
         String filterType = args.length >= 3 ? args[2].toUpperCase() : null;
         
         plugin.getCaseFileManager().getCaseEvidence(caseId).thenAccept(evidence -> {
-            if (evidence.isEmpty()) {
-                sender.sendMessage(ColorUtil.translate("&cNo evidence found for case: " + caseId));
-                return;
-            }
-            
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            sender.sendMessage(ColorUtil.translate("&6🔍 Evidence for Case #" + caseId));
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
-            
-            for (Map.Entry<String, String> entry : evidence.entrySet()) {
-                if (filterType != null && !entry.getKey().equals(filterType)) continue;
-                
-                sender.sendMessage(ColorUtil.translate("&e▸ " + entry.getKey() + ":"));
-                
-                // Truncate long content
-                String content = entry.getValue();
-                String[] lines = content.split("\n");
-                int shown = 0;
-                for (String line : lines) {
-                    if (shown++ >= 10) {
-                        sender.sendMessage(ColorUtil.translate("  &8... (" + (lines.length - 10) + " more lines)"));
-                        break;
-                    }
-                    sender.sendMessage(ColorUtil.translate("  &7" + line));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (evidence.isEmpty()) {
+                    sender.sendMessage(ColorUtil.translate("&cNo evidence found for case: " + caseId));
+                    return;
                 }
-                sender.sendMessage("");
-            }
-            
-            sender.sendMessage(ColorUtil.translate("&7Types: " + String.join(", ", evidence.keySet())));
-            sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                sender.sendMessage(ColorUtil.translate("&6🔍 Evidence for Case #" + caseId));
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+                
+                for (Map.Entry<String, String> entry : evidence.entrySet()) {
+                    if (filterType != null && !entry.getKey().equals(filterType)) continue;
+                    
+                    sender.sendMessage(ColorUtil.translate("&e▸ " + entry.getKey() + ":"));
+                    
+                    // Truncate long content
+                    String content = entry.getValue();
+                    String[] lines = content.split("\n");
+                    int shown = 0;
+                    for (String line : lines) {
+                        if (shown++ >= 10) {
+                            sender.sendMessage(ColorUtil.translate("  &8... (" + (lines.length - 10) + " more lines)"));
+                            break;
+                        }
+                        sender.sendMessage(ColorUtil.translate("  &7" + line));
+                    }
+                    sender.sendMessage("");
+                }
+                
+                sender.sendMessage(ColorUtil.translate("&7Types: " + String.join(", ", evidence.keySet())));
+                sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
+            });
         });
     }
 
@@ -167,8 +173,10 @@ public class CaseCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(ColorUtil.translate("&7Creating case file for &e" + target.getName() + "&7..."));
         
         plugin.getCaseFileManager().createCaseFile(target, player).thenAccept(caseFile -> {
-            sender.sendMessage(ColorUtil.translate("&a✓ Case file created! ID: &e#" + caseFile.caseId()));
-            sender.sendMessage(ColorUtil.translate("&7View with: &e/case view " + caseFile.caseId()));
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                sender.sendMessage(ColorUtil.translate("&a✓ Case file created! ID: &e#" + caseFile.caseId()));
+                sender.sendMessage(ColorUtil.translate("&7View with: &e/case view " + caseFile.caseId()));
+            });
         });
     }
 

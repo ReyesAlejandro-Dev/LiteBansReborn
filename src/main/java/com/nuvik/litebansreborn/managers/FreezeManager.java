@@ -78,7 +78,9 @@ public class FreezeManager {
         // Notify the player if online
         Player target = Bukkit.getPlayer(targetUUID);
         if (target != null) {
-            plugin.getMessagesManager().send(target, "unfreeze.unfrozen-message");
+            plugin.getMessagesManager().send(target, "unfreeze.unfrozen-message",
+                "executor", executorName
+            );
         }
         
         // Broadcast
@@ -165,7 +167,10 @@ public class FreezeManager {
                 return;
             }
             
-            plugin.getMessagesManager().send(player, "freeze.reminder");
+            String reason = plugin.getCacheManager().getFreezeReason(uuid);
+            plugin.getMessagesManager().send(player, "freeze.reminder",
+                "reason", reason != null ? reason : "Frozen"
+            );
         }, 100L, 100L); // 5 seconds
     }
     

@@ -1,0 +1,220 @@
+# ================================
+# Reports GUI Configuration
+# LiteBansReborn v6.0.0
+# ================================
+
+# GUI Settings
+gui:
+  enabled: true
+  title: "&c&l🛡️ REPORTS PANEL"
+  rows: 6  # 1-6 (9 slots each row)
+  
+  # Background item
+  background:
+    enabled: true
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+  
+  # Border decoration
+  border:
+    enabled: true
+    material: GRAY_STAINED_GLASS_PANE
+    name: " "
+
+# Report Item Display
+report-item:
+  # Material based on priority
+  materials:
+    low: PAPER
+    normal: BOOK
+    high: GOLDEN_APPLE
+    critical: NETHER_STAR
+  
+  # Item format
+  name: "&e&l⚠ Report #%id%"
+  lore:
+    - "&8━━━━━━━━━━━━━━━━━━━━━"
+    - "&7Reported: &f%reported%"
+    - "&7Reporter: &f%reporter%"
+    - "&7Reason: &f%reason%"
+    - "&7Time: &f%time%"
+    - "&7Server: &f%server%"
+    - "&8━━━━━━━━━━━━━━━━━━━━━"
+    - "&7Priority: %priority_color%%priority%"
+    - "&7Status: %status_color%%status%"
+    - ""
+    - "&a▸ Left click to handle"
+    - "&c▸ Right click to dismiss"
+    - "&e▸ Shift+Left click to teleport"
+
+  # Priority colors
+  priority-colors:
+    low: "&a"
+    normal: "&e"
+    high: "&6"
+    critical: "&c&l"
+  
+  # Status colors
+  status-colors:
+    open: "&e⬤ Open"
+    in-progress: "&6⬤ In Progress"
+    resolved: "&a⬤ Resolved"
+    dismissed: "&8⬤ Dismissed"
+
+# Navigation buttons
+navigation:
+  previous-page:
+    slot: 45
+    material: ARROW
+    name: "&a← Previous Page"
+    lore:
+      - "&7Click to go to previous page"
+      - "&8Page %current%/%total%"
+  
+  next-page:
+    slot: 53
+    material: ARROW
+    name: "&a→ Next Page"
+    lore:
+      - "&7Click to go to next page"
+      - "&8Page %current%/%total%"
+  
+  refresh:
+    slot: 49
+    material: SUNFLOWER
+    name: "&e⟳ Refresh"
+    lore:
+      - "&7Click to refresh reports"
+      - "&7Last updated: &f%time%"
+  
+  close:
+    slot: 47
+    material: BARRIER
+    name: "&c✖ Close"
+    lore:
+      - "&7Click to close this menu"
+
+# Filter buttons
+filters:
+  all:
+    slot: 46
+    material: COMPASS
+    name: "&f🔍 All Reports"
+    lore:
+      - "&7Show all reports"
+      - "&8Currently showing: %count% reports"
+  
+  priority-filter:
+    slot: 48
+    material: HOPPER
+    name: "&e⚙ Filter by Priority"
+    lore:
+      - "&7Current: &f%current%"
+      - ""
+      - "&7Click to cycle:"
+      - "&8➤ All → Low → Normal → High → Critical"
+
+  status-filter:
+    slot: 50
+    material: COMPARATOR
+    name: "&e⚙ Filter by Status"
+    lore:
+      - "&7Current: &f%current%"
+      - ""
+      - "&7Click to cycle:"
+      - "&8➤ All → Open → In Progress → Resolved"
+
+  my-reports:
+    slot: 51
+    material: PLAYER_HEAD
+    name: "&b👤 My Assigned Reports"
+    lore:
+      - "&7Show only reports assigned to you"
+      - "&8You have: &f%count% assignments"
+
+# Quick actions menu (when clicking a report)
+actions-menu:
+  title: "&c&lReport Actions #%id%"
+  rows: 3
+  
+  items:
+    handle:
+      slot: 10
+      material: EMERALD_BLOCK
+      name: "&a✔ Handle Report"
+      lore:
+        - "&7Mark this report as handled"
+        - "&7You will be assigned as handler"
+    
+    dismiss:
+      slot: 12
+      material: REDSTONE_BLOCK
+      name: "&c✖ Dismiss Report"
+      lore:
+        - "&7Mark this report as false/invalid"
+        - "&7Reason will be logged"
+    
+    teleport:
+      slot: 14
+      material: ENDER_PEARL
+      name: "&b⌖ Teleport to Location"
+      lore:
+        - "&7Teleport to where the report was made"
+        - "&7Location: &f%world%, %x%, %y%, %z%"
+    
+    view-reported:
+      slot: 16
+      material: PLAYER_HEAD
+      name: "&e👤 View Reported Player"
+      lore:
+        - "&7Player: &f%reported%"
+        - "&7Click to run /history %reported%"
+    
+    punish:
+      slot: 21
+      material: IRON_SWORD
+      name: "&6⚔ Quick Punish"
+      lore:
+        - "&7Open punishment menu for"
+        - "&7Player: &f%reported%"
+    
+    assign:
+      slot: 23
+      material: BOOK
+      name: "&d📋 Assign to Staff"
+      lore:
+        - "&7Assign this report to a staff member"
+        - "&7Current: &f%assignee%"
+    
+    back:
+      slot: 22
+      material: ARROW
+      name: "&7← Back to Reports"
+      lore:
+        - "&7Return to reports list"
+
+# Sound effects
+sounds:
+  open-menu: BLOCK_CHEST_OPEN
+  click: UI_BUTTON_CLICK
+  success: ENTITY_PLAYER_LEVELUP
+  error: ENTITY_VILLAGER_NO
+
+# Auto-refresh
+auto-refresh:
+  enabled: true
+  interval-seconds: 30
+
+# Notifications
+notifications:
+  # Notify when new report is created
+  new-report:
+    enabled: true
+    sound: ENTITY_EXPERIENCE_ORB_PICKUP
+    title: "&c&lNew Report!"
+    subtitle: "&7%reporter% reported %reported%"
+  
+  # Notify when assigned report is updated
+  assignment-update:
+    enabled: true
+    sound: BLOCK_NOTE_BLOCK_PLING

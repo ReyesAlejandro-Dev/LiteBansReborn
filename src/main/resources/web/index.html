@@ -5,33 +5,1068 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LiteBansReborn - Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap/dist/css/jsvectormap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/js/jsvectormap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/maps/world.js"></script>
     <style>
+        :root {
+            --bg-body: #0d0d12;
+            --bg-card: rgba(22, 22, 30, 0.95);
+            --bg-sidebar: #111118;
+            --bg-hover: rgba(255, 255, 255, 0.05);
+            --bg-active: rgba(99, 102, 241, 0.15);
+            --border: rgba(255, 255, 255, 0.08);
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --text-main: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --radius: 12px;
+            --transition: all 0.2s ease;
+        }
+
         * {
-            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        body {
+            background: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, sans-serif;
+            min-height: 100vh;
         }
 
-        .glass {
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
         }
 
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #0d0d12 0%, #1a1a24 100%);
         }
 
-        .pulse {
+        .login-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px;
+            width: 100%;
+            max-width: 420px;
+            backdrop-filter: blur(20px);
+        }
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-size: 0.9rem;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-sm {
+            padding: 8px 14px;
+            font-size: 0.8rem;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: black;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-hover);
+        }
+
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 20px 12px;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            margin-bottom: 24px;
+        }
+
+        .sidebar-brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-brand-text {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .sidebar-brand-text span {
+            color: var(--primary);
+        }
+
+        .nav-section {
+            margin-bottom: 8px;
+        }
+
+        .nav-title {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            padding: 12px 12px 8px;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-main);
+        }
+
+        .nav-item.active {
+            background: var(--bg-active);
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 16px 12px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+            padding: 24px 32px;
+            min-height: 100vh;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 280px;
+            padding: 10px 16px 10px 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.875rem;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 1200px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .stat-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .stat-icon.blue {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary);
+        }
+
+        .stat-icon.red {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .stat-icon.yellow {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .stat-icon.green {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .status-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-row-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-row-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-row-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-row-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .status-row-value {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .action-card {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .action-card:hover {
+            background: var(--bg-hover);
+            border-color: var(--primary);
+        }
+
+        .action-icon {
+            font-size: 1.25rem;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .action-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            background: rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-top: 1px solid var(--border);
+            font-size: 0.875rem;
+        }
+
+        tr:hover td {
+            background: var(--bg-hover);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.active,
+        .status-badge.banned {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .status-badge.expired {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .status-badge.pending,
+        .status-badge.muted {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .status-badge.running,
+        .status-badge.online {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .status-badge.offline {
+            background: rgba(113, 113, 122, 0.15);
+            color: var(--text-muted);
+        }
+
+        .status-badge.clean {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary);
+        }
+
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+
+        .player-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .player-card:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .player-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .player-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: var(--bg-hover);
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .player-uuid {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-family: monospace;
+        }
+
+        .player-status-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .player-punishment {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .player-punishment.ban {
+            color: var(--danger);
+        }
+
+        .player-punishment.mute {
+            color: var(--warning);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+        }
+
+        .modal {
+            background: #16161e;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 24px 24px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-player-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .modal-player-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+        }
+
+        .modal-player-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .modal-player-uuid {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: monospace;
+            margin-top: 4px;
+        }
+
+        .modal-player-status {
+            margin-top: 8px;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.25rem;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-section {
+            margin-bottom: 24px;
+        }
+
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-section-title {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .punishment-info-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .punishment-info-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .punishment-info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            padding: 6px 0;
+            border-top: 1px solid var(--border);
+        }
+
+        .punishment-info-row:first-of-type {
+            border-top: none;
+        }
+
+        .punishment-info-label {
+            color: var(--text-muted);
+        }
+
+        .modal-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .modal-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            gap: 8px;
+        }
+
+        .modal-action-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .modal-action-btn.danger {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .modal-action-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--danger);
+        }
+
+        .modal-action-btn.warning {
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .modal-action-btn.warning:hover {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: var(--warning);
+        }
+
+        .modal-action-btn.success {
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .modal-action-btn.success:hover {
+            background: rgba(34, 197, 94, 0.15);
+            border-color: var(--success);
+        }
+
+        .modal-action-btn i {
+            font-size: 1.3rem;
+        }
+
+        .modal-action-btn span {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Action Form Modal */
+        .action-form {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .action-form-title {
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-form .form-group {
+            margin-bottom: 16px;
+        }
+
+        .action-form .form-group:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .action-form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .action-form-buttons .btn {
+            flex: 1;
+        }
+
+        .settings-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .settings-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-header i {
+            color: var(--primary);
+        }
+
+        .settings-row {
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .settings-row:last-child {
+            border-bottom: none;
+        }
+
+        .settings-label {
+            font-size: 0.9rem;
+        }
+
+        .settings-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .toggle {
+            width: 44px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .toggle.active {
+            background: var(--primary);
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: var(--transition);
+        }
+
+        .toggle.active::after {
+            left: 23px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            opacity: 0.5;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 300px;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .url-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .url-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .url-value {
+            font-family: monospace;
+            font-size: 0.875rem;
+            color: var(--primary);
+        }
+
+        .copy-btn {
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .refresh-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .refresh-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
             animation: pulse 2s infinite;
         }
 
@@ -47,358 +1082,790 @@
             }
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #1a1a2e;
+        .staff-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #667eea;
-            border-radius: 4px;
+        .staff-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .staff-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+        }
+
+        .staff-name {
+            font-weight: 600;
+        }
+
+        .staff-role {
+            font-size: 0.75rem;
+            color: var(--primary);
+            margin-top: 2px;
+        }
+
+        .staff-stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .staff-stats-label {
+            color: var(--text-muted);
+        }
+
+        .staff-stats-value {
+            font-weight: 600;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast.error {
+            border-color: var(--danger);
+        }
+
+        .toast i {
+            font-size: 1.25rem;
+        }
+
+        .toast.success i {
+            color: var(--success);
+        }
+
+        .toast.error i {
+            color: var(--danger);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
     </style>
 </head>
 
-<body class="bg-gray-900 text-white min-h-screen">
-    <div id="root"></div>
+<body>
+    <div id="app"></div>
+    <div id="toast-container"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect, createContext, useContext } = React;
-
-        // API Configuration
+    <script>
         const API_BASE = window.location.origin;
         let API_KEY = localStorage.getItem('lbr_api_key') || '';
+        let currentPage = 'dashboard';
+        let refreshInterval = null;
+        let lastRefresh = Date.now();
+        let selectedPlayer = null;
+        let currentAction = null;
 
-        // API Helper
-        const api = {
-            async get(endpoint) {
+        let state = {
+            isLoggedIn: !!API_KEY,
+            stats: null,
+            loading: true,
+            bans: null, mutes: null, warnings: null, kicks: null,
+            reports: null, appeals: null, players: null,
+            staffStats: null, onlineStaff: null, publicIP: null,
+            settings: { darkMode: true, notifications: true, autoRefresh: true, compactMode: false },
+            urls: { public: window.location.origin },
+            showMap: false, geoData: null
+        };
+
+        const savedSettings = localStorage.getItem('lbr_settings');
+        if (savedSettings) { try { state.settings = { ...state.settings, ...JSON.parse(savedSettings) }; } catch (e) { } }
+
+        async function api(endpoint, options = {}) {
+            try {
                 const res = await fetch(`${API_BASE}${endpoint}`, {
-                    headers: { 'X-API-Key': API_KEY }
+                    ...options,
+                    headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json', ...options.headers }
                 });
                 return res.json();
-            },
-            async post(endpoint, data) {
-                const res = await fetch(`${API_BASE}${endpoint}`, {
+            } catch (e) { console.error('API error:', e); return null; }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="ri-${type === 'success' ? 'check-line' : 'error-warning-line'}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        async function executeAction(action, player, reason = '', duration = '') {
+            try {
+                const result = await api('/api/actions/execute', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({ action, player, reason: reason || 'Via Web Panel', duration })
                 });
-                return res.json();
+                if (result && result.success) {
+                    showToast(`${action.toUpperCase()} ejecutado en ${player}`, 'success');
+                    currentAction = null;
+                    closePlayerModal();
+                    loadAllOnlinePlayers();
+                } else {
+                    showToast(result?.message || 'Error al ejecutar comando', 'error');
+                }
+            } catch (e) {
+                showToast('Error de conexión', 'error');
+            }
+        }
+
+        async function loadDashboard() {
+            state.loading = true; render();
+            try {
+                const [dashboard, health] = await Promise.all([api('/api/dashboard'), api('/api/health')]);
+                if (dashboard && health) {
+                    state.stats = {
+                        onlinePlayers: dashboard.onlinePlayers || 0, maxPlayers: dashboard.maxPlayers || 100,
+                        activeBans: dashboard.cachedBans || 0, activeMutes: dashboard.cachedMutes || 0,
+                        uptime: dashboard.uptime || 0, version: health.version || '6.0.0'
+                    };
+                    state.publicIP = dashboard.publicIP;
+                    state.port = dashboard.port;
+                }
+                lastRefresh = Date.now();
+            } catch (e) { console.error(e); }
+            state.loading = false; render();
+        }
+
+        async function loadAllOnlinePlayers() {
+            try { const data = await api('/api/players/search?q='); if (data) state.players = data; } catch (e) { state.players = { results: [], query: '' }; }
+            render();
+        }
+
+        async function searchPlayers(query) {
+            try { const data = await api(`/api/players/search?q=${encodeURIComponent(query)}`); state.players = data || { results: [], query }; } catch (e) { state.players = { results: [], query }; }
+            render();
+        }
+
+        async function loadStaffStats() {
+            state.loading = true; render();
+            try {
+                const [stats, online] = await Promise.all([api('/api/staff/stats'), api('/api/staff/online')]);
+                state.staffStats = stats || { staff: [] }; state.onlineStaff = online || { staff: [], count: 0 };
+            } catch (e) { state.staffStats = { staff: [] }; state.onlineStaff = { staff: [], count: 0 }; }
+            state.loading = false; render();
+        }
+
+        function formatUptime(ms) { const h = Math.floor(ms / 3600000); const m = Math.floor((ms % 3600000) / 60000); return `${h}h ${m}m`; }
+        function formatLastRefresh() { const s = Math.floor((Date.now() - lastRefresh) / 1000); return s < 60 ? `${s}s ago` : `${Math.floor(s / 60)}m ago`; }
+        function copyToClipboard(text) { navigator.clipboard.writeText(text); const btn = event.target; const o = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = o, 1500); }
+        function toggleSetting(key) { state.settings[key] = !state.settings[key]; localStorage.setItem('lbr_settings', JSON.stringify(state.settings)); if (key === 'autoRefresh') setupAutoRefresh(); render(); }
+
+        function setupAutoRefresh() {
+            if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null; }
+            if (state.settings.autoRefresh && state.isLoggedIn) {
+                // Update data every 10 seconds
+                refreshInterval = setInterval(() => {
+                    if (!document.hidden) {
+                        if (currentPage === 'dashboard') loadDashboard();
+                        else if (currentPage === 'players') loadAllOnlinePlayers();
+                        else if (currentPage === 'staff') loadStaffStats();
+                        else if (['bans', 'mutes', 'warnings', 'kicks', 'reports', 'appeals'].includes(currentPage)) loadPageData(currentPage);
+                    }
+                }, 10000);
+                // Update time indicator every second
+                setInterval(() => {
+                    const indicator = document.querySelector('.refresh-indicator');
+                    if (indicator) indicator.innerHTML = `<div class="refresh-dot"></div>${formatLastRefresh()}`;
+                }, 1000);
+            }
+        }
+
+        function handleLogin(event) { event.preventDefault(); const key = document.getElementById('apiKey').value; localStorage.setItem('lbr_api_key', key); API_KEY = key; state.isLoggedIn = true; loadDashboard(); setupAutoRefresh(); }
+        function logout() { localStorage.removeItem('lbr_api_key'); API_KEY = ''; state.isLoggedIn = false; if (refreshInterval) clearInterval(refreshInterval); render(); }
+
+        async function setPage(page) {
+            currentPage = page; selectedPlayer = null; currentAction = null;
+            if (['bans', 'mutes', 'warnings', 'kicks', 'reports', 'appeals'].includes(page)) { state.loading = true; render(); await loadPageData(page); }
+            else if (page === 'dashboard') loadDashboard();
+            else if (page === 'staff') loadStaffStats();
+            else if (page === 'players') { state.loading = true; render(); await loadAllOnlinePlayers(); state.loading = false; render(); }
+            else if (['analytics', 'leaderboard', 'timeline'].includes(page)) { state.loading = true; render(); await loadAnalyticsData(); state.loading = false; render(); }
+            else render();
+        }
+
+        async function loadPageData(page) {
+            try {
+                let data;
+                if (page === 'reports') {
+                    data = await api('/api/reports');
+                } else if (page === 'appeals') {
+                    data = await api('/api/appeals');
+                } else {
+                    // Map page names to API types: 'bans' -> 'ban', 'warnings' -> 'warn', etc.
+                    let apiType = page;
+                    if (page === 'bans') apiType = 'ban';
+                    else if (page === 'mutes') apiType = 'mute';
+                    else if (page === 'warnings') apiType = 'warn';
+                    else if (page === 'kicks') apiType = 'kick';
+
+                    data = await api(`/api/punishments?type=${apiType}&limit=100`);
+                }
+                console.log(`Loaded ${page}:`, data);
+                state[page] = data;
+            } catch (e) {
+                console.error(`Error loading ${page}:`, e);
+                state[page] = { punishments: [], total: 0 };
+            }
+            state.loading = false;
+            render();
+        }
+
+        function openPlayerModal(player) { selectedPlayer = player; currentAction = null; render(); }
+        function closePlayerModal() { selectedPlayer = null; currentAction = null; render(); }
+        function selectAction(action) { currentAction = action; render(); }
+        function cancelAction() { currentAction = null; render(); }
+
+        function submitAction() {
+            const reason = document.getElementById('action-reason')?.value || '';
+            const duration = document.getElementById('action-duration')?.value || '1d';
+            executeAction(currentAction, selectedPlayer.name, reason, duration);
+        }
+
+        function renderLogin() {
+            return `<div class="login-container"><div class="login-box"><div class="login-logo"><i class="ri-shield-keyhole-line"></i></div><h1 class="login-title">LiteBansReborn</h1><p class="login-subtitle">Admin Panel v6.0.0</p><form onsubmit="handleLogin(event)"><div class="form-group"><label class="form-label">API Key</label><input type="password" id="apiKey" class="form-input" placeholder="Enter your API key" required></div><button type="submit" class="btn btn-primary"><i class="ri-login-box-line"></i> Sign In</button></form><p style="text-align: center; color: var(--text-muted); font-size: 0.75rem; margin-top: 24px;">Find your API key in config.yml</p></div></div>`;
+        }
+
+        function renderSidebar() {
+            const navSections = [
+                { title: 'Overview', items: [{ id: 'dashboard', icon: 'ri-dashboard-line', label: 'Dashboard' }, { id: 'players', icon: 'ri-group-line', label: 'Players' }] },
+                { title: 'Analytics', items: [{ id: 'analytics', icon: 'ri-bar-chart-2-line', label: 'Analytics' }, { id: 'leaderboard', icon: 'ri-medal-line', label: 'Leaderboard' }, { id: 'timeline', icon: 'ri-time-line', label: 'Timeline' }] },
+                { title: 'Punishments', items: [{ id: 'bans', icon: 'ri-forbid-line', label: 'Bans' }, { id: 'mutes', icon: 'ri-volume-mute-line', label: 'Mutes' }, { id: 'warnings', icon: 'ri-error-warning-line', label: 'Warnings' }, { id: 'kicks', icon: 'ri-logout-circle-line', label: 'Kicks' }] },
+                { title: 'Moderation', items: [{ id: 'reports', icon: 'ri-flag-line', label: 'Reports' }, { id: 'appeals', icon: 'ri-mail-check-line', label: 'Appeals' }] },
+                { title: 'Admin', items: [{ id: 'staff', icon: 'ri-shield-user-line', label: 'Staff Stats' }, { id: 'settings', icon: 'ri-settings-4-line', label: 'Settings' }] }
+            ];
+            let html = `<aside class="sidebar"><div class="sidebar-brand"><div class="sidebar-brand-icon"><i class="ri-shield-keyhole-line"></i></div><div class="sidebar-brand-text">Lite<span>Bans</span>Reborn</div></div>`;
+            navSections.forEach((section, idx) => {
+                html += `<div class="nav-section"><div class="nav-title">${section.title}</div>`;
+                section.items.forEach(item => { html += `<div class="nav-item ${currentPage === item.id ? 'active' : ''}" onclick="setPage('${item.id}')"><span class="nav-icon"><i class="${item.icon}"></i></span><span>${item.label}</span></div>`; });
+                html += `</div>`; if (idx < navSections.length - 1) html += `<div class="nav-divider"></div>`;
+            });
+            html += `<div class="sidebar-footer"><div class="nav-item" onclick="logout()" style="color: var(--danger);"><span class="nav-icon"><i class="ri-logout-box-line"></i></span><span>Logout</span></div></div></aside>`;
+            return html;
+        }
+
+        function renderDashboard() {
+            const s = state.stats || {};
+            const ip = state.publicIP || window.location.hostname;
+            const port = state.port || window.location.port || '8080';
+            const fullURL = `http://${ip}:${port}`;
+            return `<div class="content-header"><div><h1 class="page-title">Dashboard</h1><p class="page-subtitle">Welcome back, Admin 👋</p></div><div class="header-actions"><button class="btn btn-outline" style="padding: 8px 12px;" onclick="openMapModal()"><i class="ri-earth-line"></i> <span style="font-size: 0.85rem;">Geo Map</span></button>${state.settings.autoRefresh ? `<div class="refresh-indicator"><div class="refresh-dot"></div>${formatLastRefresh()}</div>` : ''}</div></div>
+            <div class="grid"><div class="card stat-card"><div><div class="stat-label">Online Players</div><div class="stat-value">${s.onlinePlayers || 0}/${s.maxPlayers || 100}</div></div><div class="stat-icon blue"><i class="ri-server-line"></i></div></div><div class="card stat-card"><div><div class="stat-label">Active Bans</div><div class="stat-value">${s.activeBans || 0}</div></div><div class="stat-icon red"><i class="ri-prohibited-line"></i></div></div><div class="card stat-card"><div><div class="stat-label">Active Mutes</div><div class="stat-value">${s.activeMutes || 0}</div></div><div class="stat-icon yellow"><i class="ri-volume-mute-line"></i></div></div><div class="card stat-card"><div><div class="stat-label">Uptime</div><div class="stat-value">${formatUptime(s.uptime || 0)}</div></div><div class="stat-icon green"><i class="ri-time-line"></i></div></div></div>
+            <div class="dashboard-grid"><div class="card"><div class="section-title">Server Status<span class="status-badge running">Online</span></div><div class="status-row"><div class="status-row-left"><div class="status-row-icon"><i class="ri-global-line" style="color: var(--primary);"></i></div><div><div class="status-row-text">Public IP</div><div class="status-row-sub">${ip}:${port}</div></div></div><button class="copy-btn" onclick="copyToClipboard('${fullURL}')">Copy</button></div><div class="status-row"><div class="status-row-left"><div class="status-row-icon"><i class="ri-database-2-line" style="color: var(--success);"></i></div><div><div class="status-row-text">Database</div><div class="status-row-sub">Connected</div></div></div><span style="color: var(--success);">OK</span></div></div>
+            <div class="card"><div class="section-title">Quick Actions</div><div class="actions-grid"><div class="action-card" onclick="setPage('players')"><i class="ri-search-line action-icon" style="color: var(--primary);"></i><div class="action-label">Lookup Player</div></div><div class="action-card" onclick="setPage('bans')"><i class="ri-forbid-line action-icon" style="color: var(--danger);"></i><div class="action-label">View Bans</div></div><div class="action-card" onclick="setPage('reports')"><i class="ri-flag-line action-icon" style="color: var(--warning);"></i><div class="action-label">Reports</div></div><div class="action-card" onclick="setPage('appeals')"><i class="ri-mail-check-line action-icon" style="color: var(--success);"></i><div class="action-label">Appeals</div></div></div></div></div>`;
+        }
+
+        function renderPlayers() {
+            const results = state.players?.results || [];
+            const query = state.players?.query || '';
+            let cardsHtml = results.map(p => {
+                let badge = p.online ? '<span class="status-badge online">Online</span>' : '<span class="status-badge offline">Offline</span>';
+                if (p.isBanned) badge = '<span class="status-badge banned">Banned</span>';
+                else if (p.isMuted) badge = '<span class="status-badge muted">Muted</span>';
+                let info = '';
+                if (p.isBanned) info += `<div class="player-punishment ban"><i class="ri-forbid-line"></i> ${(p.banReason || 'Banned').substring(0, 25)}</div>`;
+                if (p.isMuted) info += `<div class="player-punishment mute"><i class="ri-volume-mute-line"></i> ${(p.muteReason || 'Muted').substring(0, 25)}</div>`;
+                return `<div class="player-card" onclick='openPlayerModal(${JSON.stringify(p).replace(/'/g, "\\'")})'><div class="player-card-header"><img class="player-avatar" src="https://minotar.net/avatar/${p.name}/48" onerror="this.src='https://minotar.net/avatar/Steve/48'"><div class="player-info"><div class="player-name">${p.name}</div><div class="player-uuid">${(p.uuid || 'unknown').substring(0, 8)}...</div></div>${badge}</div>${info ? `<div class="player-status-row">${info}</div>` : ''}</div>`;
+            }).join('');
+            if (!cardsHtml) cardsHtml = `<div class="card empty-state" style="grid-column: 1/-1;"><i class="ri-user-search-line"></i><p>No players found</p></div>`;
+            return `<div class="content-header"><div><h1 class="page-title">Players</h1><p class="page-subtitle">Search and manage players</p></div><div style="background: var(--bg-card); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem;"><span style="color: var(--success);">●</span> ${results.filter(p => p.online).length} Online | ${results.length} Total</div></div>
+            <div class="card" style="margin-bottom: 24px;"><div class="search-box" style="width: 100%;"><i class="ri-search-line"></i><input type="text" placeholder="Search players..." style="width: 100%;" value="${query}" oninput="searchPlayers(this.value)"></div></div>
+            <div class="player-grid">${cardsHtml}</div>${selectedPlayer ? renderPlayerModal() : ''}`;
+        }
+
+        function renderPlayerModal() {
+            const p = selectedPlayer;
+            if (!p) return '';
+            const needsDuration = ['tempban', 'tempmute'].includes(currentAction);
+            const needsReason = ['ban', 'tempban', 'banip', 'hwidban', 'mute', 'tempmute', 'warn', 'kick'].includes(currentAction);
+
+            let actionForm = '';
+            if (currentAction) {
+                actionForm = `<div class="action-form"><div class="action-form-title"><i class="ri-edit-line"></i> ${currentAction.toUpperCase()} - ${p.name}</div>
+                ${needsDuration ? `<div class="form-group"><label class="form-label">Duration</label><input type="text" id="action-duration" class="form-input" placeholder="1d, 1h, 30m, permanent" value="1d"></div>` : ''}
+                ${needsReason ? `<div class="form-group"><label class="form-label">Reason</label><input type="text" id="action-reason" class="form-input" placeholder="Enter reason..."></div>` : ''}
+                <div class="action-form-buttons"><button class="btn btn-outline" onclick="cancelAction()">Cancel</button><button class="btn btn-primary" onclick="submitAction()"><i class="ri-check-line"></i> Execute</button></div></div>`;
+            }
+
+            return `<div class="modal-overlay" onclick="if(event.target===this)closePlayerModal()"><div class="modal">
+            <div class="modal-header"><div class="modal-player-info"><img class="modal-player-avatar" src="https://minotar.net/avatar/${p.name}/56" onerror="this.src='https://minotar.net/avatar/Steve/56'"><div><div class="modal-player-name">${p.name}</div><div class="modal-player-uuid">${p.uuid || 'Unknown UUID'}</div><div class="modal-player-status">${p.online ? '<span class="status-badge online">Online</span>' : '<span class="status-badge offline">Offline</span>'}</div></div></div><button class="modal-close" onclick="closePlayerModal()"><i class="ri-close-line"></i></button></div>
+            <div class="modal-body">
+            ${p.isBanned ? `<div class="punishment-info-box"><div class="punishment-info-header" style="color: var(--danger);"><i class="ri-forbid-line"></i> BANNED</div><div class="punishment-info-row"><span class="punishment-info-label">Reason</span><span>${p.banReason || 'No reason'}</span></div><div class="punishment-info-row"><span class="punishment-info-label">By</span><span>${p.banExecutor || 'Console'}</span></div></div>` : ''}
+            ${p.isMuted ? `<div class="punishment-info-box"><div class="punishment-info-header" style="color: var(--warning);"><i class="ri-volume-mute-line"></i> MUTED</div><div class="punishment-info-row"><span class="punishment-info-label">Reason</span><span>${p.muteReason || 'No reason'}</span></div><div class="punishment-info-row"><span class="punishment-info-label">By</span><span>${p.muteExecutor || 'Console'}</span></div></div>` : ''}
+            <div class="modal-section"><div class="modal-section-title">Punishment Actions</div><div class="modal-actions-grid">
+            <div class="modal-action-btn danger" onclick="selectAction('ban')"><i class="ri-forbid-line" style="color: var(--danger);"></i><span>Ban</span></div>
+            <div class="modal-action-btn danger" onclick="selectAction('tempban')"><i class="ri-time-line" style="color: var(--danger);"></i><span>TempBan</span></div>
+            <div class="modal-action-btn danger" onclick="selectAction('banip')"><i class="ri-global-line" style="color: var(--danger);"></i><span>Ban IP</span></div>
+            <div class="modal-action-btn danger" onclick="selectAction('hwidban')"><i class="ri-cpu-line" style="color: var(--danger);"></i><span>HWID Ban</span></div>
+            <div class="modal-action-btn warning" onclick="selectAction('mute')"><i class="ri-volume-mute-line" style="color: var(--warning);"></i><span>Mute</span></div>
+            <div class="modal-action-btn warning" onclick="selectAction('tempmute')"><i class="ri-timer-line" style="color: var(--warning);"></i><span>TempMute</span></div>
+            <div class="modal-action-btn" onclick="selectAction('warn')"><i class="ri-error-warning-line" style="color: var(--primary);"></i><span>Warn</span></div>
+            <div class="modal-action-btn" onclick="selectAction('kick')"><i class="ri-logout-box-line" style="color: var(--primary);"></i><span>Kick</span></div>
+            <div class="modal-action-btn" onclick="selectAction('freeze')"><i class="ri-pause-circle-line" style="color: var(--primary);"></i><span>Freeze</span></div>
+            </div></div>
+            ${p.isBanned || p.isMuted ? `<div class="modal-section"><div class="modal-section-title">Remove Punishments</div><div class="modal-actions-grid">${p.isBanned ? `<div class="modal-action-btn success" onclick="executeAction('unban', '${p.name}')"><i class="ri-check-line" style="color: var(--success);"></i><span>Unban</span></div><div class="modal-action-btn success" onclick="executeAction('unbanip', '${p.name}')"><i class="ri-global-line" style="color: var(--success);"></i><span>Unban IP</span></div><div class="modal-action-btn success" onclick="executeAction('unbanhwid', '${p.name}')"><i class="ri-cpu-line" style="color: var(--success);"></i><span>Unban HWID</span></div>` : ''}${p.isMuted ? `<div class="modal-action-btn success" onclick="executeAction('unmute', '${p.name}')"><i class="ri-volume-up-line" style="color: var(--success);"></i><span>Unmute</span></div>` : ''}</div></div>` : ''}
+            ${actionForm}</div></div></div>`;
+        }
+
+        function renderStaff() {
+            const staff = state.onlineStaff?.staff || [];
+            return `<div class="content-header"><div><h1 class="page-title">Staff Stats</h1><p class="page-subtitle">View staff activity</p></div><div style="background: var(--bg-card); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem;"><span style="color: var(--success);">●</span> ${staff.length} Online</div></div>
+            <div class="grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 24px;"><div class="card stat-card"><div><div class="stat-label">Online Staff</div><div class="stat-value">${staff.length}</div></div><div class="stat-icon green"><i class="ri-user-heart-line"></i></div></div><div class="card stat-card"><div><div class="stat-label">Total Punishments</div><div class="stat-value">${(state.stats?.activeBans || 0) + (state.stats?.activeMutes || 0)}</div></div><div class="stat-icon red"><i class="ri-hammer-line"></i></div></div><div class="card stat-card"><div><div class="stat-label">Reports</div><div class="stat-value">${state.reports?.reports?.length || 0}</div></div><div class="stat-icon yellow"><i class="ri-flag-line"></i></div></div></div>
+            ${staff.length > 0 ? `<div class="staff-grid">${staff.map(s => `<div class="staff-card"><div class="staff-header"><img class="staff-avatar" src="https://minotar.net/avatar/${s.name}/48"><div><div class="staff-name">${s.name}</div><div class="staff-role">Staff</div></div><span class="status-badge online">Online</span></div></div>`).join('')}</div>` : `<div class="card empty-state"><i class="ri-shield-user-line"></i><p>No staff online</p></div>`}`;
+        }
+
+        function renderSettings() {
+            const s = state.settings;
+            return `<div class="content-header"><div><h1 class="page-title">Settings</h1><p class="page-subtitle">Configure panel</p></div></div>
+            <div class="settings-section"><div class="settings-header"><i class="ri-palette-line"></i>Appearance</div><div class="settings-row"><div><div class="settings-label">Dark Mode</div><div class="settings-desc">Use dark theme</div></div><div class="toggle ${s.darkMode ? 'active' : ''}" onclick="toggleSetting('darkMode')"></div></div></div>
+            <div class="settings-section"><div class="settings-header"><i class="ri-refresh-line"></i>Data</div><div class="settings-row"><div><div class="settings-label">Auto Refresh</div><div class="settings-desc">Refresh every 10 seconds</div></div><div class="toggle ${s.autoRefresh ? 'active' : ''}" onclick="toggleSetting('autoRefresh')"></div></div></div>
+            <div class="settings-section"><div class="settings-header"><i class="ri-information-line"></i>About</div><div class="settings-row"><div><div class="settings-label">Version</div><div class="settings-desc">LiteBansReborn Panel</div></div><span style="color: var(--primary); font-weight: 600;">v${state.stats?.version || '6.0.0'}</span></div><div class="settings-row"><div><div class="settings-label">API</div><div class="settings-desc">Connection status</div></div><span class="status-badge running">Connected</span></div></div>`;
+        }
+
+        function renderList(title, subtitle, type, dataObj) {
+            if (!dataObj) return `<div class="content-header"><div><h1 class="page-title">${title}</h1><p class="page-subtitle">${subtitle}</p></div></div><div class="loading-container"><div class="spinner"></div></div>`;
+            const list = dataObj[type] || dataObj.punishments || [];
+            if (!list.length) return `<div class="content-header"><div><h1 class="page-title">${title}</h1><p class="page-subtitle">${subtitle}</p></div></div><div class="card empty-state"><i class="ri-inbox-line"></i><p>No records</p></div>`;
+            const rows = list.map(i => {
+                const target = i.targetName || i.playerName || i.reportedName || 'Unknown';
+                const source = i.executorName || i.reporterName || 'Console';
+                const reason = (i.reason || i.message || 'No reason').substring(0, 35);
+                let st = 'pending', stxt = '-';
+                if (i.active === true) { st = 'active'; stxt = 'Active'; }
+                else if (i.active === false) { st = 'expired'; stxt = 'Expired'; }
+                return `<tr><td style="font-family: monospace; color: var(--text-muted);">#${i.id}</td><td><div style="display:flex;align-items:center;gap:10px;"><img src="https://minotar.net/avatar/${target}/24" style="width:24px;height:24px;border-radius:4px;" onerror="this.style.display='none'">${target}</div></td><td>${reason}</td><td>${source}</td><td><span class="status-badge ${st}">${stxt}</span></td></tr>`;
+            }).join('');
+            return `<div class="content-header"><div><h1 class="page-title">${title}</h1><p class="page-subtitle">${subtitle}</p></div><div style="background: var(--bg-card); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; font-size: 0.8rem;">${list.length} Records</div></div><div class="table-card"><table><thead><tr><th>ID</th><th>Target</th><th>Reason</th><th>By</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+        }
+
+        // Analytics Renders
+        function renderAnalytics() {
+            const heatmap = state.heatmap || { hourly: Array(24).fill(0) };
+            const hourlyData = heatmap.hourly || Array(24).fill(0);
+            const maxVal = Math.max(...hourlyData, 1);
+
+            let heatmapHtml = '<div class="heatmap-grid">';
+            for (let i = 0; i < 24; i++) {
+                const intensity = hourlyData[i] / maxVal;
+                const color = intensity > 0.7 ? 'var(--danger)' : intensity > 0.4 ? 'var(--warning)' : intensity > 0.1 ? 'var(--primary)' : 'var(--bg-hover)';
+                heatmapHtml += `<div class="heatmap-cell" style="background: ${color}; opacity: ${0.3 + intensity * 0.7};" title="${i}:00 - ${hourlyData[i]} punishments"><span>${i}</span></div>`;
+            }
+            heatmapHtml += '</div>';
+
+            return `<div class="content-header"><div><h1 class="page-title">📊 Analytics</h1><p class="page-subtitle">Activity heatmap and trends</p></div></div>
+            <div class="grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="card">
+                    <div class="section-title"><i class="ri-fire-line" style="color: var(--warning);"></i> Activity Heatmap (24h)</div>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 16px;">Punishments by hour of day (last 30 days)</p>
+                    ${heatmapHtml}
+                    <p style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 12px;">Peak hour: ${heatmap.peakHour || 0}:00</p>
+                </div>
+                <div class="card">
+                    <div class="section-title"><i class="ri-line-chart-line" style="color: var(--success);"></i> Quick Stats</div>
+                    <div class="stats-list">
+                        <div class="stats-item"><span>Total Punishments (30d)</span><strong>${hourlyData.reduce((a, b) => a + b, 0)}</strong></div>
+                        <div class="stats-item"><span>Peak Activity Hour</span><strong>${heatmap.peakHour || 0}:00</strong></div>
+                        <div class="stats-item"><span>Active Bans</span><strong>${state.stats?.activeBans || 0}</strong></div>
+                        <div class="stats-item"><span>Active Mutes</span><strong>${state.stats?.activeMutes || 0}</strong></div>
+                    </div>
+                </div>
+            </div>
+            <style>
+                .heatmap-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; }
+                .heatmap-cell { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; cursor: help; }
+                .stats-list { display: flex; flex-direction: column; gap: 12px; }
+                .stats-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+                .stats-item:last-child { border-bottom: none; }
+                .stats-item span { color: var(--text-secondary); }
+                .stats-item strong { color: var(--primary); font-size: 1.1rem; }
+            </style>`;
+        }
+
+        function renderLeaderboard() {
+            const data = state.leaderboard || { leaderboard: [] };
+            const list = data.leaderboard || [];
+
+            if (!list.length) {
+                return `<div class="content-header"><div><h1 class="page-title">🏆 Staff Leaderboard</h1><p class="page-subtitle">Top moderators</p></div></div><div class="card empty-state"><i class="ri-medal-line"></i><p>No data available</p></div>`;
+            }
+
+            const rows = list.map((s, idx) => {
+                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+                return `<tr>
+                    <td style="font-weight: 600; font-size: 1.1rem;">${medal}</td>
+                    <td><div style="display:flex;align-items:center;gap:10px;"><img src="https://minotar.net/avatar/${s.name}/28" style="width:28px;height:28px;border-radius:6px;">${s.name}</div></td>
+                    <td style="font-weight: 600; color: var(--primary);">${s.total}</td>
+                    <td style="color: var(--danger);">${s.bans}</td>
+                    <td style="color: var(--warning);">${s.mutes}</td>
+                    <td style="color: var(--text-secondary);">${s.warns}</td>
+                    <td style="color: var(--text-muted);">${s.kicks}</td>
+                </tr>`;
+            }).join('');
+
+            return `<div class="content-header"><div><h1 class="page-title">🏆 Staff Leaderboard</h1><p class="page-subtitle">Top moderators by total punishments</p></div></div>
+            <div class="table-card"><table><thead><tr><th>Rank</th><th>Staff</th><th>Total</th><th>Bans</th><th>Mutes</th><th>Warns</th><th>Kicks</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+        }
+
+        function renderTimeline() {
+            const data = state.timeline || { events: [] };
+            const events = data.events || [];
+
+            if (!events.length) {
+                return `<div class="content-header"><div><h1 class="page-title">📅 Timeline</h1><p class="page-subtitle">Recent events</p></div></div><div class="card empty-state"><i class="ri-time-line"></i><p>No events</p></div>`;
+            }
+
+            const items = events.map(e => {
+                const icon = e.type === 'BAN' ? 'ri-forbid-line' : e.type === 'MUTE' ? 'ri-volume-mute-line' : e.type === 'WARN' ? 'ri-error-warning-line' : 'ri-logout-circle-line';
+                const color = e.type === 'BAN' ? 'var(--danger)' : e.type === 'MUTE' ? 'var(--warning)' : e.type === 'WARN' ? 'var(--primary)' : 'var(--text-secondary)';
+                return `<div class="timeline-item">
+                    <div class="timeline-icon" style="background: ${color};"><i class="${icon}"></i></div>
+                    <div class="timeline-content">
+                        <div class="timeline-header"><strong>${e.target}</strong> was ${e.type.toLowerCase()}ed by <span style="color: var(--primary);">${e.executor}</span></div>
+                        <div class="timeline-reason">${e.reason || 'No reason'}</div>
+                        <div class="timeline-time">${e.timestamp || 'Unknown time'}</div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            return `<div class="content-header"><div><h1 class="page-title">📅 Timeline</h1><p class="page-subtitle">Recent punishment events</p></div></div>
+            <div class="card"><div class="timeline">${items}</div></div>
+            <style>
+                .timeline { display: flex; flex-direction: column; gap: 16px; }
+                .timeline-item { display: flex; gap: 16px; padding: 16px; border-radius: 12px; background: var(--bg-hover); }
+                .timeline-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+                .timeline-content { flex: 1; }
+                .timeline-header { font-size: 0.95rem; margin-bottom: 4px; }
+                .timeline-reason { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 4px; }
+                .timeline-time { color: var(--text-muted); font-size: 0.75rem; }
+            </style>`;
+        }
+
+        async function loadAnalyticsData() {
+            try {
+                const [heatmap, leaderboard, timeline] = await Promise.all([
+                    api('/api/analytics/heatmap'),
+                    api('/api/staff/leaderboard'),
+                    api('/api/analytics/timeline?limit=30')
+                ]);
+                state.heatmap = heatmap;
+                state.leaderboard = leaderboard;
+                state.timeline = timeline;
+            } catch (e) {
+                console.error('Failed to load analytics:', e);
+            }
+            render();
+        }
+
+        function renderMain() {
+            if (state.loading) return `<div class="loading-container"><div class="spinner"></div></div>`;
+            switch (currentPage) {
+                case 'dashboard': return renderDashboard();
+                case 'players': return renderPlayers();
+                case 'analytics': return renderAnalytics();
+                case 'leaderboard': return renderLeaderboard();
+                case 'timeline': return renderTimeline();
+                case 'bans': return renderList('Bans', 'Manage bans', 'punishments', state.bans);
+                case 'mutes': return renderList('Mutes', 'Manage mutes', 'punishments', state.mutes);
+                case 'warnings': return renderList('Warnings', 'View warnings', 'punishments', state.warnings);
+                case 'kicks': return renderList('Kicks', 'View kicks', 'punishments', state.kicks);
+                case 'reports': return renderList('Reports', 'Manage reports', 'reports', state.reports);
+                case 'appeals': return renderList('Appeals', 'Review appeals', 'appeals', state.appeals);
+                case 'staff': return renderStaff();
+                case 'settings': return renderSettings();
+                default: return renderDashboard();
+            }
+        }
+
+        // ==================== GEO MAP MODULE ====================
+        const GeoMap = {
+            instance: null,
+
+            // Configuration constants
+            CONFIG: {
+                MARKER_COLORS: { banned: '#ef4444', players: '#22c55e' },
+                MARKER_RADIUS: { min: 5, max: 12 },
+                MAP_STYLES: {
+                    region: { fill: '#2a2a35', stroke: '#1a1a20', strokeWidth: 0.5 },
+                    regionHover: { fill: '#3a3a45' }
+                },
+                DEMO_DATA: {
+                    bannedCountries: { "Argentina": 2, "Brazil": 1, "Russia": 3 },
+                    playerCountries: { "United States": 5, "Mexico": 3, "Spain": 2, "Germany": 1 },
+                    totalBanned: 6,
+                    totalPlayers: 11,
+                    isDemo: true
+                }
+            },
+
+            // Country coordinates database
+            COORDS: {
+                "Argentina": [-38.4161, -63.6167], "Australia": [-25.2744, 133.7751], "Brazil": [-14.2350, -51.9253],
+                "Canada": [56.1304, -106.3468], "China": [35.8617, 104.1954], "Colombia": [4.5709, -74.2973],
+                "France": [46.2276, 2.2137], "Germany": [51.1657, 10.4515], "India": [20.5937, 78.9629],
+                "Italy": [41.8719, 12.5674], "Japan": [36.2048, 138.2529], "Mexico": [23.6345, -102.5528],
+                "Netherlands": [52.1326, 5.2913], "Poland": [51.9194, 19.1451], "Russia": [61.5240, 105.3188],
+                "Spain": [40.4637, -3.7492], "Sweden": [60.1282, 18.6435], "Turkey": [38.9637, 35.2433],
+                "United Kingdom": [55.3781, -3.4360], "United States": [37.0902, -95.7129], "Chile": [-35.6751, -71.5430],
+                "Peru": [-9.1900, -75.0152], "Venezuela": [6.4238, -66.5897], "Ecuador": [-1.8312, -78.1834],
+                "Bolivia": [-16.2902, -63.5887], "Paraguay": [-23.4425, -58.4438], "Uruguay": [-32.5228, -55.7658],
+                "Costa Rica": [9.7489, -83.7534], "Panama": [8.5380, -80.7821], "Guatemala": [15.7835, -90.2308],
+                "Cuba": [21.5218, -77.7812], "Dominican Republic": [18.7357, -70.1627], "Honduras": [15.2000, -86.2419],
+                "El Salvador": [13.7942, -88.8965], "Nicaragua": [12.8654, -85.2072], "Puerto Rico": [18.2208, -66.5901],
+                "Portugal": [39.3999, -8.2245], "Greece": [39.0742, 21.8243], "Belgium": [50.5039, 4.4699],
+                "Austria": [47.5162, 14.5501], "Switzerland": [46.8182, 8.2275], "Czech Republic": [49.8175, 15.4730],
+                "Hungary": [47.1625, 19.5033], "Romania": [45.9432, 24.9668], "Ukraine": [48.3794, 31.1656],
+                "Norway": [60.4720, 8.4689], "Finland": [61.9241, 25.7482], "Denmark": [56.2639, 9.5018],
+                "Ireland": [53.4129, -8.2439], "South Africa": [-30.5595, 22.9375], "Egypt": [26.8206, 30.8025],
+                "Morocco": [31.7917, -7.0926], "Nigeria": [9.0820, 8.6753], "Kenya": [-1.2921, 36.8219],
+                "Saudi Arabia": [23.8859, 45.0792], "United Arab Emirates": [23.4241, 53.8478],
+                "Israel": [31.0461, 34.8516], "Iran": [32.4279, 53.6880], "Iraq": [33.2232, 43.6793],
+                "Pakistan": [30.3753, 69.3451], "Bangladesh": [23.6850, 90.3563], "Thailand": [15.8700, 100.9925],
+                "Vietnam": [14.0583, 108.2772], "Indonesia": [-0.7893, 113.9213], "Philippines": [12.8797, 121.7740],
+                "Malaysia": [4.2105, 101.9758], "Singapore": [1.3521, 103.8198], "South Korea": [35.9078, 127.7669],
+                "Taiwan": [23.6978, 120.9605], "Hong Kong": [22.3193, 114.1694], "New Zealand": [-40.9006, 174.8860]
+            },
+
+            // Helper: Check if data has content
+            hasData(data) {
+                return Object.keys(data?.bannedCountries || {}).length > 0 ||
+                    Object.keys(data?.playerCountries || {}).length > 0;
+            },
+
+            // Helper: Calculate marker radius based on count
+            calcRadius(count, isLog = false) {
+                const { min, max } = this.CONFIG.MARKER_RADIUS;
+                return isLog ? Math.min(min + Math.log(count + 1) * 2, max) : Math.min(min + count, max);
+            },
+
+            // Helper: Get coordinates for country with optional offset
+            getCoords(country, offset = 0) {
+                const coords = this.COORDS[country];
+                if (!coords || coords[0] === 0) return null;
+                return offset ? [coords[0] + offset, coords[1]] : coords;
+            },
+
+            // Build markers array from geo data
+            buildMarkers(geoData) {
+                const markers = [];
+                const styles = [];
+                const { banned, players } = this.CONFIG.MARKER_COLORS;
+                const bannedCountries = geoData?.bannedCountries || {};
+                const playerCountries = geoData?.playerCountries || {};
+
+                // Red markers for banned IPs
+                Object.entries(bannedCountries).forEach(([country, count]) => {
+                    const coords = this.getCoords(country);
+                    if (coords) {
+                        markers.push({ name: `🔴 ${country}: ${count} IP ban${count !== 1 ? 's' : ''}`, coords });
+                        styles.push({ fill: banned, r: this.calcRadius(count) });
+                    }
+                });
+
+                // Green markers for players
+                Object.entries(playerCountries).forEach(([country, count]) => {
+                    const offset = bannedCountries[country] ? 2 : 0;
+                    const coords = this.getCoords(country, offset);
+                    if (coords) {
+                        markers.push({ name: `🟢 ${country}: ${count} player${count !== 1 ? 's' : ''}`, coords });
+                        styles.push({ fill: players, r: this.calcRadius(count, true) });
+                    }
+                });
+
+                return { markers, styles };
+            },
+
+            // Render country list for sidebar
+            renderCountryList(countries, color, icon, label, total) {
+                if (Object.keys(countries).length === 0) return '';
+
+                const items = Object.entries(countries)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5)
+                    .map(([c, n]) => `<div style="display:flex;justify-content:space-between;padding:4px 0;">
+                        <span style="color:var(--text-secondary)">${c}</span>
+                        <span style="color:${color};font-weight:600">${n}</span>
+                    </div>`).join('');
+
+                const bgColor = color === 'var(--danger)' ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)';
+                const borderColor = color === 'var(--danger)' ? 'rgba(239,68,68,0.3)' : 'rgba(34,197,94,0.3)';
+
+                return `<div style="padding:12px;background:${bgColor};border:1px solid ${borderColor};border-radius:8px;margin-bottom:12px;">
+                    <div style="font-size:0.75rem;color:${color};margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                        <i class="${icon}"></i> ${label} (${total})
+                    </div>
+                    ${items}
+                </div>`;
+            },
+
+            // Initialize the map
+            init() {
+                const el = document.getElementById('world-map');
+                if (!el) return;
+
+                this.destroy();
+
+                const geoData = state.geoData || {};
+                const { markers, styles } = this.buildMarkers(geoData);
+
+                try {
+                    this.instance = new jsVectorMap({
+                        selector: '#world-map',
+                        map: 'world',
+                        markers,
+                        markerStyle: {
+                            initial: { fill: '#ef4444', stroke: '#fff', strokeWidth: 1.5, r: 6 },
+                            hover: { strokeWidth: 2, r: 8 }
+                        },
+                        regionStyle: {
+                            initial: { ...this.CONFIG.MAP_STYLES.region, fillOpacity: 1 },
+                            hover: { ...this.CONFIG.MAP_STYLES.regionHover, fillOpacity: 1 }
+                        },
+                        backgroundColor: 'transparent',
+                        zoomButtons: true,
+                        zoomOnScroll: true,
+                        onLoaded: () => this.applyMarkerStyles(styles)
+                    });
+                } catch (e) {
+                    console.error('Map init error:', e);
+                    el.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);"><i class="ri-error-warning-line" style="margin-right:8px;"></i>Error loading map</div>';
+                }
+            },
+
+            // Apply custom styles to markers
+            applyMarkerStyles(styles) {
+                if (!styles.length) return;
+                document.querySelectorAll('#world-map circle').forEach((marker, i) => {
+                    if (styles[i]) {
+                        marker.style.fill = styles[i].fill;
+                        marker.setAttribute('r', styles[i].r);
+                    }
+                });
+            },
+
+            // Destroy map instance
+            destroy() {
+                if (this.instance) {
+                    try { this.instance.destroy(); } catch (e) { }
+                    this.instance = null;
+                }
             }
         };
 
-        // Auth Context
-        const AuthContext = createContext();
+        // ==================== MAP MODAL FUNCTIONS ====================
+        async function openMapModal() {
+            state.showMap = true;
+            state.geoData = null;
+            render();
 
-        // Components
-        function Sidebar({ active, setActive }) {
-            const items = [
-                { id: 'dashboard', icon: '📊', label: 'Dashboard' },
-                { id: 'players', icon: '👥', label: 'Players' },
-                { id: 'bans', icon: '🔨', label: 'Bans' },
-                { id: 'mutes', icon: '🔇', label: 'Mutes' },
-                { id: 'warnings', icon: '⚠️', label: 'Warnings' },
-                { id: 'reports', icon: '📋', label: 'Reports' },
-                { id: 'appeals', icon: '📝', label: 'Appeals' },
-                { id: 'tickets', icon: '🎫', label: 'Tickets' },
-                { id: 'staff', icon: '👮', label: 'Staff' },
-                { id: 'settings', icon: '⚙️', label: 'Settings' },
-            ];
-
-            return (
-                <aside className="w-64 bg-gray-800 border-r border-gray-700 min-h-screen p-4">
-                    <div className="flex items-center gap-3 mb-8 px-2">
-                        <div className="w-10 h-10 rounded-lg gradient-bg flex items-center justify-center text-xl">⚔️</div>
-                        <div>
-                            <h1 className="font-bold text-lg">LiteBansReborn</h1>
-                            <span className="text-xs text-gray-400">v5.0.0</span>
-                        </div>
-                    </div>
-
-                    <nav className="space-y-1">
-                        {items.map(item => (
-                            <button
-                                key={item.id}
-                                onClick={() => setActive(item.id)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${active === item.id
-                                        ? 'bg-purple-600 text-white'
-                                        : 'text-gray-400 hover:bg-gray-700 hover:text-white'
-                                    }`}
-                            >
-                                <span>{item.icon}</span>
-                                <span className="font-medium">{item.label}</span>
-                            </button>
-                        ))}
-                    </nav>
-                </aside>
-            );
-        }
-
-        function StatCard({ icon, label, value, change, color }) {
-            return (
-                <div className={`glass rounded-2xl p-6 card-hover transition-all duration-300`}>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-gray-400 text-sm">{label}</p>
-                            <h3 className="text-3xl font-bold mt-1">{value}</h3>
-                            {change && (
-                                <p className={`text-sm mt-2 ${change > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                    {change > 0 ? '↑' : '↓'} {Math.abs(change)}% from last week
-                                </p>
-                            )}
-                        </div>
-                        <div className={`w-14 h-14 rounded-xl ${color} flex items-center justify-center text-2xl`}>
-                            {icon}
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        function Dashboard({ stats }) {
-            return (
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h2 className="text-2xl font-bold">Dashboard</h2>
-                            <p className="text-gray-400">Overview of your server's moderation</p>
-                        </div>
-                        <button className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition">
-                            🔄 Refresh
-                        </button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <StatCard icon="👥" label="Online Players" value={stats?.online || 0} color="bg-blue-500" />
-                        <StatCard icon="🔨" label="Active Bans" value={stats?.bans || 0} change={-5} color="bg-red-500" />
-                        <StatCard icon="🔇" label="Active Mutes" value={stats?.mutes || 0} change={12} color="bg-orange-500" />
-                        <StatCard icon="⚠️" label="Total Warnings" value={stats?.warnings || 0} change={8} color="bg-yellow-500" />
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Recent Activity */}
-                        <div className="glass rounded-2xl p-6">
-                            <h3 className="font-bold text-lg mb-4">📋 Recent Activity</h3>
-                            <div className="space-y-3">
-                                {[
-                                    { type: 'ban', player: 'Griefer123', staff: 'Admin', time: '2m ago' },
-                                    { type: 'mute', player: 'Spammer456', staff: 'Mod', time: '15m ago' },
-                                    { type: 'warn', player: 'NewPlayer', staff: 'Helper', time: '1h ago' },
-                                    { type: 'unban', player: 'Reformed', staff: 'Admin', time: '2h ago' },
-                                ].map((item, i) => (
-                                    <div key={i} className="flex items-center justify-between py-2 border-b border-gray-700 last:border-0">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-xl">
-                                                {item.type === 'ban' ? '🔨' : item.type === 'mute' ? '🔇' : item.type === 'warn' ? '⚠️' : '✅'}
-                                            </span>
-                                            <div>
-                                                <p className="font-medium">{item.player}</p>
-                                                <p className="text-xs text-gray-400">by {item.staff}</p>
-                                            </div>
-                                        </div>
-                                        <span className="text-sm text-gray-400">{item.time}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Quick Actions */}
-                        <div className="glass rounded-2xl p-6">
-                            <h3 className="font-bold text-lg mb-4">⚡ Quick Actions</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                <button className="bg-red-600 hover:bg-red-700 p-4 rounded-xl text-center transition">
-                                    <span className="text-2xl">🔨</span>
-                                    <p className="mt-2 font-medium">Ban Player</p>
-                                </button>
-                                <button className="bg-orange-600 hover:bg-orange-700 p-4 rounded-xl text-center transition">
-                                    <span className="text-2xl">🔇</span>
-                                    <p className="mt-2 font-medium">Mute Player</p>
-                                </button>
-                                <button className="bg-yellow-600 hover:bg-yellow-700 p-4 rounded-xl text-center transition">
-                                    <span className="text-2xl">⚠️</span>
-                                    <p className="mt-2 font-medium">Warn Player</p>
-                                </button>
-                                <button className="bg-blue-600 hover:bg-blue-700 p-4 rounded-xl text-center transition">
-                                    <span className="text-2xl">🔍</span>
-                                    <p className="mt-2 font-medium">Search</p>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Server Status */}
-                    <div className="glass rounded-2xl p-6">
-                        <h3 className="font-bold text-lg mb-4">🖥️ Server Status</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="text-center">
-                                <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-2 pulse"></div>
-                                <p className="font-medium">Server</p>
-                                <p className="text-xs text-green-400">Online</p>
-                            </div>
-                            <div className="text-center">
-                                <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-2 pulse"></div>
-                                <p className="font-medium">Database</p>
-                                <p className="text-xs text-green-400">Connected</p>
-                            </div>
-                            <div className="text-center">
-                                <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-2 pulse"></div>
-                                <p className="font-medium">Discord Bot</p>
-                                <p className="text-xs text-green-400">Active</p>
-                            </div>
-                            <div className="text-center">
-                                <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto mb-2"></div>
-                                <p className="font-medium">Maintenance</p>
-                                <p className="text-xs text-yellow-400">Disabled</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        function PlayersPage() {
-            const [players, setPlayers] = useState([]);
-            const [search, setSearch] = useState('');
-
-            return (
-                <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                        <h2 className="text-2xl font-bold">👥 Players</h2>
-                        <input
-                            type="text"
-                            placeholder="Search players..."
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 w-64 focus:outline-none focus:border-purple-500"
-                        />
-                    </div>
-
-                    <div className="glass rounded-2xl overflow-hidden">
-                        <table className="w-full">
-                            <thead className="bg-gray-800">
-                                <tr>
-                                    <th className="text-left p-4">Player</th>
-                                    <th className="text-left p-4">UUID</th>
-                                    <th className="text-left p-4">Status</th>
-                                    <th className="text-left p-4">Last Seen</th>
-                                    <th className="text-left p-4">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {[
-                                    { name: 'Steve', uuid: '1234...5678', status: 'Online', lastSeen: 'Now' },
-                                    { name: 'Alex', uuid: '2345...6789', status: 'Banned', lastSeen: '2 days ago' },
-                                    { name: 'Notch', uuid: '3456...7890', status: 'Offline', lastSeen: '1 week ago' },
-                                ].map((player, i) => (
-                                    <tr key={i} className="border-t border-gray-700 hover:bg-gray-800 transition">
-                                        <td className="p-4 flex items-center gap-3">
-                                            <img src={`https://mc-heads.net/avatar/${player.name}/32`} alt="" className="w-8 h-8 rounded" />
-                                            <span className="font-medium">{player.name}</span>
-                                        </td>
-                                        <td className="p-4 text-gray-400 font-mono text-sm">{player.uuid}</td>
-                                        <td className="p-4">
-                                            <span className={`px-2 py-1 rounded text-xs font-medium ${player.status === 'Online' ? 'bg-green-600' :
-                                                    player.status === 'Banned' ? 'bg-red-600' : 'bg-gray-600'
-                                                }`}>{player.status}</span>
-                                        </td>
-                                        <td className="p-4 text-gray-400">{player.lastSeen}</td>
-                                        <td className="p-4">
-                                            <button className="text-purple-400 hover:text-purple-300 mr-3">View</button>
-                                            <button className="text-red-400 hover:text-red-300">Ban</button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            );
-        }
-
-        function LoginPage({ onLogin }) {
-            const [key, setKey] = useState('');
-
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                localStorage.setItem('lbr_api_key', key);
-                API_KEY = key;
-                onLogin();
-            };
-
-            return (
-                <div className="min-h-screen flex items-center justify-center gradient-bg">
-                    <div className="glass rounded-3xl p-8 w-full max-w-md">
-                        <div className="text-center mb-8">
-                            <div className="w-20 h-20 mx-auto rounded-2xl bg-white/10 flex items-center justify-center text-4xl mb-4">⚔️</div>
-                            <h1 className="text-2xl font-bold">LiteBansReborn</h1>
-                            <p className="text-gray-300 mt-2">Admin Panel v5.0</p>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium mb-2">API Key</label>
-                                <input
-                                    type="password"
-                                    value={key}
-                                    onChange={e => setKey(e.target.value)}
-                                    placeholder="Enter your API key"
-                                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 focus:outline-none focus:border-white/40"
-                                    required
-                                />
-                            </div>
-                            <button type="submit" className="w-full bg-white text-purple-600 font-bold py-3 rounded-lg hover:bg-gray-100 transition">
-                                Login
-                            </button>
-                        </form>
-
-                        <p className="text-center text-sm text-gray-300 mt-6">
-                            Find your API key in config.yml
-                        </p>
-                    </div>
-                </div>
-            );
-        }
-
-        function App() {
-            const [isLoggedIn, setIsLoggedIn] = useState(!!API_KEY);
-            const [activePage, setActivePage] = useState('dashboard');
-            const [stats, setStats] = useState({ online: 0, bans: 0, mutes: 0, warnings: 0 });
-
-            useEffect(() => {
-                if (isLoggedIn) {
-                    api.get('/api/stats').then(data => {
-                        if (data) setStats(data);
-                    }).catch(() => { });
-                }
-            }, [isLoggedIn]);
-
-            if (!isLoggedIn) {
-                return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
+            try {
+                const data = await api('/api/analytics/geo');
+                console.log('Geo data received:', data);
+                state.geoData = GeoMap.hasData(data) ? data : { ...GeoMap.CONFIG.DEMO_DATA };
+            } catch (e) {
+                console.error('Geo data error:', e);
+                state.geoData = { ...GeoMap.CONFIG.DEMO_DATA };
             }
-
-            return (
-                <div className="flex">
-                    <Sidebar active={activePage} setActive={setActivePage} />
-                    <main className="flex-1 p-8">
-                        {activePage === 'dashboard' && <Dashboard stats={stats} />}
-                        {activePage === 'players' && <PlayersPage />}
-                        {activePage === 'bans' && <div className="text-center py-20 text-gray-400">🔨 Bans Page - Coming Soon</div>}
-                        {activePage === 'mutes' && <div className="text-center py-20 text-gray-400">🔇 Mutes Page - Coming Soon</div>}
-                        {activePage === 'warnings' && <div className="text-center py-20 text-gray-400">⚠️ Warnings Page - Coming Soon</div>}
-                        {activePage === 'reports' && <div className="text-center py-20 text-gray-400">📋 Reports Page - Coming Soon</div>}
-                        {activePage === 'appeals' && <div className="text-center py-20 text-gray-400">📝 Appeals Page - Coming Soon</div>}
-                        {activePage === 'tickets' && <div className="text-center py-20 text-gray-400">🎫 Tickets Page - Coming Soon</div>}
-                        {activePage === 'staff' && <div className="text-center py-20 text-gray-400">👮 Staff Page - Coming Soon</div>}
-                        {activePage === 'settings' && <div className="text-center py-20 text-gray-400">⚙️ Settings Page - Coming Soon</div>}
-                    </main>
-                </div>
-            );
+            render();
         }
 
-        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+        function closeMapModal() {
+            state.showMap = false;
+            GeoMap.destroy();
+            render();
+        }
+
+        function renderMapModal() {
+            const data = state.geoData || {};
+            const { bannedCountries = {}, playerCountries = {}, totalBanned = 0, totalPlayers = 0, isDemo } = data;
+            const hasData = GeoMap.hasData(data);
+
+            const demoAlert = isDemo ? `<div style="background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);border-radius:6px;padding:8px;margin-bottom:12px;font-size:0.75rem;color:var(--warning);"><i class="ri-information-line"></i> Demo data - Enable Anti-VPN for real data</div>` : '';
+
+            const legend = `<div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;">LEGEND</div>
+                <div style="display:flex;gap:16px;margin-bottom:16px;font-size:0.8rem;">
+                    <div style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:var(--danger);border-radius:50%;"></span> Banned</div>
+                    <div style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;background:var(--success);border-radius:50%;"></span> Players</div>
+                </div>`;
+
+            const bannedHtml = GeoMap.renderCountryList(bannedCountries, 'var(--danger)', 'ri-forbid-line', 'IP BANS', totalBanned);
+            const playersHtml = GeoMap.renderCountryList(playerCountries, 'var(--success)', 'ri-user-line', 'PLAYERS', totalPlayers);
+
+            const statsHtml = hasData
+                ? `${demoAlert}${legend}${bannedHtml}${playersHtml}`
+                : `<div style="padding:24px;text-align:center;color:var(--text-muted);"><i class="ri-map-pin-line" style="font-size:2rem;opacity:0.5;"></i><p style="margin-top:8px;">No data available</p></div>`;
+
+            return `<div class="modal-overlay" onclick="if(event.target===this)closeMapModal()">
+                <div class="modal" style="max-width:950px;">
+                    <div class="modal-header">
+                        <div>
+                            <h2 style="margin:0;font-size:1.25rem;"><i class="ri-earth-line" style="color:var(--primary);margin-right:8px;"></i>Geographic IP Ban Map</h2>
+                            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;">Red = Banned IPs | Green = Active Players</p>
+                        </div>
+                        <button class="modal-close" onclick="closeMapModal()"><i class="ri-close-line"></i></button>
+                    </div>
+                    <div class="modal-body" style="padding:16px;">
+                        <div style="display:grid;grid-template-columns:1fr 220px;gap:16px;">
+                            <div id="world-map" style="width:100%;height:450px;background:rgba(0,0,0,0.2);border-radius:12px;overflow:hidden;"></div>
+                            <div style="max-height:450px;overflow-y:auto;">${statsHtml}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function initMap() { GeoMap.init(); }
+
+        function render() {
+            const app = document.getElementById('app');
+            if (!state.isLoggedIn) { app.innerHTML = renderLogin(); return; }
+            let html = `<div class="app-container">${renderSidebar()}<main class="main-content">${renderMain()}</main></div>`;
+            if (state.showMap) html += renderMapModal();
+            app.innerHTML = html;
+            if (state.showMap) setTimeout(initMap, 100);
+        }
+
+        if (state.isLoggedIn) { loadDashboard(); setupAutoRefresh(); } else { render(); }
     </script>
 </body>
 

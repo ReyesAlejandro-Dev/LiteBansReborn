@@ -74,17 +74,18 @@ public class MessagesManager {
             if (defaultStream == null) return;
             
             YamlConfiguration defaults = YamlConfiguration.loadConfiguration(
-                new InputStreamReader(defaultStream)
+                new InputStreamReader(defaultStream, java.nio.charset.StandardCharsets.UTF_8)
             );
             
             boolean modified = false;
+            int addedKeys = 0;
             
             // Add missing keys from defaults
             for (String key : defaults.getKeys(true)) {
                 if (!messages.contains(key)) {
                     messages.set(key, defaults.get(key));
                     modified = true;
-                    plugin.debug("Added missing message key: " + key);
+                    addedKeys++;
                 }
             }
             
@@ -92,7 +93,7 @@ public class MessagesManager {
             if (modified) {
                 try {
                     messages.save(messagesFile);
-                    plugin.log(Level.INFO, "Messages updated with new entries from plugin update!");
+                    plugin.log(Level.INFO, "Messages updated with " + addedKeys + " new entries from plugin update!");
                 } catch (Exception e) {
                     plugin.log(Level.WARNING, "Could not save updated messages: " + e.getMessage());
                 }

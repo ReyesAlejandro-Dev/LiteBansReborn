@@ -22,7 +22,7 @@ import java.util.logging.Level;
  * - Screenshots (if supported)
  * 
  * @author Nuvik
- * @version 5.1.0
+ * @version 5.4.0
  */
 public class CaseFileManager {
 
@@ -44,37 +44,39 @@ public class CaseFileManager {
     }
     
     private void createTables() {
-        String sql = """
-            CREATE TABLE IF NOT EXISTS case_files (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                case_id VARCHAR(36) UNIQUE NOT NULL,
-                target_uuid VARCHAR(36) NOT NULL,
-                target_name VARCHAR(16) NOT NULL,
-                creator_uuid VARCHAR(36) NOT NULL,
-                creator_name VARCHAR(16) NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                status VARCHAR(16) DEFAULT 'OPEN',
-                notes TEXT,
-                verdict VARCHAR(32)
-            );
-            
-            CREATE TABLE IF NOT EXISTS case_evidence (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                case_id VARCHAR(36) NOT NULL,
-                evidence_type VARCHAR(32) NOT NULL,
-                content TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (case_id) REFERENCES case_files(case_id)
-            );
-            """;
-        
+        // Use separate statements for each table for better compatibility
         try (Connection conn = plugin.getDatabaseManager().getConnection();
              Statement stmt = conn.createStatement()) {
-            for (String query : sql.split(";")) {
-                if (!query.trim().isEmpty()) {
-                    stmt.execute(query.trim());
-                }
-            }
+            
+            // Case files table
+            String caseFilesSQL = """
+                CREATE TABLE IF NOT EXISTS case_files (
+                    id INTEGER PRIMARY KEY,
+                    case_id VARCHAR(36) UNIQUE NOT NULL,
+                    target_uuid VARCHAR(36) NOT NULL,
+                    target_name VARCHAR(16) NOT NULL,
+                    creator_uuid VARCHAR(36) NOT NULL,
+                    creator_name VARCHAR(16) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    status VARCHAR(16) DEFAULT 'OPEN',
+                    notes TEXT,
+                    verdict VARCHAR(32)
+                )
+                """;
+            stmt.execute(caseFilesSQL.trim());
+            
+            // Case evidence table (without foreign key for SQLite compatibility)
+            String caseEvidenceSQL = """
+                CREATE TABLE IF NOT EXISTS case_evidence (
+                    id INTEGER PRIMARY KEY,
+                    case_id VARCHAR(36) NOT NULL,
+                    evidence_type VARCHAR(32) NOT NULL,
+                    content TEXT NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+                """;
+            stmt.execute(caseEvidenceSQL.trim());
+            
         } catch (SQLException e) {
             plugin.log(Level.SEVERE, "Failed to create case file tables: " + e.getMessage());
         }
@@ -128,6 +130,11 @@ public class CaseFileManager {
     private void recordMovement(Player player) {
         UUID uuid = player.getUniqueId();
         Location loc = player.getLocation();
+        
+        // Null check for world to prevent NPE
+        if (loc.getWorld() == null) {
+            return;
+        }
         
         movementHistory.computeIfAbsent(uuid, k -> new LinkedList<>());
         

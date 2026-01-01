@@ -20,10 +20,41 @@ import java.util.logging.Level;
  * - Anti-advertisement (IPs, domains)
  * - Link blocking
  * - Character spam detection
+ * 
+ * @author Nuvik
+ * @version 6.0.0
  */
 public class ChatFilterManager {
 
     private final LiteBansReborn plugin;
+    
+    // ==================== CONSTANTS ====================
+    
+    /** Maximum time (ms) to keep message history for anti-spam detection */
+    private static final long MESSAGE_HISTORY_RETENTION_MS = 60000; // 1 minute
+    
+    /** Maximum number of recent messages to keep per player */
+    private static final int MAX_RECENT_MESSAGES = 10;
+    
+    /** Default caps percentage threshold */
+    private static final int DEFAULT_CAPS_THRESHOLD = 70;
+    
+    /** Default minimum message length for caps check */
+    private static final int DEFAULT_MIN_CAPS_LENGTH = 5;
+    
+    /** Default spam message limit */
+    private static final int DEFAULT_SPAM_MESSAGE_LIMIT = 5;
+    
+    /** Default spam time window in seconds */
+    private static final int DEFAULT_SPAM_TIME_WINDOW_SECONDS = 10;
+    
+    /** Default flood similarity threshold (percentage) */
+    private static final int DEFAULT_FLOOD_SIMILARITY_THRESHOLD = 80;
+    
+    /** Default character spam threshold (consecutive same chars) */
+    private static final int DEFAULT_CHAR_SPAM_THRESHOLD = 4;
+    
+    // ==================== FIELDS ====================
     
     // Blocked patterns
     private final List<Pattern> blockedPatterns = new ArrayList<>();
@@ -33,7 +64,7 @@ public class ChatFilterManager {
     // Player tracking for anti-spam
     private final Map<UUID, PlayerChatData> playerChatData = new ConcurrentHashMap<>();
     
-    // Configuration
+    // Configuration flags
     private boolean enabled = true;
     private boolean blockAds = true;
     private boolean blockLinks = false;
@@ -42,12 +73,13 @@ public class ChatFilterManager {
     private boolean blockFlood = true;
     private boolean blockCharSpam = true;
     
-    private int capsPercentThreshold = 70;
-    private int minCapsLength = 5;
-    private int spamMessageLimit = 5;
-    private int spamTimeWindow = 10000;  // 10 seconds
-    private int floodSimilarityThreshold = 80;
-    private int charSpamThreshold = 4;
+    // Configuration thresholds (loaded from config)
+    private int capsPercentThreshold = DEFAULT_CAPS_THRESHOLD;
+    private int minCapsLength = DEFAULT_MIN_CAPS_LENGTH;
+    private int spamMessageLimit = DEFAULT_SPAM_MESSAGE_LIMIT;
+    private int spamTimeWindow = DEFAULT_SPAM_TIME_WINDOW_SECONDS * 1000;
+    private int floodSimilarityThreshold = DEFAULT_FLOOD_SIMILARITY_THRESHOLD;
+    private int charSpamThreshold = DEFAULT_CHAR_SPAM_THRESHOLD;
 
     public ChatFilterManager(LiteBansReborn plugin) {
         this.plugin = plugin;
@@ -127,9 +159,9 @@ public class ChatFilterManager {
             recentMessages.add(message.toLowerCase());
             lastMessageTime = now;
 
-            // Keep only recent entries
-            messageTimes.removeIf(t -> now - t > 60000);
-            while (recentMessages.size() > 10) {
+            // Keep only recent entries using defined constants
+            messageTimes.removeIf(t -> now - t > MESSAGE_HISTORY_RETENTION_MS);
+            while (recentMessages.size() > MAX_RECENT_MESSAGES) {
                 recentMessages.remove(0);
             }
         }

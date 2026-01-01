@@ -122,39 +122,51 @@ public class TemplateManager {
      */
     public CompletableFuture<Integer> incrementOffenseCount(UUID uuid, String templateId) {
         return plugin.getDatabaseManager().queryAsync(conn -> {
-            // Try to insert or update
-            String sql = "INSERT INTO " + plugin.getDatabaseManager().getTable("template_offenses") +
-                    " (player_uuid, template_id, offense_count, last_offense) VALUES (?, ?, 1, ?) " +
-                    "ON DUPLICATE KEY UPDATE offense_count = offense_count + 1, last_offense = ?";
-            
-            Timestamp now = Timestamp.from(Instant.now());
-            
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, uuid.toString());
-                stmt.setString(2, templateId);
-                stmt.setTimestamp(3, now);
-                stmt.setTimestamp(4, now);
-                
-                stmt.executeUpdate();
-            }
-            
-            // Get the new count
-            String selectSql = "SELECT offense_count FROM " + 
+            // First, check if record exists
+            String checkSql = "SELECT offense_count FROM " + 
                     plugin.getDatabaseManager().getTable("template_offenses") +
                     " WHERE player_uuid = ? AND template_id = ?";
             
-            try (PreparedStatement stmt = conn.prepareStatement(selectSql)) {
+            int currentCount = 0;
+            boolean exists = false;
+            
+            try (PreparedStatement stmt = conn.prepareStatement(checkSql)) {
                 stmt.setString(1, uuid.toString());
                 stmt.setString(2, templateId);
                 
                 try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
-                        return rs.getInt("offense_count");
+                        currentCount = rs.getInt("offense_count");
+                        exists = true;
                     }
                 }
             }
             
-            return 1;
+            Timestamp now = Timestamp.from(Instant.now());
+            
+            if (exists) {
+                // Update existing record
+                String updateSql = "UPDATE " + plugin.getDatabaseManager().getTable("template_offenses") +
+                        " SET offense_count = offense_count + 1, last_offense = ? WHERE player_uuid = ? AND template_id = ?";
+                try (PreparedStatement stmt = conn.prepareStatement(updateSql)) {
+                    stmt.setTimestamp(1, now);
+                    stmt.setString(2, uuid.toString());
+                    stmt.setString(3, templateId);
+                    stmt.executeUpdate();
+                }
+                return currentCount + 1;
+            } else {
+                // Insert new record
+                String insertSql = "INSERT INTO " + plugin.getDatabaseManager().getTable("template_offenses") +
+                        " (player_uuid, template_id, offense_count, last_offense) VALUES (?, ?, 1, ?)";
+                try (PreparedStatement stmt = conn.prepareStatement(insertSql)) {
+                    stmt.setString(1, uuid.toString());
+                    stmt.setString(2, templateId);
+                    stmt.setTimestamp(3, now);
+                    stmt.executeUpdate();
+                }
+                return 1;
+            }
         });
     }
     

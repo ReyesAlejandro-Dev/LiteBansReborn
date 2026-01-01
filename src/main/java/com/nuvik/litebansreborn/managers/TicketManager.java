@@ -148,8 +148,7 @@ public class TicketManager {
     // ==================== DATABASE ====================
 
     private void initializeDatabase() {
-        try {
-            Connection conn = plugin.getDatabaseManager().getConnection();
+        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
             
             // Tickets table
             String ticketTable = "CREATE TABLE IF NOT EXISTS " + plugin.getDatabaseManager().getTable("tickets") + " (" +
@@ -204,24 +203,25 @@ public class TicketManager {
                 ticket.setCreatedAt(System.currentTimeMillis());
                 ticket.setUpdatedAt(System.currentTimeMillis());
 
-                Connection conn = plugin.getDatabaseManager().getConnection();
-                String sql = "INSERT INTO " + plugin.getDatabaseManager().getTable("tickets") +
-                    " (player_uuid, player_name, category, status, subject, created_at, updated_at) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+                    String sql = "INSERT INTO " + plugin.getDatabaseManager().getTable("tickets") +
+                        " (player_uuid, player_name, category, status, subject, created_at, updated_at) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-                try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                    stmt.setString(1, playerUUID.toString());
-                    stmt.setString(2, playerName);
-                    stmt.setString(3, category.name());
-                    stmt.setString(4, TicketStatus.OPEN.name());
-                    stmt.setString(5, subject);
-                    stmt.setLong(6, ticket.getCreatedAt());
-                    stmt.setLong(7, ticket.getUpdatedAt());
-                    stmt.executeUpdate();
+                    try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                        stmt.setString(1, playerUUID.toString());
+                        stmt.setString(2, playerName);
+                        stmt.setString(3, category.name());
+                        stmt.setString(4, TicketStatus.OPEN.name());
+                        stmt.setString(5, subject);
+                        stmt.setLong(6, ticket.getCreatedAt());
+                        stmt.setLong(7, ticket.getUpdatedAt());
+                        stmt.executeUpdate();
 
-                    try (ResultSet rs = stmt.getGeneratedKeys()) {
-                        if (rs.next()) {
-                            ticket.setId(rs.getInt(1));
+                        try (ResultSet rs = stmt.getGeneratedKeys()) {
+                            if (rs.next()) {
+                                ticket.setId(rs.getInt(1));
+                            }
                         }
                     }
                 }
@@ -253,22 +253,23 @@ public class TicketManager {
                 msg.setStaff(isStaff);
                 msg.setTimestamp(System.currentTimeMillis());
 
-                Connection conn = plugin.getDatabaseManager().getConnection();
-                String sql = "INSERT INTO " + plugin.getDatabaseManager().getTable("ticket_messages") +
-                    " (ticket_id, author_uuid, author_name, message, is_staff, timestamp) VALUES (?, ?, ?, ?, ?, ?)";
+                try (Connection conn = plugin.getDatabaseManager().getConnection()) {
+                    String sql = "INSERT INTO " + plugin.getDatabaseManager().getTable("ticket_messages") +
+                        " (ticket_id, author_uuid, author_name, message, is_staff, timestamp) VALUES (?, ?, ?, ?, ?, ?)";
 
-                try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-                    stmt.setInt(1, ticketId);
-                    stmt.setString(2, authorUUID.toString());
-                    stmt.setString(3, authorName);
-                    stmt.setString(4, message);
-                    stmt.setBoolean(5, isStaff);
-                    stmt.setLong(6, msg.getTimestamp());
-                    stmt.executeUpdate();
+                    try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                        stmt.setInt(1, ticketId);
+                        stmt.setString(2, authorUUID.toString());
+                        stmt.setString(3, authorName);
+                        stmt.setString(4, message);
+                        stmt.setBoolean(5, isStaff);
+                        stmt.setLong(6, msg.getTimestamp());
+                        stmt.executeUpdate();
 
-                    try (ResultSet rs = stmt.getGeneratedKeys()) {
-                        if (rs.next()) {
-                            msg.setId(rs.getInt(1));
+                        try (ResultSet rs = stmt.getGeneratedKeys()) {
+                            if (rs.next()) {
+                                msg.setId(rs.getInt(1));
+                            }
                         }
                     }
                 }
@@ -298,8 +299,7 @@ public class TicketManager {
      */
     public CompletableFuture<Boolean> claimTicket(int ticketId, UUID staffUUID, String staffName) {
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                Connection conn = plugin.getDatabaseManager().getConnection();
+            try (Connection conn = plugin.getDatabaseManager().getConnection()) {
                 String sql = "UPDATE " + plugin.getDatabaseManager().getTable("tickets") +
                     " SET claimed_by_uuid = ?, claimed_by_name = ?, status = ?, updated_at = ? WHERE id = ?";
 
@@ -332,8 +332,7 @@ public class TicketManager {
      */
     public CompletableFuture<Boolean> closeTicket(int ticketId, TicketStatus status) {
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                Connection conn = plugin.getDatabaseManager().getConnection();
+            try (Connection conn = plugin.getDatabaseManager().getConnection()) {
                 String sql = "UPDATE " + plugin.getDatabaseManager().getTable("tickets") +
                     " SET status = ?, closed_at = ?, updated_at = ? WHERE id = ?";
 
@@ -363,8 +362,7 @@ public class TicketManager {
      * Update ticket status
      */
     private void updateTicketStatus(int ticketId, TicketStatus status) {
-        try {
-            Connection conn = plugin.getDatabaseManager().getConnection();
+        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
             String sql = "UPDATE " + plugin.getDatabaseManager().getTable("tickets") +
                 " SET status = ?, updated_at = ? WHERE id = ?";
 
@@ -390,8 +388,7 @@ public class TicketManager {
     public CompletableFuture<List<Ticket>> getOpenTickets() {
         return CompletableFuture.supplyAsync(() -> {
             List<Ticket> tickets = new ArrayList<>();
-            try {
-                Connection conn = plugin.getDatabaseManager().getConnection();
+            try (Connection conn = plugin.getDatabaseManager().getConnection()) {
                 String sql = "SELECT * FROM " + plugin.getDatabaseManager().getTable("tickets") +
                     " WHERE status IN ('OPEN', 'CLAIMED', 'WAITING_RESPONSE') ORDER BY created_at DESC";
 
@@ -414,8 +411,7 @@ public class TicketManager {
     public CompletableFuture<List<Ticket>> getPlayerTickets(UUID playerUUID) {
         return CompletableFuture.supplyAsync(() -> {
             List<Ticket> tickets = new ArrayList<>();
-            try {
-                Connection conn = plugin.getDatabaseManager().getConnection();
+            try (Connection conn = plugin.getDatabaseManager().getConnection()) {
                 String sql = "SELECT * FROM " + plugin.getDatabaseManager().getTable("tickets") +
                     " WHERE player_uuid = ? ORDER BY created_at DESC";
 
@@ -444,8 +440,7 @@ public class TicketManager {
         }
 
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                Connection conn = plugin.getDatabaseManager().getConnection();
+            try (Connection conn = plugin.getDatabaseManager().getConnection()) {
                 String sql = "SELECT * FROM " + plugin.getDatabaseManager().getTable("tickets") +
                     " WHERE id = ?";
 
@@ -495,8 +490,7 @@ public class TicketManager {
     }
 
     private void loadTicketMessages(Ticket ticket) {
-        try {
-            Connection conn = plugin.getDatabaseManager().getConnection();
+        try (Connection conn = plugin.getDatabaseManager().getConnection()) {
             String sql = "SELECT * FROM " + plugin.getDatabaseManager().getTable("ticket_messages") +
                 " WHERE ticket_id = ? ORDER BY timestamp ASC";
 

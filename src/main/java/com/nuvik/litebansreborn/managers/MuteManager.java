@@ -139,11 +139,14 @@ public class MuteManager {
             if (success) {
                 plugin.getCacheManager().invalidateMute(targetUUID);
                 
-                // Notify player
+                // Notify player with executor placeholder
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     Player player = Bukkit.getPlayer(targetUUID);
                     if (player != null) {
-                        plugin.getMessagesManager().send(player, "unmute.player-notification");
+                        plugin.getMessagesManager().send(player, "unmute.player-notification",
+                            "executor", executorName,
+                            "reason", reason != null ? reason : "No reason specified"
+                        );
                     }
                 });
             }
@@ -362,26 +365,10 @@ public class MuteManager {
         }
     }
     
+    /**
+     * Parse a Punishment from ResultSet using centralized method
+     */
     private Punishment parsePunishment(ResultSet rs) throws SQLException {
-        return new Punishment(
-            rs.getLong("id"),
-            PunishmentType.fromId(rs.getString("type")),
-            rs.getString("target_uuid") != null ? UUID.fromString(rs.getString("target_uuid")) : null,
-            rs.getString("target_name"),
-            rs.getString("target_ip"),
-            UUID.fromString(rs.getString("executor_uuid")),
-            rs.getString("executor_name"),
-            rs.getString("reason"),
-            rs.getString("server"),
-            rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toInstant() : null,
-            rs.getTimestamp("expires_at") != null ? rs.getTimestamp("expires_at").toInstant() : null,
-            rs.getBoolean("active"),
-            rs.getTimestamp("removed_at") != null ? rs.getTimestamp("removed_at").toInstant() : null,
-            rs.getString("removed_by_uuid") != null ? UUID.fromString(rs.getString("removed_by_uuid")) : null,
-            rs.getString("removed_by_name"),
-            rs.getString("remove_reason"),
-            rs.getBoolean("silent"),
-            rs.getBoolean("ip_based")
-        );
+        return Punishment.fromResultSet(rs);
     }
 }

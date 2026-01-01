@@ -1,0 +1,324 @@
+# ================================
+# Client Detection Configuration
+# LiteBansReborn v6.0.0
+# ================================
+# This file controls the client/mod detection system
+# Detects clients like Forge, Fabric, Lunar, Badlion, Meteor, etc.
+
+# Master toggle for client detection
+enabled: true
+
+# Alert staff when specific clients are detected
+alert-staff: true
+
+# Alert permission (who receives alerts)
+alert-permission: "litebansreborn.alerts.clientdetection"
+
+# ================================
+# JAVA CLIENT DETECTION
+# ================================
+java-clients:
+  
+  # Vanilla client detection
+  vanilla:
+    enabled: true
+    action: NONE  # NONE, LOG, ALERT, KICK, BAN
+    alert-message: "&8[&bClient&8] &e%player% &7is using &aVanilla &7client"
+  
+  # Forge modloader
+  forge:
+    enabled: true
+    action: ALERT
+    allowed: true
+    alert-message: "&8[&bClient&8] &e%player% &7is using &6Forge"
+    
+  # Fabric modloader  
+  fabric:
+    enabled: true
+    action: ALERT
+    allowed: true
+    alert-message: "&8[&bClient&8] &e%player% &7is using &bFabric"
+  
+  # Quilt modloader
+  quilt:
+    enabled: true
+    action: ALERT
+    allowed: true
+    alert-message: "&8[&bClient&8] &e%player% &7is using &dQuilt"
+  
+  # Lunar Client
+  lunar:
+    enabled: true
+    action: LOG
+    allowed: true
+    alert-message: "&8[&bClient&8] &e%player% &7is using &bLunar Client"
+  
+  # Badlion Client
+  badlion:
+    enabled: true
+    action: LOG
+    allowed: true
+    alert-message: "&8[&bClient&8] &e%player% &7is using &cBadlion Client"
+  
+  # LabyMod
+  labymod:
+    enabled: true
+    action: LOG
+    allowed: true
+    alert-message: "&8[&bClient&8] &e%player% &7is using &aLabyMod"
+  
+  # Feather Client
+  feather:
+    enabled: true
+    action: LOG
+    allowed: true
+    alert-message: "&8[&bClient&8] &e%player% &7is using &fFeather Client"
+  
+  # PVP Lounge
+  pvplounge:
+    enabled: true
+    action: LOG
+    allowed: true
+    alert-message: "&8[&bClient&8] &e%player% &7is using &ePVP Lounge"
+
+# ================================
+# CHEAT CLIENTS (HACKED CLIENTS)
+# ================================
+# These are known hacked clients - they will be blocked by default
+cheat-clients:
+  
+  enabled: true
+  default-action: BAN  # Default action for detected cheat clients
+  ban-reason: "Cheating/Hacked Client Detected"
+  ban-duration: -1  # -1 = permanent, or duration like "7d"
+  
+  # Known cheat clients to detect
+  clients:
+    meteor:
+      enabled: true
+      action: BAN
+      detect-brand: true  # Detect via brand string
+      detect-channels: true  # Detect via registered channels
+      brands:
+        - "meteor"
+        - "meteor-client"
+      channels:
+        - "meteor:client"
+    
+    wurst:
+      enabled: true
+      action: BAN
+      brands:
+        - "wurst"
+    
+    aristois:
+      enabled: true
+      action: BAN
+      brands:
+        - "aristois"
+    
+    impact:
+      enabled: true
+      action: BAN
+      brands:
+        - "impact"
+    
+    kami:
+      enabled: true
+      action: BAN
+      brands:
+        - "kami"
+        - "kamiblue"
+    
+    inertia:
+      enabled: true
+      action: BAN
+      brands:
+        - "inertia"
+    
+    liquidbounce:
+      enabled: true
+      action: BAN
+      brands:
+        - "liquidbounce"
+    
+    sigma:
+      enabled: true
+      action: BAN
+      brands:
+        - "sigma"
+    
+    future:
+      enabled: true
+      action: BAN
+      brands:
+        - "future"
+    
+    phobos:
+      enabled: true
+      action: BAN
+      brands:
+        - "phobos"
+    
+    rusherhack:
+      enabled: true
+      action: BAN
+      brands:
+        - "rusherhack"
+    
+    nhack:
+      enabled: true
+      action: BAN
+      brands:
+        - "nhack"
+
+# ================================
+# SUSPICIOUS MODS DETECTION
+# ================================
+suspicious-mods:
+  
+  enabled: true
+  default-action: ALERT  # NONE, LOG, ALERT, KICK, BAN
+  
+  mods:
+    # X-Ray related
+    xray:
+      enabled: true
+      action: BAN
+      channels:
+        - "xray"
+        - "x-ray"
+        - "advancedxray"
+    
+    # Auto-clicker/combat mods
+    autoclicker:
+      enabled: true
+      action: KICK
+      channels:
+        - "autoclicker"
+        - "autoclick"
+    
+    # Fly hacks
+    fly:
+      enabled: true
+      action: BAN
+      channels:
+        - "flymod"
+        - "creative+"
+    
+    # Kill aura
+    killaura:
+      enabled: true
+      action: BAN
+      channels:
+        - "killaura"
+        - "aura"
+    
+    # Speed hacks
+    speed:
+      enabled: true
+      action: BAN
+      channels:
+        - "speedhack"
+        - "speed+"
+
+# ================================
+# BEDROCK CLIENT DETECTION (Geyser)
+# ================================
+bedrock-clients:
+  
+  enabled: true
+  geyser-prefix: "."  # Default Geyser prefix for Bedrock players
+  
+  # Detect Bedrock players
+  detection:
+    enabled: true
+    action: LOG
+    alert-message: "&8[&bBedrock&8] &e%player% &7joined from Bedrock Edition"
+  
+  # Toolbox for MCPE detection (cheat client)
+  toolbox:
+    enabled: true
+    action: BAN
+    ban-reason: "Toolbox (Cheat) Detected"
+    # Detection methods for Toolbox:
+    # - Abnormal packet rates
+    # - Invalid movement patterns
+    # - Modified client data
+    detection-methods:
+      packet-analysis: true
+      movement-analysis: true
+      client-data: true
+  
+  # Horion (another Bedrock cheat client)
+  horion:
+    enabled: true
+    action: BAN
+    ban-reason: "Horion Client (Cheat) Detected"
+  
+  # Other known Bedrock cheats
+  other-cheats:
+    enabled: true
+    action: BAN
+    clients:
+      - "toolbox"
+      - "horion"
+      - "packet"
+      - "zephyr"
+      - "mchax"
+      - "omnicraft"
+
+# ================================
+# CUSTOM DETECTION RULES
+# ================================
+# Add your own custom brand/channel patterns
+custom-rules:
+  
+  enabled: false
+  
+  rules:
+    - name: "Example Custom Rule"
+      enabled: false
+      brands:
+        - "custom_brand"
+      channels:
+        - "custom:channel"
+      action: ALERT
+      message: "&c%player% matched custom rule!"
+
+# ================================
+# CHANNEL WHITELISTING
+# ================================
+# Whitelist specific channels that should NEVER trigger alerts
+whitelist:
+  channels:
+    - "minecraft:brand"
+    - "minecraft:register"
+    - "minecraft:unregister"
+    # WorldEdit/FAWE
+    - "worldedit:cui"
+    - "we:cui"
+    # ViaVersion
+    - "viaversion:minecraft"
+    # ProtocolLib
+    - "protocollib"
+
+# ================================
+# LOGGING
+# ================================
+logging:
+  # Log all client detections to file
+  enabled: true
+  file: "client-detections.log"
+  
+  # Log format
+  format: "[%date%] %player% (%uuid%) - Client: %client%, Channels: %channels%"
+
+# ================================
+# ACTIONS REFERENCE
+# ================================
+# NONE     - Do nothing
+# LOG      - Log to file only
+# ALERT    - Send alert to staff
+# KICK     - Kick the player
+# BAN      - Ban the player (uses ban-reason and ban-duration)

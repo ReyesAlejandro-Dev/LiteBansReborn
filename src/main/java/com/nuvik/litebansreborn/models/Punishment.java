@@ -1,11 +1,21 @@
 package com.nuvik.litebansreborn.models;
 
+import com.nuvik.litebansreborn.utils.PlayerUtil;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
 
 /**
  * Represents a punishment entry in LiteBansReborn
  * This is the base class for all punishment types
+ * 
+ * Uses Builder pattern for complex object construction
+ * 
+ * @author Nuvik
+ * @version 6.0.0
  */
 public class Punishment {
     
@@ -29,8 +39,34 @@ public class Punishment {
     private boolean ipBased;
     
     /**
-     * Create a new punishment (no ID yet - for new punishments)
+     * Private constructor - use Builder instead
      */
+    private Punishment(Builder builder) {
+        this.id = builder.id;
+        this.type = builder.type;
+        this.targetUUID = builder.targetUUID;
+        this.targetName = builder.targetName;
+        this.targetIP = builder.targetIP;
+        this.executorUUID = builder.executorUUID;
+        this.executorName = builder.executorName;
+        this.reason = builder.reason;
+        this.server = builder.server;
+        this.createdAt = builder.createdAt;
+        this.expiresAt = builder.expiresAt;
+        this.active = builder.active;
+        this.removedAt = builder.removedAt;
+        this.removedByUUID = builder.removedByUUID;
+        this.removedByName = builder.removedByName;
+        this.removeReason = builder.removeReason;
+        this.silent = builder.silent;
+        this.ipBased = builder.ipBased;
+    }
+    
+    /**
+     * Create a new punishment (no ID yet - for new punishments)
+     * @deprecated Use Builder instead
+     */
+    @Deprecated
     public Punishment(PunishmentType type, UUID targetUUID, String targetName, String targetIP,
                      UUID executorUUID, String executorName, String reason, String server,
                      Instant expiresAt, boolean silent, boolean ipBased) {
@@ -51,7 +87,9 @@ public class Punishment {
     
     /**
      * Load an existing punishment from database
+     * @deprecated Use Builder or fromResultSet instead
      */
+    @Deprecated
     public Punishment(long id, PunishmentType type, UUID targetUUID, String targetName, String targetIP,
                      UUID executorUUID, String executorName, String reason, String server,
                      Instant createdAt, Instant expiresAt, boolean active,
@@ -76,6 +114,199 @@ public class Punishment {
         this.silent = silent;
         this.ipBased = ipBased;
     }
+    
+    // ==================== BUILDER PATTERN ====================
+    
+    /**
+     * Builder for creating Punishment instances
+     */
+    public static class Builder {
+        // Required fields
+        private final PunishmentType type;
+        private final String targetName;
+        
+        // Optional fields with defaults
+        private long id = 0;
+        private UUID targetUUID;
+        private String targetIP;
+        private UUID executorUUID = PlayerUtil.CONSOLE_UUID;
+        private String executorName = PlayerUtil.CONSOLE_NAME;
+        private String reason = "No reason specified";
+        private String server = "server";
+        private Instant createdAt = Instant.now();
+        private Instant expiresAt;
+        private boolean active = true;
+        private Instant removedAt;
+        private UUID removedByUUID;
+        private String removedByName;
+        private String removeReason;
+        private boolean silent = false;
+        private boolean ipBased = false;
+        
+        /**
+         * Create a new builder with required fields
+         */
+        public Builder(PunishmentType type, String targetName) {
+            this.type = type;
+            this.targetName = targetName;
+        }
+        
+        public Builder id(long id) {
+            this.id = id;
+            return this;
+        }
+        
+        public Builder targetUUID(UUID uuid) {
+            this.targetUUID = uuid;
+            return this;
+        }
+        
+        public Builder targetIP(String ip) {
+            this.targetIP = ip;
+            return this;
+        }
+        
+        public Builder executor(UUID uuid, String name) {
+            this.executorUUID = uuid != null ? uuid : PlayerUtil.CONSOLE_UUID;
+            this.executorName = name != null ? name : PlayerUtil.CONSOLE_NAME;
+            return this;
+        }
+        
+        public Builder executorUUID(UUID uuid) {
+            this.executorUUID = uuid != null ? uuid : PlayerUtil.CONSOLE_UUID;
+            return this;
+        }
+        
+        public Builder executorName(String name) {
+            this.executorName = name != null ? name : PlayerUtil.CONSOLE_NAME;
+            return this;
+        }
+        
+        public Builder reason(String reason) {
+            this.reason = reason != null ? reason : "No reason specified";
+            return this;
+        }
+        
+        public Builder server(String server) {
+            this.server = server != null ? server : "server";
+            return this;
+        }
+        
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt != null ? createdAt : Instant.now();
+            return this;
+        }
+        
+        public Builder expiresAt(Instant expiresAt) {
+            this.expiresAt = expiresAt;
+            return this;
+        }
+        
+        public Builder permanent() {
+            this.expiresAt = null;
+            return this;
+        }
+        
+        public Builder duration(long durationMillis) {
+            if (durationMillis < 0) {
+                this.expiresAt = null; // Permanent
+            } else {
+                this.expiresAt = Instant.now().plusMillis(durationMillis);
+            }
+            return this;
+        }
+        
+        public Builder active(boolean active) {
+            this.active = active;
+            return this;
+        }
+        
+        public Builder removed(Instant removedAt, UUID removedByUUID, String removedByName, String removeReason) {
+            this.removedAt = removedAt;
+            this.removedByUUID = removedByUUID;
+            this.removedByName = removedByName;
+            this.removeReason = removeReason;
+            return this;
+        }
+        
+        public Builder silent(boolean silent) {
+            this.silent = silent;
+            return this;
+        }
+        
+        public Builder ipBased(boolean ipBased) {
+            this.ipBased = ipBased;
+            return this;
+        }
+        
+        /**
+         * Build the Punishment instance
+         */
+        public Punishment build() {
+            return new Punishment(this);
+        }
+    }
+    
+    /**
+     * Create a new builder
+     */
+    public static Builder builder(PunishmentType type, String targetName) {
+        return new Builder(type, targetName);
+    }
+    
+    /**
+     * Parse a Punishment from a ResultSet
+     * Centralizes database parsing logic to avoid code duplication
+     * 
+     * @param rs The ResultSet to parse from
+     * @return A Punishment object
+     * @throws SQLException If there's an error reading from the ResultSet
+     */
+    public static Punishment fromResultSet(ResultSet rs) throws SQLException {
+        // Parse UUIDs safely, handling null values
+        String targetUuidStr = rs.getString("target_uuid");
+        UUID targetUUID = targetUuidStr != null ? UUID.fromString(targetUuidStr) : null;
+        
+        String executorUuidStr = rs.getString("executor_uuid");
+        UUID executorUUID = executorUuidStr != null ? UUID.fromString(executorUuidStr) : PlayerUtil.CONSOLE_UUID;
+        
+        String removedByUuidStr = rs.getString("removed_by_uuid");
+        UUID removedByUUID = removedByUuidStr != null ? UUID.fromString(removedByUuidStr) : null;
+        
+        // Parse timestamps safely
+        Timestamp createdAtTs = rs.getTimestamp("created_at");
+        Instant createdAt = createdAtTs != null ? createdAtTs.toInstant() : null;
+        
+        Timestamp expiresAtTs = rs.getTimestamp("expires_at");
+        Instant expiresAt = expiresAtTs != null ? expiresAtTs.toInstant() : null;
+        
+        Timestamp removedAtTs = rs.getTimestamp("removed_at");
+        Instant removedAt = removedAtTs != null ? removedAtTs.toInstant() : null;
+        
+        // Get punishment type
+        PunishmentType type = PunishmentType.fromId(rs.getString("type"));
+        if (type == null) {
+            type = PunishmentType.BAN; // Default fallback
+        }
+        
+        return new Builder(type, rs.getString("target_name"))
+            .id(rs.getLong("id"))
+            .targetUUID(targetUUID)
+            .targetIP(rs.getString("target_ip"))
+            .executorUUID(executorUUID)
+            .executorName(rs.getString("executor_name"))
+            .reason(rs.getString("reason"))
+            .server(rs.getString("server"))
+            .createdAt(createdAt)
+            .expiresAt(expiresAt)
+            .active(rs.getBoolean("active"))
+            .removed(removedAt, removedByUUID, rs.getString("removed_by_name"), rs.getString("remove_reason"))
+            .silent(rs.getBoolean("silent"))
+            .ipBased(rs.getBoolean("ip_based"))
+            .build();
+    }
+    
+    // ==================== BUSINESS LOGIC ====================
     
     /**
      * Check if the punishment is permanent
@@ -123,7 +354,8 @@ public class Punishment {
         this.removeReason = reason;
     }
     
-    // Getters and Setters
+    // ==================== GETTERS AND SETTERS ====================
+    
     public long getId() {
         return id;
     }

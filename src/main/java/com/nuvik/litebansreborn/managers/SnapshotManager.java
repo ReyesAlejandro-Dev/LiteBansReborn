@@ -7,7 +7,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,8 +19,9 @@ public class SnapshotManager {
     private final LiteBansReborn plugin;
     private final ConcurrentLinkedDeque<String> globalChatBuffer;
     private final int bufferSize;
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-    private final SimpleDateFormat fileDateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+    // Thread-safe formatters
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final DateTimeFormatter FILE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 
     public SnapshotManager(LiteBansReborn plugin) {
         this.plugin = plugin;
@@ -31,7 +33,7 @@ public class SnapshotManager {
         if (!plugin.getConfigManager().getBoolean("snapshots.enabled", true)) return;
 
         String entry = String.format("[%s] %s: %s", 
-            dateFormat.format(new Date()),
+            LocalDateTime.now().format(TIME_FORMATTER),
             player.getName(), 
             message
         );
@@ -52,7 +54,7 @@ public class SnapshotManager {
                 File folder = new File(plugin.getDataFolder(), "snapshots");
                 if (!folder.exists()) folder.mkdirs();
 
-                String timestamp = fileDateFormat.format(new Date());
+                String timestamp = LocalDateTime.now().format(FILE_DATE_FORMATTER);
                 String filename = String.format("%s_%s_%s.txt", timestamp, targetName, type);
                 File file = new File(folder, filename);
 

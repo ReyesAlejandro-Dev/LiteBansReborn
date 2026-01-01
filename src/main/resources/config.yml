@@ -1,7 +1,7 @@
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║                           LiteBansReborn Configuration                         ║
 # ║                    Advanced Punishment Management System                       ║
-# ║                              Version 5.1.0                                    ║
+# ║                              Version 6.0.0                                    ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
 
 # ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -132,7 +132,7 @@ redemption:
 # │                           Hardware ID Banning                                    │
 # └─────────────────────────────────────────────────────────────────────────────────┘
 hardware-ban:
-  enabled: false
+  enabled: true
   # Requires optional client mod for full HWID tracking
   client-mod: "LiteBansClient"
   # Track these identifiers
@@ -143,26 +143,6 @@ hardware-ban:
   # Fingerprint similarity threshold for alt detection (0-100)
   alt-detection-threshold: 70
 
-# ┌─────────────────────────────────────────────────────────────────────────────────┐
-# │                              Web Panel                                           │
-# └─────────────────────────────────────────────────────────────────────────────────┘
-web-panel:
-  enabled: false
-  port: 8080
-  ssl: false
-  # keystore-password: "changeit"  # For SSL
-  
-  # API keys for authentication (generate your own!)
-  api-keys:
-    - "your-secret-api-key-here"
-  
-  # Features
-  features:
-    real-time-dashboard: true
-    punishment-management: true
-    player-search: true
-    staff-statistics: true
-    appeal-handling: true
 
 # ┌─────────────────────────────────────────────────────────────────────────────────┐
 # │                              Database Settings                                  │
@@ -688,26 +668,6 @@ client-detection:
   # Action for modded clients (Forge/Fabric): NONE, WARN, KICK
   modded-action: "WARN"
 
-# ┌─────────────────────────────────────────────────────────────────────────────────┐
-# │                              Web Panel Settings                                 │
-# └─────────────────────────────────────────────────────────────────────────────────┘
-web-panel:
-  # Enable Web Panel (Dashboard)
-  enabled: true
-  
-  # Port for the web server
-  port: 8080
-  
-  # Use SSL (HTTPS)
-  ssl: false
-  keystore-password: "changeit"
-  
-  # API keys for authentication
-  api-keys:
-    - "admin"
-    
-  # Allow connections from any origin (CORS)
-  cors: true
 
 # ┌─────────────────────────────────────────────────────────────────────────────────┐
 # │                              Broadcast Settings                                 │
@@ -1055,3 +1015,207 @@ predictive:
   # Learn from bans to improve predictions
   learn-from-bans: true
 
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                                Web Panel Settings                               │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+web-panel:
+  # Enable built-in web panel
+  enabled: true
+  
+  # Port to listen on
+  port: 8080
+  
+  # Use SSL (HTTPS)
+  # Requires keystore.jks in plugin folder
+  ssl: false
+  keystore-password: "changeit"
+  
+  # API Keys for authenticating with the panel
+  # One is automatically generated on first run if empty
+  api-keys:
+    - "admin"
+  
+  cors: true
+  
+  # Customization
+  # Images are located in plugin/LiteBansReborn/web/img/
+  images:
+    logo: "logo.png"
+    dashboard: "dashboard.png"
+
+  # Features
+  features:
+    real-time-dashboard: true
+    punishment-management: true
+    player-search: true
+    staff-statistics: true
+    appeal-handling: true
+    # NEW v5.9 Features
+    analytics: true
+    staff-leaderboard: true
+    activity-heatmap: true
+    geo-map: true
+    timeline: true
+    ai-moderation: true
+    mugshot-generator: true
+
+  # Performance Settings to optimize resource usage
+  performance:
+    # Memory optimization level: low, medium, high
+    # Controls caching and update frequency
+    optimization: "high"
+    # Worker threads (CPU usage)
+    # Lower this if you want to save resources (min 1)
+    worker-threads: 2
+    # Max RAM usage limit (Approximate - controls cache size)
+    # Examples: 512M, 1G. Set to 0 to disable limit.
+    max-memory: "128M"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                          AI Moderation (Groq)                                   │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+ai:
+  # Enable AI-powered moderation
+  enabled: true
+  
+  # Groq API Key (get from https://console.groq.com)
+  groq-api-key: "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"
+  
+  # Model to use (llama-3.3-70b-versatile recommended)
+  model: "llama-3.3-70b-versatile"
+  
+  # Auto-moderation settings
+  auto-moderation:
+    enabled: true
+    # Analyze all chat messages automatically
+    analyze-chat: true
+    # Toxicity threshold (0-100) to trigger action
+    toxicity-threshold: 70
+    # Action when threshold exceeded: warn, mute, kick, ban
+    action: "warn"
+    # Mute duration for auto-mute
+    mute-duration: "10m"
+    
+  # Smart suggestions
+  suggestions:
+    enabled: true
+    # Suggest ban duration based on player history
+    smart-duration: true
+    # Suggest reasons based on violation type
+    smart-reason: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                        Anti-Cheat Integration                                   │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+anti-cheat:
+  # Enable anti-cheat integration
+  enabled: true
+  
+  # Supported: Vulcan, Grim, Matrix, Spartan, NoCheatPlus, AAC
+  # Will auto-detect installed plugins
+  
+  # Auto-ban settings
+  auto-ban:
+    enabled: true
+    # Violation threshold to trigger auto-ban
+    threshold: 50
+    # Ban duration
+    duration: "7d"
+    # Ban reason
+    reason: "Cheating detected by anti-cheat system"
+    
+  # Auto-warn settings
+  auto-warn:
+    enabled: true
+    threshold: 20
+    
+  # Evidence capture
+  evidence:
+    enabled: true
+    # Capture screenshot on detection (requires replay mod integration)
+    capture-screenshot: false
+    # Log chat before ban
+    log-chat: true
+    
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                           VIP Protection                                        │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+vip-protection:
+  enabled: true
+  
+  # Permissions that grant VIP protection
+  permissions:
+    - "litebansreborn.vip"
+    - "litebansreborn.vip.protection"
+    - "essentials.vip"
+    - "group.vip"
+    - "group.donator"
+    - "group.mvp"
+    
+  # What VIP protection does:
+  features:
+    # Exempt from auto-bans (anti-cheat)
+    exempt-auto-ban: true
+    # Exempt from chat filter auto-mute
+    exempt-chat-filter: true
+    # Require staff to confirm before banning VIP
+    require-confirmation: true
+    # Notify higher staff when VIP is punished
+    notify-admins: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                          Mugshot System                                         │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+mugshot:
+  enabled: true
+  
+  # Auto-generate mugshot when player is banned
+  auto-generate: true
+  
+  # Include in Discord notifications
+  send-to-discord: true
+  
+  # Style settings
+  style:
+    # Title text
+    title: "WANTED"
+    # Footer text
+    footer: "LiteBansReborn"
+    # Show ban reason
+    show-reason: true
+    # Show ban date
+    show-date: true
+    # Show executor
+    show-executor: true
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                          Notifications                                          │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+notifications:
+  # Browser push notifications
+  push:
+    enabled: true
+    # Events to notify
+    events:
+      - new-report
+      - new-appeal
+      - high-risk-player
+      - anti-cheat-detection
+      
+  # Sound alerts in web panel
+  sounds:
+    enabled: true
+    # Sound for new report
+    new-report: "notification"
+    # Sound for high priority
+    urgent: "alert"
+    
+  # Email notifications (requires SMTP setup)
+  email:
+    enabled: false
+    smtp-host: "smtp.gmail.com"
+    smtp-port: 587
+    smtp-user: ""
+    smtp-password: ""
+    recipients:
+      - "admin@yourserver.com"

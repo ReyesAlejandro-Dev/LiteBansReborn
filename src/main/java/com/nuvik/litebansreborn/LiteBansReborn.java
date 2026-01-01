@@ -18,21 +18,46 @@ import com.nuvik.litebansreborn.web.WebPanelServer;
 import com.nuvik.litebansreborn.utils.ColorUtil;
 import com.nuvik.litebansreborn.utils.UpdateChecker;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 /**
  * LiteBansReborn - Advanced Punishment Management System
  * A sophisticated and feature-rich alternative to LiteBans
  * 
+ * v5.9 Improvements:
+ * - Fixed startTime field usage
+ * - Precompiled regex pattern for log color stripping
+ * - Safe command registration with null checks
+ * - Proper shutdown order (managers → DB)
+ * - Tracked scheduled tasks for proper reload
+ * - Removed duplicate manager initialization
+ * - API cleanup on disable
+ * 
  * @author Nuvik
- * @version 5.1.0
+ * @version 6.0.0
  */
 public class LiteBansReborn extends JavaPlugin {
 
+    // Precompiled pattern for color stripping (performance)
+    private static final Pattern COLOR_PATTERN = Pattern.compile("§[0-9a-fk-or]");
+
     private static LiteBansReborn instance;
     private static LiteBansRebornAPI api;
+    
+    // Startup time (field used by getter)
+    private long startTime;
+    
+    // Tracked scheduled tasks for proper reload
+    private final List<BukkitTask> scheduledTasks = new ArrayList<>();
     
     // Managers
     private ConfigManager configManager;
@@ -96,7 +121,7 @@ public class LiteBansReborn extends JavaPlugin {
     
     @Override
     public void onEnable() {
-        long startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis(); // Use field, not local variable
         instance = this;
         
         // Print startup banner
@@ -118,7 +143,7 @@ public class LiteBansReborn extends JavaPlugin {
         log(Level.INFO, "Initializing cache system...");
         initializeCache();
         
-        // Initialize managers
+        // Initialize ALL managers in one place
         log(Level.INFO, "Initializing managers...");
         initializeManagers();
         
@@ -153,11 +178,6 @@ public class LiteBansReborn extends JavaPlugin {
             log(Level.INFO, "Initializing Client Detection...");
             clientDetector = new ClientDetector(this);
         }
-        
-        // Initialize Report Manager
-        reportManager = new ReportManager(this);
-        ghostMuteManager = new GhostMuteManager(this);
-        snapshotManager = new SnapshotManager(this);
         
         // V4.0 Features
         log(Level.INFO, "Initializing v4.0 features...");
@@ -213,8 +233,12 @@ public class LiteBansReborn extends JavaPlugin {
         }
         
         // Check for updates
+        if (configManager.getBoolean("general.check-updates", true)) {
+            new UpdateChecker(this, 131216);
+        }
+
         if (configManager.getBoolean("general.metrics")) {
-            // Initialize bStats here
+            new org.bstats.bukkit.Metrics(this, 20468);
         }
         
         // Start scheduled tasks
@@ -239,17 +263,27 @@ public class LiteBansReborn extends JavaPlugin {
     public void onDisable() {
         log(Level.INFO, "Disabling LiteBansReborn...");
         
-        // Save all cached data
-        if (cacheManager != null) {
-            cacheManager.saveAll();
+        // FIRST: Cancel all scheduled tasks
+        stopScheduledTasks();
+        
+        // SECOND: Shutdown services that depend on DB
+        if (hwidManager != null) {
+            hwidManager.shutdown();
+        }
+        if (vpnManager != null) {
+            vpnManager.shutdown();
+        }
+        if (clientDetector != null) {
+            clientDetector.shutdown();
+        }
+        if (webPanelServer != null) {
+            webPanelServer.stop();
+        }
+        if (discordBotManager != null) {
+            discordBotManager.stop();
         }
         
-        // Close database connection
-        if (databaseManager != null) {
-            databaseManager.close();
-        }
-        
-        // Shutdown notifiers
+        // THIRD: Shutdown notifiers
         if (discordNotifier != null) {
             discordNotifier.shutdown();
         }
@@ -257,30 +291,20 @@ public class LiteBansReborn extends JavaPlugin {
             telegramNotifier.shutdown();
         }
         
-        // Shutdown Anti-VPN
-        if (vpnManager != null) {
-            vpnManager.shutdown();
+        // FOURTH: Save cache data
+        if (cacheManager != null) {
+            cacheManager.saveAll();
         }
         
-        // Shutdown Client Detector
-        if (clientDetector != null) {
-            clientDetector.shutdown();
-        }
-        
-        // V4.0 Shutdown
-        if (hwidManager != null) {
-            hwidManager.shutdown();
-        }
-        if (webPanelServer != null) {
-            webPanelServer.stop();
-        }
-        
-        // V4.5 Shutdown
-        if (discordBotManager != null) {
-            discordBotManager.stop();
+        // LAST: Close database connection
+        if (databaseManager != null) {
+            databaseManager.close();
         }
         
         log(Level.INFO, "§cLiteBansReborn has been disabled!");
+        
+        // Clean up static references
+        api = null;
         instance = null;
     }
     
@@ -306,15 +330,12 @@ public class LiteBansReborn extends JavaPlugin {
     }
     
     private void initializeConfigurations() {
-        // Save default configs if not present
         saveDefaultConfig();
         saveResource("messages.yml", false);
         
-        // Initialize config managers
         configManager = new ConfigManager(this);
         messagesManager = new MessagesManager(this);
         
-        // Load configurations
         configManager.load();
         messagesManager.load();
     }
@@ -336,6 +357,10 @@ public class LiteBansReborn extends JavaPlugin {
         cacheManager = new CacheManager(this);
     }
     
+    /**
+     * Initialize ALL managers in one centralized place
+     * Avoids duplicate initialization
+     */
     private void initializeManagers() {
         // Punishment managers
         banManager = new BanManager(this);
@@ -346,6 +371,8 @@ public class LiteBansReborn extends JavaPlugin {
         
         // Additional managers
         reportManager = new ReportManager(this);
+        ghostMuteManager = new GhostMuteManager(this);
+        snapshotManager = new SnapshotManager(this);
         appealManager = new AppealManager(this);
         noteManager = new NoteManager(this);
         historyManager = new HistoryManager(this);
@@ -358,164 +385,153 @@ public class LiteBansReborn extends JavaPlugin {
         templateManager.loadTemplates();
     }
     
+    /**
+     * Safe command registration helper
+     * Logs error instead of NPE if command not in plugin.yml
+     */
+    private void registerCmd(String name, CommandExecutor executor, TabCompleter tabCompleter) {
+        PluginCommand cmd = getCommand(name);
+        if (cmd == null) {
+            log(Level.SEVERE, "Command missing in plugin.yml: " + name);
+            return;
+        }
+        cmd.setExecutor(executor);
+        if (tabCompleter != null) {
+            cmd.setTabCompleter(tabCompleter);
+        }
+    }
+    
     private void registerCommands() {
         // Ban commands
-        getCommand("ban").setExecutor(new BanCommand(this));
-        getCommand("tempban").setExecutor(new TempBanCommand(this));
-        getCommand("ipban").setExecutor(new IPBanCommand(this));
-        getCommand("unban").setExecutor(new UnbanCommand(this));
-        getCommand("unbanip").setExecutor(new UnbanIPCommand(this));
+        registerCmd("ban", new BanCommand(this), null);
+        registerCmd("tempban", new TempBanCommand(this), null);
+        registerCmd("ipban", new IPBanCommand(this), null);
+        registerCmd("unban", new UnbanCommand(this), null);
+        registerCmd("unbanip", new UnbanIPCommand(this), null);
         
         // Mute commands
-        getCommand("mute").setExecutor(new MuteCommand(this));
-        getCommand("tempmute").setExecutor(new TempMuteCommand(this));
-        getCommand("ipmute").setExecutor(new IPMuteCommand(this));
-        getCommand("unmute").setExecutor(new UnmuteCommand(this));
-        getCommand("unmuteip").setExecutor(new UnmuteIPCommand(this));
+        registerCmd("mute", new MuteCommand(this), null);
+        registerCmd("tempmute", new TempMuteCommand(this), null);
+        registerCmd("ipmute", new IPMuteCommand(this), null);
+        registerCmd("unmute", new UnmuteCommand(this), null);
+        registerCmd("unmuteip", new UnmuteIPCommand(this), null);
         
         // Kick commands
-        getCommand("kick").setExecutor(new KickCommand(this));
-        getCommand("kickall").setExecutor(new KickAllCommand(this));
+        registerCmd("kick", new KickCommand(this), null);
+        registerCmd("kickall", new KickAllCommand(this), null);
         
         // Warn commands
-        getCommand("warn").setExecutor(new WarnCommand(this));
-        getCommand("unwarn").setExecutor(new UnwarnCommand(this));
-        getCommand("warnings").setExecutor(new WarningsCommand(this));
+        registerCmd("warn", new WarnCommand(this), null);
+        registerCmd("unwarn", new UnwarnCommand(this), null);
+        registerCmd("warnings", new WarningsCommand(this), null);
         
         // Freeze commands
-        getCommand("freeze").setExecutor(new FreezeCommand(this));
-        getCommand("unfreeze").setExecutor(new UnfreezeCommand(this));
+        registerCmd("freeze", new FreezeCommand(this), null);
+        registerCmd("unfreeze", new UnfreezeCommand(this), null);
         
         // History commands
-        getCommand("history").setExecutor(new HistoryCommand(this));
-        getCommand("staffhistory").setExecutor(new StaffHistoryCommand(this));
-        getCommand("banlist").setExecutor(new BanListCommand(this));
-        getCommand("mutelist").setExecutor(new MuteListCommand(this));
+        registerCmd("history", new HistoryCommand(this), null);
+        registerCmd("staffhistory", new StaffHistoryCommand(this), null);
+        registerCmd("banlist", new BanListCommand(this), null);
+        registerCmd("mutelist", new MuteListCommand(this), null);
         
         // Check commands
-        getCommand("checkban").setExecutor(new CheckBanCommand(this));
-        getCommand("checkmute").setExecutor(new CheckMuteCommand(this));
+        registerCmd("checkban", new CheckBanCommand(this), null);
+        registerCmd("checkmute", new CheckMuteCommand(this), null);
         
         // Utility commands
-        getCommand("clearchat").setExecutor(new ClearChatCommand(this));
-        getCommand("mutechat").setExecutor(new MuteChatCommand(this));
-        getCommand("staffchat").setExecutor(new StaffChatCommand(this));
+        registerCmd("clearchat", new ClearChatCommand(this), null);
+        registerCmd("mutechat", new MuteChatCommand(this), null);
+        registerCmd("staffchat", new StaffChatCommand(this), null);
         
         // Report commands
-        getCommand("report").setExecutor(new ReportCommand(this));
-        getCommand("reports").setExecutor(new ReportsCommand(this));
-        getCommand("handlereport").setExecutor(new HandleReportCommand(this));
+        registerCmd("report", new ReportCommand(this), null);
+        registerCmd("reports", new ReportsCommand(this), null);
+        registerCmd("handlereport", new HandleReportCommand(this), null);
         
         // Appeal commands
-        getCommand("appeal").setExecutor(new AppealCommand(this));
-        getCommand("appeals").setExecutor(new AppealsCommand(this));
-        getCommand("handleappeal").setExecutor(new HandleAppealCommand(this));
+        registerCmd("appeal", new AppealCommand(this), null);
+        registerCmd("appeals", new AppealsCommand(this), null);
+        registerCmd("handleappeal", new HandleAppealCommand(this), null);
         
         // Alt detection commands
-        getCommand("alts").setExecutor(new AltsCommand(this));
-        getCommand("dupeip").setExecutor(new DupeIPCommand(this));
+        registerCmd("alts", new AltsCommand(this), null);
+        registerCmd("dupeip", new DupeIPCommand(this), null);
         
         // Note commands
-        getCommand("note").setExecutor(new NoteCommand(this));
-        getCommand("notes").setExecutor(new NotesCommand(this));
-        getCommand("delnote").setExecutor(new DelNoteCommand(this));
+        registerCmd("note", new NoteCommand(this), null);
+        registerCmd("notes", new NotesCommand(this), null);
+        registerCmd("delnote", new DelNoteCommand(this), null);
         
         // Other commands
-        getCommand("rollback").setExecutor(new RollbackCommand(this));
-        getCommand("geoip").setExecutor(new GeoIPCommand(this));
-        getCommand("allowplayer").setExecutor(new AllowPlayerCommand(this));
-        getCommand("punish").setExecutor(new PunishCommand(this));
-        
-        // Ghost Mute
-        getCommand("ghostmute").setExecutor(new GhostMuteCommand(this));
-        
-        // Main plugin command
-        getCommand("litebansreborn").setExecutor(new MainCommand(this));
+        registerCmd("rollback", new RollbackCommand(this), null);
+        registerCmd("geoip", new GeoIPCommand(this), null);
+        registerCmd("allowplayer", new AllowPlayerCommand(this), null);
+        registerCmd("punish", new PunishCommand(this), null);
+        registerCmd("ghostmute", new GhostMuteCommand(this), null);
+        registerCmd("litebansreborn", new MainCommand(this), null);
         
         // Anti-VPN commands
         VPNCheckCommand vpnCmd = new VPNCheckCommand(this);
-        getCommand("vpncheck").setExecutor(vpnCmd);
-        getCommand("vpncheck").setTabCompleter(vpnCmd);
+        registerCmd("vpncheck", vpnCmd, vpnCmd);
         
         // Client detection commands
         ClientCheckCommand clientCmd = new ClientCheckCommand(this);
-        getCommand("clientcheck").setExecutor(clientCmd);
-        getCommand("clientcheck").setTabCompleter(clientCmd);
+        registerCmd("clientcheck", clientCmd, clientCmd);
         
         // V4.0 Commands
         EvidenceCommand evidenceCmd = new EvidenceCommand(this);
-        getCommand("evidence").setExecutor(evidenceCmd);
-        getCommand("evidence").setTabCompleter(evidenceCmd);
+        registerCmd("evidence", evidenceCmd, evidenceCmd);
         
         RedemptionCommand redemptionCmd = new RedemptionCommand(this);
-        getCommand("redemption").setExecutor(redemptionCmd);
-        getCommand("redemption").setTabCompleter(redemptionCmd);
+        registerCmd("redemption", redemptionCmd, redemptionCmd);
         
         HWIDCommand hwidCmd = new HWIDCommand(this);
-        getCommand("hwid").setExecutor(hwidCmd);
-        getCommand("hwid").setTabCompleter(hwidCmd);
+        registerCmd("hwid", hwidCmd, hwidCmd);
         
         // V4.5 Commands
         TicketCommand ticketCmd = new TicketCommand(this);
-        getCommand("ticket").setExecutor(ticketCmd);
-        getCommand("ticket").setTabCompleter(ticketCmd);
+        registerCmd("ticket", ticketCmd, ticketCmd);
         
         VerifyCommand verifyCmd = new VerifyCommand(this);
-        getCommand("verify").setExecutor(verifyCmd);
-        getCommand("verify").setTabCompleter(verifyCmd);
-        getCommand("unlink").setExecutor(verifyCmd);
-        getCommand("discordinfo").setExecutor(verifyCmd);
-        getCommand("whois").setExecutor(verifyCmd);
+        registerCmd("verify", verifyCmd, verifyCmd);
+        registerCmd("unlink", verifyCmd, null);
+        registerCmd("discordinfo", verifyCmd, null);
+        registerCmd("whois", verifyCmd, null);
         
         // V5.0 Commands
         MaintenanceCommand maintenanceCmd = new MaintenanceCommand(this);
-        getCommand("maintenance").setExecutor(maintenanceCmd);
-        getCommand("maintenance").setTabCompleter(maintenanceCmd);
+        registerCmd("maintenance", maintenanceCmd, maintenanceCmd);
         
         if (roleSyncManager != null) {
             RoleSyncCommand roleSyncCmd = new RoleSyncCommand(this);
-            getCommand("rolesync").setExecutor(roleSyncCmd);
-            getCommand("rolesync").setTabCompleter(roleSyncCmd);
+            registerCmd("rolesync", roleSyncCmd, roleSyncCmd);
         }
         
         // V5.1 Commands
         NetworkCommand networkCmd = new NetworkCommand(this);
-        getCommand("network").setExecutor(networkCmd);
-        getCommand("network").setTabCompleter(networkCmd);
+        registerCmd("network", networkCmd, networkCmd);
         
         CaseCommand caseCmd = new CaseCommand(this);
-        getCommand("case").setExecutor(caseCmd);
-        getCommand("case").setTabCompleter(caseCmd);
+        registerCmd("case", caseCmd, caseCmd);
         
         RiskCommand riskCmd = new RiskCommand(this);
-        getCommand("risk").setExecutor(riskCmd);
-        getCommand("risk").setTabCompleter(riskCmd);
+        registerCmd("risk", riskCmd, riskCmd);
         
         AICommand aiCmd = new AICommand(this);
-        getCommand("ai").setExecutor(aiCmd);
-        getCommand("ai").setTabCompleter(aiCmd);
+        registerCmd("ai", aiCmd, aiCmd);
     }
     
     private void registerListeners() {
-        // Player join/quit listeners
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new PlayerQuitListener(this), this);
-        
-        // Chat listener for mutes and staff chat
         getServer().getPluginManager().registerEvents(new ChatListener(this), this);
-        
-        // Freeze listener
         getServer().getPluginManager().registerEvents(new FreezeListener(this), this);
-        
-        // Command listener for muted players
         getServer().getPluginManager().registerEvents(new CommandListener(this), this);
-        
-        // GUI listener
         getServer().getPluginManager().registerEvents(new GUIListener(this), this);
     }
     
     private void hookIntoPlugins() {
-        // PlaceholderAPI
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new PlaceholderAPIHook(this).register();
             log(Level.INFO, "§aHooked into PlaceholderAPI!");
@@ -523,42 +539,55 @@ public class LiteBansReborn extends JavaPlugin {
     }
     
     private void initializeNotifiers() {
-        // Discord
         if (configManager.getBoolean("discord.enabled")) {
             discordNotifier = new DiscordNotifier(this);
             log(Level.INFO, "§aDiscord notifications enabled!");
         }
         
-        // Telegram
         if (configManager.getBoolean("telegram.enabled")) {
             telegramNotifier = new TelegramNotifier(this);
             log(Level.INFO, "§aTelegram notifications enabled!");
         }
     }
     
+    /**
+     * Start scheduled tasks (tracked for proper reload)
+     */
     private void startScheduledTasks() {
         // Point decay task (runs every hour)
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+        scheduledTasks.add(Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             if (configManager.getBoolean("points.enabled")) {
                 pointManager.decayPoints();
             }
-        }, 20L * 60 * 60, 20L * 60 * 60);
+        }, 20L * 60 * 60, 20L * 60 * 60));
         
         // Cache cleanup task (runs every 5 minutes)
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+        scheduledTasks.add(Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             cacheManager.cleanup();
-        }, 20L * 60 * 5, 20L * 60 * 5);
+        }, 20L * 60 * 5, 20L * 60 * 5));
         
         // Warning expiry task (runs every 6 hours)
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+        scheduledTasks.add(Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             warnManager.expireOldWarnings();
-        }, 20L * 60 * 60 * 6, 20L * 60 * 60 * 6);
+        }, 20L * 60 * 60 * 6, 20L * 60 * 60 * 6));
+    }
+    
+    /**
+     * Stop all scheduled tasks
+     */
+    private void stopScheduledTasks() {
+        scheduledTasks.forEach(BukkitTask::cancel);
+        scheduledTasks.clear();
     }
     
     /**
      * Reload the plugin configuration
      */
     public void reload() {
+        // Stop current scheduled tasks
+        stopScheduledTasks();
+        
+        // Reload configurations
         configManager.reload();
         messagesManager.reload();
         templateManager.loadTemplates();
@@ -567,18 +596,73 @@ public class LiteBansReborn extends JavaPlugin {
         // Reinitialize notifiers
         if (discordNotifier != null) {
             discordNotifier.shutdown();
+            discordNotifier = null;
         }
         if (telegramNotifier != null) {
             telegramNotifier.shutdown();
+            telegramNotifier = null;
         }
         initializeNotifiers();
+        
+        // Reload HWID Manager
+        if (configManager.getBoolean("hardware-ban.enabled", false)) {
+            if (hwidManager == null) {
+                hwidManager = new HWIDManager(this);
+                log(Level.INFO, "Enabled HWID system");
+            }
+        } else {
+            if (hwidManager != null) {
+                hwidManager.shutdown();
+                hwidManager = null;
+                log(Level.INFO, "Disabled HWID system");
+            }
+        }
+        
+        // Reload Web Panel
+        if (webPanelServer != null) {
+            webPanelServer.stop();
+            webPanelServer = null;
+        }
+        if (configManager.getBoolean("web-panel.enabled", false)) {
+            webPanelServer = new WebPanelServer(this);
+            webPanelServer.start();
+        }
+        
+        // Reload Anti-VPN
+        if (vpnManager != null) {
+            vpnManager.shutdown();
+            vpnManager = null;
+        }
+        if (configManager.getBoolean("anti-vpn.enabled", false)) {
+            vpnManager = new VPNManager(this);
+        }
+        
+        // Reload Client Detector
+        if (clientDetector != null) {
+            clientDetector.shutdown();
+            clientDetector = null;
+        }
+        if (configManager.getBoolean("client-detection.enabled", true)) {
+            clientDetector = new ClientDetector(this);
+        }
+        
+        // Restart scheduled tasks with new config
+        startScheduledTasks();
     }
     
     /**
-     * Log a message to the console
+     * Log a message to the console (with precompiled regex for performance)
      */
     public void log(Level level, String message) {
-        getLogger().log(level, ColorUtil.translate(message));
+        String cleanMessage = COLOR_PATTERN.matcher(message).replaceAll("");
+        getLogger().log(level, cleanMessage);
+    }
+    
+    /**
+     * Log a message with colors to console sender (supports colors)
+     */
+    public void logColored(String message) {
+        Bukkit.getConsoleSender().sendMessage("[LiteBansReborn] " + ColorUtil.translate(message));
     }
     
     /**
@@ -586,190 +670,68 @@ public class LiteBansReborn extends JavaPlugin {
      */
     public void debug(String message) {
         if (configManager != null && configManager.getBoolean("general.debug")) {
-            log(Level.INFO, "§7[DEBUG] " + message);
+            log(Level.INFO, "[DEBUG] " + message);
         }
     }
     
-    // Getters
-    public static LiteBansReborn getInstance() {
-        return instance;
-    }
+    // ==================== GETTERS ====================
     
-    public static LiteBansRebornAPI getAPI() {
-        return api;
-    }
+    public static LiteBansReborn getInstance() { return instance; }
+    public static LiteBansRebornAPI getAPI() { return api; }
     
-    public ConfigManager getConfigManager() {
-        return configManager;
-    }
+    public ConfigManager getConfigManager() { return configManager; }
+    public MessagesManager getMessagesManager() { return messagesManager; }
+    public DatabaseManager getDatabaseManager() { return databaseManager; }
+    public CacheManager getCacheManager() { return cacheManager; }
     
-    public MessagesManager getMessagesManager() {
-        return messagesManager;
-    }
+    public BanManager getBanManager() { return banManager; }
+    public MuteManager getMuteManager() { return muteManager; }
+    public WarnManager getWarnManager() { return warnManager; }
+    public KickManager getKickManager() { return kickManager; }
+    public FreezeManager getFreezeManager() { return freezeManager; }
     
-    public DatabaseManager getDatabaseManager() {
-        return databaseManager;
-    }
+    public ReportManager getReportManager() { return reportManager; }
+    public GhostMuteManager getGhostMuteManager() { return ghostMuteManager; }
+    public SnapshotManager getSnapshotManager() { return snapshotManager; }
+    public AppealManager getAppealManager() { return appealManager; }
+    public NoteManager getNoteManager() { return noteManager; }
+    public HistoryManager getHistoryManager() { return historyManager; }
+    public AltManager getAltManager() { return altManager; }
+    public PointManager getPointManager() { return pointManager; }
+    public TemplateManager getTemplateManager() { return templateManager; }
+    public GeoIPManager getGeoIPManager() { return geoIPManager; }
     
-    public CacheManager getCacheManager() {
-        return cacheManager;
-    }
+    public DiscordNotifier getDiscordNotifier() { return discordNotifier; }
+    public TelegramNotifier getTelegramNotifier() { return telegramNotifier; }
+    public VPNManager getVPNManager() { return vpnManager; }
+    public ClientDetector getClientDetector() { return clientDetector; }
     
-    public BanManager getBanManager() {
-        return banManager;
-    }
-    
-    public MuteManager getMuteManager() {
-        return muteManager;
-    }
-    
-    public WarnManager getWarnManager() {
-        return warnManager;
-    }
-    
-    public KickManager getKickManager() {
-        return kickManager;
-    }
-    
-    public FreezeManager getFreezeManager() {
-        return freezeManager;
-    }
-    
-    public ReportManager getReportManager() {
-        return reportManager;
-    }
-    
-    public GhostMuteManager getGhostMuteManager() {
-        return ghostMuteManager;
-    }
-    
-    public SnapshotManager getSnapshotManager() {
-        return snapshotManager;
-    }
-    
-    public AppealManager getAppealManager() {
-        return appealManager;
-    }
-    
-    public NoteManager getNoteManager() {
-        return noteManager;
-    }
-    
-    public HistoryManager getHistoryManager() {
-        return historyManager;
-    }
-    
-    public AltManager getAltManager() {
-        return altManager;
-    }
-    
-    public PointManager getPointManager() {
-        return pointManager;
-    }
-    
-    public TemplateManager getTemplateManager() {
-        return templateManager;
-    }
-    
-    public GeoIPManager getGeoIPManager() {
-        return geoIPManager;
-    }
-    
-    public DiscordNotifier getDiscordNotifier() {
-        return discordNotifier;
-    }
-    
-    public TelegramNotifier getTelegramNotifier() {
-        return telegramNotifier;
-    }
-    
-    public VPNManager getVPNManager() {
-        return vpnManager;
-    }
-    
-    public ClientDetector getClientDetector() {
-        return clientDetector;
-    }
-    
-    public boolean isChatMuted() {
-        return chatMuted;
-    }
-    
-    public void setChatMuted(boolean chatMuted) {
-        this.chatMuted = chatMuted;
-    }
+    public boolean isChatMuted() { return chatMuted; }
+    public void setChatMuted(boolean chatMuted) { this.chatMuted = chatMuted; }
     
     // V4.0 Getters
-    public EvidenceManager getEvidenceManager() {
-        return evidenceManager;
-    }
-    
-    public RateLimitManager getRateLimitManager() {
-        return rateLimitManager;
-    }
-    
-    public RedemptionManager getRedemptionManager() {
-        return redemptionManager;
-    }
-    
-    public HWIDManager getHWIDManager() {
-        return hwidManager;
-    }
-    
-    public WebPanelServer getWebPanelServer() {
-        return webPanelServer;
-    }
+    public EvidenceManager getEvidenceManager() { return evidenceManager; }
+    public RateLimitManager getRateLimitManager() { return rateLimitManager; }
+    public RedemptionManager getRedemptionManager() { return redemptionManager; }
+    public HWIDManager getHWIDManager() { return hwidManager; }
+    public WebPanelServer getWebPanelServer() { return webPanelServer; }
     
     // V4.5 Getters
-    public DiscordBotManager getDiscordBotManager() {
-        return discordBotManager;
-    }
-    
-    public TicketManager getTicketManager() {
-        return ticketManager;
-    }
-    
-    public VerificationManager getVerificationManager() {
-        return verificationManager;
-    }
-    
-    public ChatFilterManager getChatFilterManager() {
-        return chatFilterManager;
-    }
+    public DiscordBotManager getDiscordBotManager() { return discordBotManager; }
+    public TicketManager getTicketManager() { return ticketManager; }
+    public VerificationManager getVerificationManager() { return verificationManager; }
+    public ChatFilterManager getChatFilterManager() { return chatFilterManager; }
     
     // V5.0 Getters
-    public MaintenanceManager getMaintenanceManager() {
-        return maintenanceManager;
-    }
-    
-    public RoleSyncManager getRoleSyncManager() {
-        return roleSyncManager;
-    }
-    
-    public AIManager getAIManager() {
-        return aiManager;
-    }
+    public MaintenanceManager getMaintenanceManager() { return maintenanceManager; }
+    public RoleSyncManager getRoleSyncManager() { return roleSyncManager; }
+    public AIManager getAIManager() { return aiManager; }
     
     // V5.1 Getters
-    public SocialNetworkManager getSocialNetworkManager() {
-        return socialNetworkManager;
-    }
+    public SocialNetworkManager getSocialNetworkManager() { return socialNetworkManager; }
+    public CaseFileManager getCaseFileManager() { return caseFileManager; }
+    public CrossServerManager getCrossServerManager() { return crossServerManager; }
+    public PredictiveManager getPredictiveManager() { return predictiveManager; }
     
-    public CaseFileManager getCaseFileManager() {
-        return caseFileManager;
-    }
-    
-    public CrossServerManager getCrossServerManager() {
-        return crossServerManager;
-    }
-    
-    public PredictiveManager getPredictiveManager() {
-        return predictiveManager;
-    }
-    
-    public long getStartTime() {
-        return startTime;
-    }
-    
-    private long startTime = System.currentTimeMillis();
+    public long getStartTime() { return startTime; }
 }

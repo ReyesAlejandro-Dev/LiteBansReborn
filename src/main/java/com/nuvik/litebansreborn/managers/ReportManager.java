@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.time.Instant;
+import com.nuvik.litebansreborn.models.Report;
+import com.nuvik.litebansreborn.models.Report.ReportStatus;
 
 public class ReportManager {
 
@@ -42,18 +45,39 @@ public class ReportManager {
         });
     }
 
+
+    
     /**
-     * Get pending reports
+     * Get all reports (all statuses)
      */
-    public CompletableFuture<List<Report>> getPendingReports(int limit, int offset) {
+    public CompletableFuture<List<Report>> getAllReports(int page, int limit) {
+        return getAllReports("all", page, limit);
+    }
+
+    /**
+     * Get all reports with filters for Web Panel
+     */
+    public CompletableFuture<List<Report>> getAllReports(String status, int page, int perPage) {
         return plugin.getDatabaseManager().queryAsync(conn -> {
-            String sql = "SELECT * FROM " + plugin.getDatabaseManager().getTable("reports") + 
-                         " WHERE status = 'pending' ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            String sql;
+            if (status == null || status.equals("all")) {
+                sql = "SELECT * FROM " + plugin.getDatabaseManager().getTable("reports") +
+                        " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            } else {
+                sql = "SELECT * FROM " + plugin.getDatabaseManager().getTable("reports") +
+                        " WHERE status = ? ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            }
             
             List<Report> reports = new ArrayList<>();
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setInt(1, limit);
-                stmt.setInt(2, offset);
+                if (status == null || status.equals("all")) {
+                    stmt.setInt(1, perPage);
+                    stmt.setInt(2, (page - 1) * perPage);
+                } else {
+                    stmt.setString(1, status);
+                    stmt.setInt(2, perPage);
+                    stmt.setInt(3, (page - 1) * perPage);
+                }
                 
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {
@@ -62,6 +86,36 @@ public class ReportManager {
                 }
             }
             return reports;
+        });
+    }
+
+    /**
+     * Get pending reports
+     */
+    public CompletableFuture<List<Report>> getPendingReports(int limit, int offset) {
+        return getAllReports("pending", offset / limit + 1, limit);
+    }
+
+    public CompletableFuture<Integer> getTotalReportsCount(String status) {
+        return plugin.getDatabaseManager().queryAsync(conn -> {
+            String sql;
+            if (status == null || status.equals("all")) {
+                sql = "SELECT COUNT(*) FROM " + plugin.getDatabaseManager().getTable("reports");
+            } else {
+                sql = "SELECT COUNT(*) FROM " + plugin.getDatabaseManager().getTable("reports") + " WHERE status = ?";
+            }
+            
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                if (status != null && !status.equals("all")) {
+                    stmt.setString(1, status);
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            }
+            return 0;
         });
     }
     
@@ -128,30 +182,14 @@ public class ReportManager {
             UUID.fromString(rs.getString("reported_uuid")),
             rs.getString("reported_name"),
             rs.getString("reason"),
-            rs.getString("created_at"), // Simplification, handle timestamp properly if needed
-            rs.getString("status")
+            null, // Category (not in this table version)
+            rs.getString("server"),
+            rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toInstant() : Instant.now(),
+            ReportStatus.fromId(rs.getString("status")),
+            rs.getTimestamp("handled_at") != null ? rs.getTimestamp("handled_at").toInstant() : null,
+            rs.getString("handled_by_uuid") != null ? UUID.fromString(rs.getString("handled_by_uuid")) : null,
+            rs.getString("handled_by_name"),
+            rs.getString("resolution")
         );
-    }
-    
-    public static class Report {
-        public final int id;
-        public final UUID reporterUuid;
-        public final String reporterName;
-        public final UUID reportedUuid;
-        public final String reportedName;
-        public final String reason;
-        public final String date;
-        public final String status;
-        
-        public Report(int id, UUID reporterUuid, String reporterName, UUID reportedUuid, String reportedName, String reason, String date, String status) {
-            this.id = id;
-            this.reporterUuid = reporterUuid;
-            this.reporterName = reporterName;
-            this.reportedUuid = reportedUuid;
-            this.reportedName = reportedName;
-            this.reason = reason;
-            this.date = date;
-            this.status = status;
-        }
     }
 }

@@ -275,27 +275,75 @@ public class HistoryManager {
         });
     }
     
+    /**
+     * Parse a Punishment from ResultSet using centralized method
+     */
     private Punishment parsePunishment(ResultSet rs) throws SQLException {
-        return new Punishment(
-            rs.getLong("id"),
-            PunishmentType.fromId(rs.getString("type")),
-            rs.getString("target_uuid") != null ? UUID.fromString(rs.getString("target_uuid")) : null,
-            rs.getString("target_name"),
-            rs.getString("target_ip"),
-            UUID.fromString(rs.getString("executor_uuid")),
-            rs.getString("executor_name"),
-            rs.getString("reason"),
-            rs.getString("server"),
-            rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toInstant() : null,
-            rs.getTimestamp("expires_at") != null ? rs.getTimestamp("expires_at").toInstant() : null,
-            rs.getBoolean("active"),
-            rs.getTimestamp("removed_at") != null ? rs.getTimestamp("removed_at").toInstant() : null,
-            rs.getString("removed_by_uuid") != null ? UUID.fromString(rs.getString("removed_by_uuid")) : null,
-            rs.getString("removed_by_name"),
-            rs.getString("remove_reason"),
-            rs.getBoolean("silent"),
-            rs.getBoolean("ip_based")
-        );
+        return Punishment.fromResultSet(rs);
+    }
+    
+    /**
+     * Get all punishments with pagination and type filter
+     */
+    public CompletableFuture<List<Punishment>> getAllPunishments(String type, int page, int perPage) {
+        return plugin.getDatabaseManager().queryAsync(conn -> {
+            String sql;
+            if (type == null || type.equals("all")) {
+                sql = "SELECT * FROM " + plugin.getDatabaseManager().getTable("punishments") +
+                        " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            } else {
+                sql = "SELECT * FROM " + plugin.getDatabaseManager().getTable("punishments") +
+                        " WHERE type LIKE ? ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            }
+            
+            List<Punishment> history = new ArrayList<>();
+            
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                if (type == null || type.equals("all")) {
+                    stmt.setInt(1, perPage);
+                    stmt.setInt(2, (page - 1) * perPage);
+                } else {
+                    stmt.setString(1, "%" + type + "%");
+                    stmt.setInt(2, perPage);
+                    stmt.setInt(3, (page - 1) * perPage);
+                }
+                
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        history.add(parsePunishment(rs));
+                    }
+                }
+            }
+            return history;
+        });
+    }
+    
+    /**
+     * Get total punishment count for pagination
+     */
+    public CompletableFuture<Integer> getTotalPunishmentCount(String type) {
+        return plugin.getDatabaseManager().queryAsync(conn -> {
+            String sql;
+            if (type == null || type.equals("all")) {
+                sql = "SELECT COUNT(*) FROM " + plugin.getDatabaseManager().getTable("punishments");
+            } else {
+                sql = "SELECT COUNT(*) FROM " + plugin.getDatabaseManager().getTable("punishments") +
+                        " WHERE type LIKE ?";
+            }
+            
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                if (type != null && !type.equals("all")) {
+                    stmt.setString(1, "%" + type + "%");
+                }
+                
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            }
+            return 0;
+        });
     }
     
     /**

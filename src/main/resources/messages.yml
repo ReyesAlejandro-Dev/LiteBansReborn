@@ -15,6 +15,7 @@ general:
   console-only: "&cThis command can only be used from console."
   invalid-syntax: "&cInvalid syntax. Usage: &e%usage%"
   invalid-duration: "&cInvalid duration format. Examples: 1d, 2h, 30m, 1w"
+  invalid-number: "&cInvalid number format."
   reload-success: "&aConfiguration reloaded successfully!"
   reload-failed: "&cFailed to reload configuration. Check console for errors."
   database-error: "&cA database error occurred. Please try again later."
@@ -23,6 +24,7 @@ general:
   cannot-punish-exempt: "&cYou cannot punish this player."
   already-punished: "&cThis player is already %punishment%."
   not-punished: "&cThis player is not %punishment%."
+  error: "&cAn error occurred. Please try again."
   
 # ┌─────────────────────────────────────────────────────────────────────────────────┐
 # │                              Ban Messages                                       │
@@ -51,8 +53,11 @@ ban:
   # IP Ban
   ip:
     usage: "&cUsage: /ipban <player|ip> [duration] [reason]"
+    invalid-ip: "&cInvalid IP address or player not found."
+
     success: "&aSuccessfully IP banned &e%target%&a."
     invalid-ip: "&cInvalid IP address format."
+    no-ip-found: "&cCould not find a known IP address for this player. They may need to join the server first."
   
   # Broadcast formats
   broadcast:
@@ -696,6 +701,32 @@ ai:
   auto-mute: "&8[&cAI&8] &e%player% &7auto-muted for &c%duration% &7(%reason%)"
   auto-warn: "&8[&cAI&8] &e%player% &7auto-warned: &f%reason%"
 
+  # Help & Usage
+  help:
+    - "&8&m----------------------------------------"
+    - "&6🤖 AI Commands"
+    - "&8&m----------------------------------------"
+    - "  &e/ai status &7- Check AI status"
+    - "  &e/ai toxicity <message> &7- Analyze toxicity"
+    - "  &e/ai analyze <player> &7- Analyze player"
+    - "  &e/ai appeal <player> <reason> <text> &7- Review appeal"
+    - "&8&m----------------------------------------"
+  
+  status:
+    info:
+      - "&8&m----------------------------------------"
+      - "&6🤖 AI Status"
+      - "&8&m----------------------------------------"
+      - "  &7Status: %enabled%"
+      - "  &7Provider: &f%provider%"
+      - "  &7Model: &f%model%"
+      - "&8&m----------------------------------------"
+
+  usage:
+    toxicity: "&cUsage: /ai toxicity <message>"
+    analyze: "&cUsage: /ai analyze <player>"
+    appeal: "&cUsage: /ai appeal <player> <reason> <text>"
+
 # ╔═══════════════════════════════════════════════════════════════════════════════╗
 # ║                           v5.1 - NEW MESSAGES                                  ║
 # ╚═══════════════════════════════════════════════════════════════════════════════╝
@@ -732,4 +763,442 @@ predictive:
   prediction-alert: "&8[&cPredictive&8] &e%player% &7has &c%prediction%% &7chance of ban in 7 days"
   analysis-complete: "&a✓ Analysis complete for &e%player%"
 
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                           Main Command Messages                                 │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+main-command:
+  # Reload
+  reload-success: "&aConfiguration and messages reloaded successfully!"
+  
+  # Import/Export
+  import-coming-soon: "&eImport system is coming soon!"
+  export-coming-soon: "&eExport system is coming soon!"
+  
+  # Debug
+  debug:
+    header: "&8&m----------------------------------------"
+    status: "  &7Debug Mode: %status%"
+    database: "  &7Database: &f%type%"
+    cache: "  &7Cache: &f%players% players, %bans% bans, %mutes% mutes"
+    managers-header: "&6📦 Managers Status:"
+    footer: "&8&m----------------------------------------"
+  
+  # Info
+  info:
+    - "&8&m----------------------------------------"
+    - "&c&lLiteBansReborn &8- &7v%version%"
+    - "&7Advanced Punishment Management System"
+    - ""
+    - "  &7Server: &f%server%"
+    - "  &7Database: &f%database%"
+    - "  &7Uptime: &f%uptime%"
+    - ""
+    - "  &7Cached Objects:"
+    - "    &7Players: &f%players_cached%"
+    - "    &7Active Bans: &f%bans_cached%"
+    - "    &7Active Mutes: &f%mutes_cached%"
+    - "    &7Frozen: &f%frozen_cached%"
+    - "&8&m----------------------------------------"
+  
+  # Stats
+  stats:
+    loading: "&7Loading statistics... please wait."
+    result:
+      - "&8&m----------------------------------------"
+      - "&c&lPunishment Statistics"
+      - "&8&m----------------------------------------"
+      - "  &7Total Bans: &c%total_bans% &7(Active: &a%active_bans%&7)"
+      - "  &7Total Mutes: &c%total_mutes% &7(Active: &a%active_mutes%&7)"
+      - "  &7Total Kicks: &e%total_kicks%"
+      - "  &7Total Warnings: &e%total_warns%"
+      - ""
+      - "  &7Total Punishments: &f%total%"
+      - "&8&m----------------------------------------"
+  
+  # AntiVPN Administration
+  antivpn:
+    not-initialized: "&cAnti-VPN is not initialized properly!"
+    enabled: "&aAnti-VPN system has been &2ENABLED&a."
+    disabled: "&cAnti-VPN system has been &4DISABLED&c."
+    alerts-status: "&7Anti-VPN Alerts are currently: %status%"
+    alerts-changed: "&7Anti-VPN Alerts have been %status%&7."
+    action-current: "&7Current Action: &f%action%"
+    action-set: "&aAction set to: &f%action%"
+    action-invalid: "&cInvalid action! Use: KICK, WARN, ALLOW, NONE"
+    cache-cleared: "&aAnti-VPN cache has been cleared."
+    providers: "&7Loaded providers: &f%count%"
+    whitelist-header: "&6🛡 Whitelisted IPs (&f%count%&6):"
+    whitelist-added: "&aAdded &f%ip% &ato whitelist."
+    whitelist-removed: "&cRemoved &f%ip% &cfrom whitelist."
+    
+    status:
+      - "&8&m----------------------------------------"
+      - "&c&lAnti-VPN Status"
+      - "&8&m----------------------------------------"
+      - "  &7System Status: %enabled%"
+      - "  &7Alerts: %alerts%"
+      - "  &7Action: &f%action%"
+      - ""
+      - "  &7Providers: &f%providers%"
+      - "  &7Cached IPs: &f%cache_size%"
+      - "  &7Whitelisted: &f%whitelisted%"
+      - "&8&m----------------------------------------"
+      
+    help:
+      - "&8&m----------------------------------------"
+      - "&c&lAnti-VPN Administration"
+      - "&8&m----------------------------------------"
+      - "  &e/lbr antivpn status &8- &7Show system status"
+      - "  &e/lbr antivpn <on|off> &8- &7Toggle system"
+      - "  &e/lbr antivpn alerts <on|off> &8- &7Toggle alerts"
+      - "  &e/lbr antivpn action <type> &8- &7Set action"
+      - "  &e/lbr antivpn whitelist <add|remove> <ip> &8- &7Manage whitelist"
+      - "  &e/lbr antivpn clearcache &8- &7Clear IP cache"
+      - "&8&m----------------------------------------"
+  
+  # Help Pages
+  help:
+    header:
+      - "&8&m----------------------------------------"
+      - "&c&lLiteBansReborn &8- &7v%version%"
+      - "&7Advanced Punishment System"
+      - "&8&m----------------------------------------"
+    
+    footer:
+      - "&8&m----------------------------------------"
+      - "&7Use &e/lbr <1-4> &7to navigate pages"
+      - "&8&m----------------------------------------"
+      
+    page-1:
+      - "&6&l▸ Page 1/4 - Core Punishments"
+      - ""
+      - "&e/ban <player> [duration] [reason] &8- &7Ban a player"
+      - "&e/tempban <player> <duration> [reason] &8- &7Temporarily ban"
+      - "&e/ipban <player|ip> [duration] [reason] &8- &7IP ban"
+      - "&e/unban <player> &8- &7Unban a player"
+      - ""
+      - "&e/mute <player> [duration] [reason] &8- &7Mute a player"
+      - "&e/tempmute <player> <duration> [reason] &8- &7Temporarily mute"
+      - "&e/unmute <player> &8- &7Unmute a player"
+      - ""
+      - "&e/kick <player> [reason] &8- &7Kick a player"
+      - "&e/warn <player> [reason] &8- &7Warn a player"
+      
+    page-2:
+      - "&6&l▸ Page 2/4 - Staff Tools"
+      - ""
+      - "&e/freeze <player> [reason] &8- &7Freeze a player"
+      - "&e/unfreeze <player> &8- &7Unfreeze a player"
+      - "&e/staffchat <message> &8- &7Staff chat"
+      - "&e/ghostmute <player> &8- &7Ghost mute"
+      - ""
+      - "&e/history <player> &8- &7View punishment history"
+      - "&e/alts <player> &8- &7Check player alts"
+      - "&e/checkban <player> &8- &7Check if banned"
+      - "&e/report <player> <reason> &8- &7Report a player"
+      - "&e/punish <player> &8- &7Open punishment GUI"
+      
+    page-3:
+      - "&6&l▸ Page 3/4 - Advanced Features (v4.0+)"
+      - ""
+      - "&e/hwid <ban|unban|check|alts> <player> &8- &7HWID banning"
+      - "&e/evidence <add|view|list> <player> &8- &7Evidence system"
+      - "&e/redemption <start|info> <player> &8- &7Redemption games"
+      - ""
+      - "&e/ticket <create|list|view|close> &8- &7Ticket system"
+      - "&e/verify [code] &8- &7Discord verification"
+      - "&e/note <player> <text> &8- &7Add staff note"
+      - "&e/notes <player> &8- &7View staff notes"
+      
+    page-4:
+      - "&6&l▸ Page 4/4 - v5.0+ Intelligence Features"
+      - ""
+      - "&e/maintenance <on|off|add|remove|list> &8- &7Maintenance mode"
+      - "&e/rolesync <sync|add|remove|list> &8- &7Discord role sync"
+      - ""
+      - "&d/network <alts|connections|check|banned> &8- &7Social analysis"
+      - "&d/case <view|list|evidence|create> &8- &7Case files"
+      - "&d/risk <check|analyze|top> &8- &7Predictive moderation"
+      - "&d/ai <status|toxicity|analyze|appeal> &8- &7AI moderation"
+      - ""
+      - "&c/lbr reload &8- &7Reload configuration"
+      - "&c/lbr info &8- &7Show plugin info"
+      - "&c/lbr stats &8- &7Show punishment stats"
+      - "&c/lbr antivpn &8- &7Anti-VPN management"
 
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                            Hardware ID (HWID)                                   │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+hwid:
+  check-usage: "&cUsage: /hwid check <player>"
+  ban-usage: "&cUsage: /hwid ban <hwid> <reason>"
+  unban-usage: "&cUsage: /hwid unban <hwid>"
+  alts-usage: "&cUsage: /hwid alts <player>"
+  fingerprint-usage: "&cUsage: /hwid fingerprint <player>"
+  banned: "&aHWID banned successfully.\n&7HWID: &f%hwid%\n&7Reason: &f%reason%"
+  ban-failed: "&cFailed to ban HWID. Check logs for details."
+  unbanned: "&aSuccessfully unbanned HWID: &f%hwid%"
+  unban-failed: "&cFailed to unban HWID."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                            Check Commands                                       │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+checkban:
+  usage: "&cUsage: /checkban <player>"
+  checking: "&7Checking ban status for &e%player%&7..."
+  banned:
+    header: "&c&l✗ %player% is BANNED"
+    reason: "&7Reason: &f%reason%"
+    by: "&7Banned by: &f%executor%"
+    date: "&7Date: &f%date%"
+    permanent: "&7Duration: &cPermanent"
+    expires: "&7Expires: &f%date% &7(&e%duration%&7)"
+    id: "&7Ban ID: &8#%id%"
+  not-banned: "&a&l✓ %player% is NOT banned"
+
+checkmute:
+  usage: "&cUsage: /checkmute <player>"
+  checking: "&7Checking mute status for &e%player%&7..."
+  muted:
+    header: "&c&l✗ %player% is MUTED"
+    reason: "&7Reason: &f%reason%"
+    by: "&7Muted by: &f%executor%"
+    permanent: "&7Duration: &cPermanent"
+    expires: "&7Expires in: &e%duration%"
+  not-muted: "&a&l✓ %player% is NOT muted"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                            List Commands                                        │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+banlist:
+  header: "&6&l═══ Active Bans ═══ &7Page %page%/%total_pages% &8(%total_bans% total)"
+  empty: "&7No active bans."
+  entry: "&c▸ %player% &7- %reason% &8[%duration%] &7by %executor%"
+  permanent: "&cPermanent"
+  footer: "&7Use &e/banlist %page% &7to navigate"
+
+mutelist:
+  header: "&6&l═══ Active Mutes ═══ &7Page %page%/%total_pages% &8(%total_mutes% total)"
+  empty: "&7No active mutes."
+  entry: "&c▸ %player% &7- %reason% &8[%duration%] &7by %executor%"
+  footer: "&7Use &e/mutelist %page% &7to navigate"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                            Warnings Commands                                    │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+warnings:
+  usage: "&cUsage: /warnings <player>"
+  header: "&6&l═══ Warnings for %player% ═══ &7(%count% active)"
+  empty: "&a%player% has no active warnings."
+  entry: "&e#%id% &7- %reason% &8by %executor% on %date%"
+
+unwarn:
+  usage: "&cUsage: /unwarn <player> [id]"
+  success: "&aRemoved warning from &e%player%&a."
+  success-id: "&aRemoved warning &e#%id% &afrom &e%player%&a."
+  not-found: "&cNo warnings found for %player%."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                            Alt Detection Commands                               │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+alts:
+  usage: "&cUsage: /alts <player>"
+  searching: "&7Searching for alternate accounts of &e%player%&7..."
+  header: "&6&l═══ Alts for %player% ═══ &7(%count% found)"
+  empty: "&aNo alternate accounts found."
+  entry: "&7▸ &f%name% %status%"
+  no-data: "&cNo IP data available for %player%."
+  status:
+    banned: "&c[BANNED]"
+    clean: "&a[CLEAN]"
+  notify:
+    join: "&c&l⚠ &e%player% &7may be an alt of banned player &c%banned%"
+    detected: "&e%player% &7has &c%count% &7possible alt accounts"
+
+dupeip:
+  usage: "&cUsage: /dupeip <player|ip>"
+  header: "&6&l═══ Players sharing IP ═══"
+  empty: "&7No players found."
+  entry: "&7▸ &f%player%"
+  no-data: "&cNo IP data available."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                            IP Unban/Unmute Commands                             │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+unbanip:
+  usage: "&cUsage: /unbanip <ip>"
+  invalid-ip: "&cInvalid IP address format."
+  success: "&aSuccessfully unbanned IP: &e%ip%"
+  not-found: "&cIP &e%ip% &cis not banned."
+  broadcast: "&a%ip% &7has been &aunbanned &7by &a%executor%"
+
+unmuteip:
+  usage: "&cUsage: /unmuteip <ip>"
+  invalid-ip: "&cInvalid IP address format."
+  success: "&aSuccessfully unmuted IP: &e%ip%"
+  not-found: "&cIP &e%ip% &cis not muted."
+  broadcast: "&a%ip% &7has been &aunmuted &7by &a%executor%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                            Staff History & Rollback                             │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+staffhistory:
+  usage: "&cUsage: /staffhistory <staff>"
+  header: "&6&l═══ Punishments by %staff% ═══"
+  empty: "&7No punishments issued by this staff member."
+  entry: "&e%type% &7→ &f%target% &7- %reason%"
+
+rollback:
+  usage: "&cUsage: /rollback <staff> [time]"
+  confirm: "&c⚠ This will rollback &e%count% &cpunishments by &e%staff%&c. Type the command again to confirm."
+  success: "&aRolled back &e%count% &apunishments by &e%staff%&a."
+  empty: "&cNo punishments to rollback."
+  broadcast: "&c%executor% &7rolled back &c%count% &7punishments by &c%staff%"
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                            Reports System                                       │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+reports:
+  # Usage message for /report command
+  usage: "&cUsage: /report <player> <reason>"
+  # When player tries to report themselves
+  cannot-report-self: "&cYou cannot report yourself!"
+  # Success message after submitting report
+  success: "&aYour report has been submitted!"
+  # Confirmation with player name
+  confirm: "&7Reported &e%player% &7successfully. Staff will review it soon."
+  # List view header
+  header: "&6&l═══ Pending Reports ═══ &7Page %page%"
+  # When there are no reports
+  empty: "&aNo pending reports!"
+  # Each report entry
+  entry: "&e#%id% &f%reported% &7reported by &e%reporter% &8- %reason%"
+  # Staff notification
+  notify: "&e&l⚠ &c%reporter% &7reported &c%reported%&7: &f%reason%"
+  # Notify about pending count
+  pending: "&e&l⚠ &7There are &e%count% &7pending reports. Use &e/reports &7to view."
+
+handlereport:
+  usage: "&cUsage: /handlereport <id> <accept|deny|ignore>"
+  success: "&aReport &e#%id% &amarked as &e%action%&a."
+  not-found: "&cReport not found."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                            Appeals System                                       │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+appeal:
+  usage: "&cUsage: /appeal <message>"
+  success: "&aYour appeal has been submitted! Please wait for a staff response."
+  no-punishment: "&cYou have no active punishments to appeal."
+  cooldown: "&cYou must wait &e%time% &cbefore submitting another appeal."
+
+appeals:
+  header: "&6&l═══ Pending Appeals ═══ &7Page %page%"
+  empty: "&aNo pending appeals!"
+  entry: "&e#%id% &f%player% &7- %type% &8- %message%"
+  notify: "&e&l⚠ &7There are &e%count% &7pending appeals. Use &e/appeals &7to view."
+
+handleappeal:
+  usage: "&cUsage: /handleappeal <id> <accept|deny> [response]"
+  accepted: "&aAppeal &e#%id% &aaccepted. Player has been unpunished."
+  denied: "&cAppeal &e#%id% &cdenied."
+  not-found: "&cAppeal not found."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                            Notes System                                         │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+note:
+  usage: "&cUsage: /note <player> <note>"
+  success: "&aNote added for &e%player%&a."
+
+notes:
+  usage: "&cUsage: /notes <player>"
+  header: "&6&l═══ Notes for %player% ═══ &7(%count% notes)"
+  empty: "&7No notes for this player."
+  entry: "&e#%id% &7by &f%author% &8on %date%\n  &7→ &f%content%"
+
+delnote:
+  usage: "&cUsage: /delnote <id>"
+  success: "&aNote &e#%id% &adeleted."
+  not-found: "&cNote not found."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                            Allow Player Command                                 │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+allowplayer:
+  usage: "&cUsage: /allowplayer <player>"
+  success: "&a%player% &acan now bypass IP bans."
+  already-allowed: "&e%player% &7is already allowed."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                            GeoIP Command                                        │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+geoip:
+  usage: "&cUsage: /geoip <player>"
+  not-online: "&cPlayer must be online."
+  header: "&6&l═══ GeoIP for %player% ═══"
+  country: "&7Country: &f%country%"
+  city: "&7City: &f%city%"
+  isp: "&7ISP: &f%isp%"
+  not-available: "&cGeoIP data not available."
+
+# ┌─────────────────────────────────────────────────────────────────────────────────┐
+# │                     Standalone Command Messages (aliases)                       │
+# │         These are for commands that use root-level message keys                 │
+# └─────────────────────────────────────────────────────────────────────────────────┘
+
+# /unwarn command messages
+unwarn:
+  usage: "&cUsage: /unwarn <player> [warning_id]"
+  success: "&aSuccessfully removed latest warning from &e%player%&a."
+  success-id: "&aSuccessfully removed warning &e#%id% &afrom &e%player%&a."
+  not-found: "&c%player% has no warnings to remove."
+
+# /warnings command messages
+warnings:
+  usage: "&cUsage: /warnings <player>"
+  header: "&6&l═══ Warnings for %player% ═══ &7(%count% warnings)"
+  empty: "&a%player% has no warnings."
+  entry: "&e#%id% &7- &f%reason% &8by &7%executor% &8(%date%)"
+
+# /unban command messages
+unban:
+  usage: "&cUsage: /unban <player>"
+  success: "&aSuccessfully unbanned &e%player%&a."
+  not-banned: "&c%player% is not banned."
+  broadcast: "&e%player% &7has been unbanned by &e%executor%&7."
+
+# /unbanip command messages
+unbanip:
+  usage: "&cUsage: /unbanip <ip>"
+  invalid-ip: "&cInvalid IP address format."
+  success: "&aSuccessfully unbanned IP &e%ip%&a."
+  not-found: "&cIP &e%ip% &cis not banned."
+
+# /unmute command messages
+unmute:
+  usage: "&cUsage: /unmute <player>"
+  success: "&aSuccessfully unmuted &e%player%&a."
+  not-muted: "&c%player% is not muted."
+  player-notification: "&aYou have been unmuted by &e%executor%&a."
+  broadcast: "&e%player% &7has been unmuted by &e%executor%&7."
+
+# /unmuteip command messages  
+unmuteip:
+  usage: "&cUsage: /unmuteip <ip>"
+  invalid-ip: "&cInvalid IP address format."
+  success: "&aSuccessfully unmuted IP &e%ip%&a."
+  not-found: "&cIP &e%ip% &cis not muted."
+
+# /unfreeze command messages
+unfreeze:
+  usage: "&cUsage: /unfreeze <player>"
+  success: "&aSuccessfully unfroze &e%player%&a."
+  not-frozen: "&c%player% is not frozen."
+
+# /staffhistory command messages
+staffhistory:
+  usage: "&cUsage: /staffhistory <staff> [page]"
+  header: "&6&l═══ Staff History for %staff% ═══ &7Page %page%"
+  empty: "&a%staff% has no punishment history."
+  entry: "&e%type% &f%target% &7- &f%reason% &8(%date%)"

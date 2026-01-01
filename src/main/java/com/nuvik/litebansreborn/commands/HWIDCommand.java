@@ -53,6 +53,7 @@ public class HWIDCommand implements CommandExecutor, TabCompleter {
         switch (action) {
             case "check" -> handleCheck(sender, args);
             case "ban" -> handleBan(sender, args);
+            case "unban" -> handleUnban(sender, args);
             case "alts" -> handleAlts(sender, args);
             case "fingerprint" -> handleFingerprint(sender, args);
             case "status" -> handleStatus(sender);
@@ -64,13 +65,13 @@ public class HWIDCommand implements CommandExecutor, TabCompleter {
 
     private void handleCheck(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.translate("&cUsage: /hwid check <player>"));
+            sender.sendMessage(plugin.getMessagesManager().get("hwid.check-usage", "prefix", plugin.getMessagesManager().getPrefix()));
             return;
         }
 
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
-            sender.sendMessage(ColorUtil.translate("&cPlayer not found or not online."));
+            sender.sendMessage(plugin.getMessagesManager().get("general.player-not-found"));
             return;
         }
 
@@ -97,16 +98,18 @@ public class HWIDCommand implements CommandExecutor, TabCompleter {
 
         // Check for HWID ban
         manager.checkBanned(target.getUniqueId()).thenAccept(ban -> {
-            if (ban != null) {
-                sender.sendMessage(ColorUtil.translate("&c⚠ This HWID is BANNED!"));
-                sender.sendMessage(ColorUtil.translate("&7Reason: &f" + ban.reason));
-            }
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (ban != null) {
+                    sender.sendMessage(ColorUtil.translate("&c⚠ This HWID is BANNED!"));
+                    sender.sendMessage(ColorUtil.translate("&7Reason: &f" + ban.reason));
+                }
+            });
         });
     }
 
     private void handleBan(CommandSender sender, String[] args) {
         if (args.length < 3) {
-            sender.sendMessage(ColorUtil.translate("&cUsage: /hwid ban <hwid> <reason>"));
+            sender.sendMessage(plugin.getMessagesManager().get("hwid.ban-usage", "prefix", plugin.getMessagesManager().getPrefix()));
             return;
         }
 
@@ -116,19 +119,36 @@ public class HWIDCommand implements CommandExecutor, TabCompleter {
         HWIDManager manager = plugin.getHWIDManager();
         manager.banHWID(hwid, reason, PlayerUtil.getExecutorUUID(sender), PlayerUtil.getExecutorName(sender))
             .thenAccept(success -> {
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    if (success) {
+                        sender.sendMessage(plugin.getMessagesManager().get("hwid.banned", "hwid", hwid.substring(0, Math.min(16, hwid.length())) + "...", "reason", reason));
+                    } else {
+                        sender.sendMessage(plugin.getMessagesManager().get("hwid.ban-failed"));
+                    }
+                });
+            });
+    }
+
+    private void handleUnban(CommandSender sender, String[] args) {
+        if (args.length < 2) {
+             sender.sendMessage(plugin.getMessagesManager().get("hwid.unban-usage", "prefix", plugin.getMessagesManager().getPrefix()));
+             return;
+        }
+        String hwid = args[1];
+        plugin.getHWIDManager().unbanHWID(hwid).thenAccept(success -> {
+            Bukkit.getScheduler().runTask(plugin, () -> {
                 if (success) {
-                    sender.sendMessage(ColorUtil.translate("&aHWID banned successfully."));
-                    sender.sendMessage(ColorUtil.translate("&7HWID: &f" + hwid.substring(0, Math.min(16, hwid.length())) + "..."));
-                    sender.sendMessage(ColorUtil.translate("&7Reason: &f" + reason));
+                    sender.sendMessage(plugin.getMessagesManager().get("hwid.unbanned", "hwid", hwid));
                 } else {
-                    sender.sendMessage(ColorUtil.translate("&cFailed to ban HWID."));
+                    sender.sendMessage(plugin.getMessagesManager().get("hwid.unban-failed"));
                 }
             });
+        });
     }
 
     private void handleAlts(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.translate("&cUsage: /hwid alts <player>"));
+            sender.sendMessage(plugin.getMessagesManager().get("hwid.alts-usage", "prefix", plugin.getMessagesManager().getPrefix()));
             return;
         }
 
@@ -143,7 +163,7 @@ public class HWIDCommand implements CommandExecutor, TabCompleter {
             @SuppressWarnings("deprecation")
             org.bukkit.OfflinePlayer offline = Bukkit.getOfflinePlayer(args[1]);
             if (!offline.hasPlayedBefore()) {
-                sender.sendMessage(ColorUtil.translate("&cPlayer not found."));
+                sender.sendMessage(plugin.getMessagesManager().get("general.player-not-found"));
                 return;
             }
             targetUUID = offline.getUniqueId();
@@ -194,13 +214,13 @@ public class HWIDCommand implements CommandExecutor, TabCompleter {
 
     private void handleFingerprint(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(ColorUtil.translate("&cUsage: /hwid fingerprint <player>"));
+            sender.sendMessage(plugin.getMessagesManager().get("hwid.fingerprint-usage", "prefix", plugin.getMessagesManager().getPrefix()));
             return;
         }
 
         Player target = Bukkit.getPlayer(args[1]);
         if (target == null) {
-            sender.sendMessage(ColorUtil.translate("&cPlayer not found or not online."));
+            sender.sendMessage(plugin.getMessagesManager().get("general.player-not-found"));
             return;
         }
 
@@ -227,6 +247,7 @@ public class HWIDCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(ColorUtil.translate("&8&m----------------------------------------"));
         sender.sendMessage(ColorUtil.translate("&c/hwid check <player> &8- &7View HWID info"));
         sender.sendMessage(ColorUtil.translate("&c/hwid ban <hwid> <reason> &8- &7Ban by HWID"));
+         sender.sendMessage(ColorUtil.translate("&c/hwid unban <hwid> &8- &7Unban HWID"));
         sender.sendMessage(ColorUtil.translate("&c/hwid alts <player> &8- &7Find linked accounts"));
         sender.sendMessage(ColorUtil.translate("&c/hwid fingerprint <player> &8- &7Update fingerprint"));
         sender.sendMessage(ColorUtil.translate("&c/hwid status &8- &7System status"));
@@ -236,17 +257,14 @@ public class HWIDCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("check", "ban", "alts", "fingerprint", "status").stream()
+            return Arrays.asList("check", "ban", "unban", "alts", "fingerprint", "status").stream()
                 .filter(s -> s.startsWith(args[0].toLowerCase()))
                 .collect(Collectors.toList());
         }
         
         if (args.length == 2 && (args[0].equalsIgnoreCase("check") || 
             args[0].equalsIgnoreCase("alts") || args[0].equalsIgnoreCase("fingerprint"))) {
-            return Bukkit.getOnlinePlayers().stream()
-                .map(Player::getName)
-                .filter(name -> name.toLowerCase().startsWith(args[1].toLowerCase()))
-                .collect(Collectors.toList());
+            return PlayerUtil.getOnlineAndOfflinePlayerNames(args[1]);
         }
         
         return new ArrayList<>();

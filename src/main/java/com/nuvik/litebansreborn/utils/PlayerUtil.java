@@ -62,14 +62,32 @@ public class PlayerUtil {
             }
         }
 
-        // First check online players
+        // First check online players (Exact)
         Player online = Bukkit.getPlayerExact(name);
         if (online != null) {
             return online;
         }
         
-        // Get offline player
-        return Bukkit.getOfflinePlayer(name);
+        // Check online players (Case-insensitive)
+        Player onlineInsensitive = Bukkit.getPlayer(name);
+        if (onlineInsensitive != null) {
+            return onlineInsensitive;
+        }
+        
+        // Check offline players (Case-insensitive correction if possible)
+        OfflinePlayer offline = Bukkit.getOfflinePlayer(name);
+        if (offline.hasPlayedBefore()) {
+            return offline;
+        }
+        
+        // Try to fix casing for offline players
+        for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
+            if (op.getName() != null && op.getName().equalsIgnoreCase(name)) {
+                return op;
+            }
+        }
+        
+        return offline;
     }
     
     /**
@@ -247,5 +265,33 @@ public class PlayerUtil {
         }
         
         return parts[0] + "." + parts[1] + "." + parts[2];
+    }
+
+    /**
+     * Get a list of matching player names (online first, then offline up to a limit)
+     */
+    public static java.util.List<String> getOnlineAndOfflinePlayerNames(String partial) {
+        java.util.List<String> matches = new java.util.ArrayList<>();
+        String partialLower = partial.toLowerCase();
+        
+        // Online players
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (p.getName().toLowerCase().startsWith(partialLower)) {
+                matches.add(p.getName());
+            }
+        }
+        
+        // Offline players (limit to 50 total matches for performance)
+        if (matches.size() < 50) {
+             for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+                 String name = p.getName();
+                 if (name != null && name.toLowerCase().startsWith(partialLower)) {
+                     if (!matches.contains(name)) matches.add(name);
+                 }
+                 if (matches.size() >= 50) break;
+             }
+        }
+        
+        return matches;
     }
 }

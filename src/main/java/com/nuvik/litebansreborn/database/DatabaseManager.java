@@ -61,6 +61,11 @@ public class DatabaseManager {
         config.setMaxLifetime(plugin.getConfigManager().getInt("database.pool.max-lifetime"));
         config.setConnectionTimeout(plugin.getConfigManager().getInt("database.pool.connection-timeout"));
         
+        // Reduce clock leap warnings by extending housekeeping period
+        // This prevents warnings when server is paused (debugging, minimized, etc.)
+        config.setKeepaliveTime(60000); // 60 seconds
+        config.addDataSourceProperty("socketTimeout", "30");
+        
         config.setPoolName("LiteBansReborn-Pool");
         
         dataSource = new HikariDataSource(config);
@@ -170,14 +175,23 @@ public class DatabaseManager {
                     uuid VARCHAR(36) PRIMARY KEY,
                     last_known_name VARCHAR(32) NOT NULL,
                     last_known_ip VARCHAR(45),
+                    country VARCHAR(64),
                     first_join TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     punishment_points DOUBLE DEFAULT 0,
                     ip_ban_exempt BOOLEAN DEFAULT FALSE,
                     INDEX idx_last_known_name (last_known_name),
-                    INDEX idx_last_known_ip (last_known_ip)
+                    INDEX idx_last_known_ip (last_known_ip),
+                    INDEX idx_country (country)
                 )
                 """.formatted(tablePrefix));
+            
+            // Try to add country column if table already exists (migration)
+            try {
+                execute(conn, "ALTER TABLE %splayers ADD COLUMN country VARCHAR(64)".formatted(tablePrefix));
+            } catch (Exception ignored) {
+                // Column already exists
+            }
             
             // Player IPs table (for alt detection)
             execute(conn, """
@@ -315,14 +329,15 @@ public class DatabaseManager {
                 sql = sql.replace("TIMESTAMP", "TEXT");
                 sql = sql.replace("BOOLEAN", "INTEGER");
                 // Remove INDEX definitions (SQLite uses different syntax)
-                sql = sql.replaceAll(",\\s*INDEX [^,)]+", "");
-                sql = sql.replaceAll(",\\s*UNIQUE KEY [^,)]+", "");
+                sql = sql.replaceAll(",\\s*INDEX\\s+[^,)]+\\s*\\([^)]+\\)", "");
+                sql = sql.replaceAll(",\\s*UNIQUE KEY\\s+[^,)]+\\s*\\([^)]+\\)", "");
                 break;
             case H2:
                 // H2 doesn't support inline INDEX definitions well - remove them
-                sql = sql.replaceAll(",\\s*INDEX [a-z_]+ \\([^)]+\\)", "");
+                // We use a more specific regex to avoid removing parts of other definitions
+                sql = sql.replaceAll(",\\s*INDEX\\s+[a-zA-Z0-9_]+\\s*\\([^)]+\\)", "");
                 // Convert UNIQUE KEY to just UNIQUE
-                sql = sql.replaceAll(",\\s*UNIQUE KEY [a-z_]+ (\\([^)]+\\))", ", UNIQUE $1");
+                sql = sql.replaceAll(",\\s*UNIQUE KEY\\s+[a-zA-Z0-9_]+\\s*(\\([^)]+\\))", ", UNIQUE $1");
                 break;
             case POSTGRESQL:
                 // PostgreSQL uses SERIAL instead of AUTO_INCREMENT
@@ -399,10 +414,48 @@ public class DatabaseManager {
     }
     
     /**
+     * Generate UPSERT SQL compatible with the current database type
+     * @param table Table name (without prefix)
+     * @param columns List of column names for INSERT
+     * @param updateColumns List of column names to update on conflict
+     * @param conflictColumns Columns that define uniqueness (for ON CONFLICT)
+     * @return SQL string with placeholders
+     */
+    public String getUpsertSQL(String table, String[] columns, String[] updateColumns, String[] conflictColumns) {
+        String tableName = getTable(table);
+        String columnList = String.join(", ", columns);
+        String valuePlaceholders = String.join(", ", java.util.Collections.nCopies(columns.length, "?"));
+        
+        StringBuilder updateClause = new StringBuilder();
+        for (int i = 0; i < updateColumns.length; i++) {
+            if (i > 0) updateClause.append(", ");
+            updateClause.append(updateColumns[i]).append(" = ?");
+        }
+        
+        return switch (databaseType) {
+            case MYSQL, MARIADB -> 
+                "INSERT INTO " + tableName + " (" + columnList + ") VALUES (" + valuePlaceholders + ") " +
+                "ON DUPLICATE KEY UPDATE " + updateClause;
+            case POSTGRESQL -> {
+                String conflictList = String.join(", ", conflictColumns);
+                StringBuilder pgUpdate = new StringBuilder();
+                for (int i = 0; i < updateColumns.length; i++) {
+                    if (i > 0) pgUpdate.append(", ");
+                    pgUpdate.append(updateColumns[i]).append(" = EXCLUDED.").append(updateColumns[i]);
+                }
+                yield "INSERT INTO " + tableName + " (" + columnList + ") VALUES (" + valuePlaceholders + ") " +
+                      "ON CONFLICT(" + conflictList + ") DO UPDATE SET " + pgUpdate;
+            }
+            default -> // SQLite, H2
+                "INSERT OR REPLACE INTO " + tableName + " (" + columnList + ") VALUES (" + valuePlaceholders + ")";
+        };
+    }
+    
+    /**
      * Database types enum
      */
     public enum DatabaseType {
-        MYSQL, MARIADB, POSTGRESQL, SQLITE, H2, MONGODB
+        MYSQL, MARIADB, POSTGRESQL, SQLITE, H2
     }
     
     /**

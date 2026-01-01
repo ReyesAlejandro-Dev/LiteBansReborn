@@ -58,6 +58,73 @@ public class AppealManager {
         });
     }
     
+
+    
+    /**
+     * Get all appeals (all statuses)
+     */
+    public CompletableFuture<List<Appeal>> getAllAppeals(int page, int limit) {
+        return getAllAppeals("all", page, limit);
+    }
+
+    /**
+     * Get all appeals with filter for Web Panel
+     */
+    public CompletableFuture<List<Appeal>> getAllAppeals(String status, int page, int perPage) {
+        return plugin.getDatabaseManager().queryAsync(conn -> {
+            String sql;
+            if (status == null || status.equals("all")) {
+                sql = "SELECT * FROM " + plugin.getDatabaseManager().getTable("appeals") +
+                        " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            } else {
+                sql = "SELECT * FROM " + plugin.getDatabaseManager().getTable("appeals") +
+                        " WHERE status = ? ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            }
+            
+            List<Appeal> appeals = new ArrayList<>();
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                if (status == null || status.equals("all")) {
+                    stmt.setInt(1, perPage);
+                    stmt.setInt(2, (page - 1) * perPage);
+                } else {
+                    stmt.setString(1, status);
+                    stmt.setInt(2, perPage);
+                    stmt.setInt(3, (page - 1) * perPage);
+                }
+                
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        appeals.add(parseAppeal(rs));
+                    }
+                }
+            }
+            return appeals;
+        });
+    }
+
+    public CompletableFuture<Integer> getTotalAppealsCount(String status) {
+        return plugin.getDatabaseManager().queryAsync(conn -> {
+            String sql;
+            if (status == null || status.equals("all")) {
+                sql = "SELECT COUNT(*) FROM " + plugin.getDatabaseManager().getTable("appeals");
+            } else {
+                sql = "SELECT COUNT(*) FROM " + plugin.getDatabaseManager().getTable("appeals") + " WHERE status = ?";
+            }
+            
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                if (status != null && !status.equals("all")) {
+                    stmt.setString(1, status);
+                }
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1);
+                    }
+                }
+            }
+            return 0;
+        });
+    }
+    
     /**
      * Get pending appeals
      */

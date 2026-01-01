@@ -40,20 +40,37 @@ public class BanCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         
-        String targetName = args[0];
+        String targetArg = args[0];
         boolean silent = false;
         Long duration = null;
         StringBuilder reasonBuilder = new StringBuilder();
         int startIndex = 1;
         
-        // Check for silent flag
-        if (args.length > 1 && args[1].equalsIgnoreCase("-s")) {
-            if (!sender.hasPermission("litebansreborn.silent")) {
-                plugin.getMessagesManager().send(sender, "general.no-permission");
-                return true;
-            }
-            silent = true;
-            startIndex = 2;
+        // Check for silent flag (can be anywhere typically, but here we check arg 1 or as part of reason)
+        // For simplicity and standard command structure, we check if arg[0] starts with -s (flag) but target is usually first.
+        // Let's stick to standard <player> first.
+        
+        // Handle flags if passed as first arg (e.g. /ban -s player)
+        if (targetArg.equalsIgnoreCase("-s")) {
+             if (args.length < 2) {
+                 plugin.getMessagesManager().send(sender, "ban.usage");
+                 return true;
+             }
+             if (!sender.hasPermission("litebansreborn.silent")) {
+                 plugin.getMessagesManager().send(sender, "general.no-permission");
+                 return true;
+             }
+             silent = true;
+             targetArg = args[1];
+             startIndex = 2;
+        } else if (args.length > 1 && args[1].equalsIgnoreCase("-s")) {
+            // /ban player -s
+             if (!sender.hasPermission("litebansreborn.silent")) {
+                 plugin.getMessagesManager().send(sender, "general.no-permission");
+                 return true;
+             }
+             silent = true;
+             startIndex = 2;
         }
         
         // Parse duration if provided
@@ -63,7 +80,7 @@ public class BanCommand implements CommandExecutor, TabCompleter {
                 duration = parsedDuration;
                 startIndex++;
             } else if (parsedDuration == -1) {
-                // Permanent
+                // Permanent explicit
                 duration = null;
                 startIndex++;
             }
@@ -75,7 +92,19 @@ public class BanCommand implements CommandExecutor, TabCompleter {
             reasonBuilder.append(args[i]);
         }
         
-        String reason = reasonBuilder.length() > 0 ? reasonBuilder.toString() : null;
+        // Check for silent in reason (-s flag at end)
+        String reasonStr = reasonBuilder.toString();
+        if (reasonStr.contains("-s")) {
+             if (sender.hasPermission("litebansreborn.silent")) {
+                 silent = true;
+                 reasonStr = reasonStr.replace("-s", "").trim();
+             }
+        }
+        
+        final String reason = reasonStr.isEmpty() ? null : reasonStr;
+        final boolean finalSilent = silent;
+        final String finalTargetName = targetArg;
+        final Long finalDuration = duration;
         
         // Check for permanent permission
         if (duration == null && !sender.hasPermission("litebansreborn.ban.permanent")) {
@@ -83,103 +112,124 @@ public class BanCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         
-        // Get target
-        OfflinePlayer target = PlayerUtil.getOfflinePlayer(targetName);
-        if (target == null || !target.hasPlayedBefore()) {
-            // Try anyway with the name
+        // Async processing for lookup
+        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
             UUID targetUUID = null;
+            String targetName = finalTargetName;
             String ip = null;
             
-            // If online, get their info
-            Player onlineTarget = Bukkit.getPlayerExact(targetName);
-            if (onlineTarget != null) {
-                targetUUID = onlineTarget.getUniqueId();
-                targetName = onlineTarget.getName();
-                ip = PlayerUtil.getPlayerIP(onlineTarget);
+            // 1. Check if input is UUID
+            try {
+                targetUUID = UUID.fromString(finalTargetName);
+                // It's a valid UUID. Try to get name.
+                OfflinePlayer p = Bukkit.getOfflinePlayer(targetUUID);
+                if (p.getName() != null) targetName = p.getName();
+            } catch (IllegalArgumentException e) {
+                // Not a UUID, proceed as name
             }
             
-            // If it's a valid UUID, accept it even if player hasn't played before
-            if (PlayerUtil.isUUID(targetName)) {
-                UUID uuid = UUID.fromString(targetName);
-                // Try to get name if possible, otherwise use UUID
-                String name = Bukkit.getOfflinePlayer(uuid).getName();
-                if (name == null) name = targetName;
-                
-                executeBan(sender, uuid, name, null, duration, reason, silent);
-                return true;
-            }
-
+            // 2. If not UUID, try online player
             if (targetUUID == null) {
-                plugin.getMessagesManager().send(sender, "general.player-not-found", "player", targetName);
-                return true;
+                Player onlineTarget = Bukkit.getPlayerExact(finalTargetName);
+                if (onlineTarget != null) {
+                    targetUUID = onlineTarget.getUniqueId();
+                    targetName = onlineTarget.getName();
+                    ip = PlayerUtil.getPlayerIP(onlineTarget);
+                }
             }
             
-            executeBan(sender, targetUUID, targetName, ip, duration, reason, silent);
-        } else {
-            UUID targetUUID = target.getUniqueId();
-            targetName = target.getName() != null ? target.getName() : targetName;
-            
-            // Get IP if online
-            String ip = null;
-            Player onlineTarget = target.getPlayer();
-            if (onlineTarget != null) {
-                ip = PlayerUtil.getPlayerIP(onlineTarget);
+            // 3. If still null, try OfflinePlayer (hasPlayedBefore)
+            if (targetUUID == null) {
+                OfflinePlayer offlineTarget = Bukkit.getOfflinePlayer(finalTargetName);
+                if (offlineTarget.hasPlayedBefore()) {
+                     targetUUID = offlineTarget.getUniqueId();
+                     targetName = offlineTarget.getName();
+                }
             }
             
-            // Self check
+            // 4. Force lookup (Mojang API) if still not found and configured to do so?
+            // For now, if provided a Name that hasn't played, we can't easily get UUID without an API call.
+            // But if user provided a UUID (step 1), we have it.
+            
+            if (targetUUID == null) {
+                 // Try to resolve via internal cache/database history if possible
+                 // Or just fail if we can't find them.
+                 // NOTE: As requested, we support banning by direct UUID which is handled in step 1.
+                 
+                 // Final attempt: allow non-existent players if strict mode is off?
+                 // For now, fail with message.
+                 plugin.getMessagesManager().send(sender, "general.player-not-found", "player", finalTargetName);
+                 return;
+            }
+            
+            
+            // Check self/exempt
             if (sender instanceof Player && ((Player) sender).getUniqueId().equals(targetUUID)) {
                 plugin.getMessagesManager().send(sender, "general.cannot-punish-self");
-                return true;
+                return;
             }
-            
-            // Exempt check
-            if (onlineTarget != null && onlineTarget.hasPermission("litebansreborn.bypass.ban")) {
+             
+            // We need to check exempt permission. If offline, we can't easily check permissions unless using LuckPerms API.
+            // Basic online check:
+            Player onlineP = Bukkit.getPlayer(targetUUID);
+            if (onlineP != null && onlineP.hasPermission("litebansreborn.bypass.ban")) {
                 plugin.getMessagesManager().send(sender, "general.cannot-punish-exempt");
-                return true;
-            }
-            
-            executeBan(sender, targetUUID, targetName, ip, duration, reason, silent);
-        }
-        
-        return true;
-    }
-    
-    private void executeBan(CommandSender sender, UUID targetUUID, String targetName, String ip,
-                           Long duration, String reason, boolean silent) {
-        
-        UUID executorUUID = PlayerUtil.getExecutorUUID(sender);
-        String executorName = PlayerUtil.getExecutorName(sender);
-        
-        // Check if already banned
-        plugin.getBanManager().getActiveBan(targetUUID).thenAccept(existingBan -> {
-            if (existingBan != null && existingBan.isActiveAndValid()) {
-                plugin.getMessagesManager().send(sender, "general.already-punished", "punishment", "banned");
                 return;
             }
             
-            // Execute the ban
-            plugin.getBanManager().ban(targetUUID, targetName, ip, executorUUID, executorName,
-                    reason, duration, silent, false).thenAccept(ban -> {
-                
-                // Send success message
-                if (duration != null) {
-                    plugin.getMessagesManager().send(sender, "ban.success-temp",
-                            "player", targetName,
-                            "duration", TimeUtil.formatDuration(duration));
-                } else {
-                    plugin.getMessagesManager().send(sender, "ban.success", "player", targetName);
+            final UUID finalUUID = targetUUID;
+            final String finalName = targetName;
+            final String finalIP = ip;
+
+            // Execute Ban logic
+            plugin.getBanManager().getActiveBan(finalUUID).thenAccept(existingBan -> {
+                if (existingBan != null && existingBan.isActiveAndValid()) {
+                    plugin.getMessagesManager().send(sender, "general.already-punished", "punishment", "banned");
+                    return;
                 }
+                
+                plugin.getBanManager().ban(finalUUID, finalName, finalIP, PlayerUtil.getExecutorUUID(sender), PlayerUtil.getExecutorName(sender),
+                        reason, finalDuration, finalSilent, false).thenAccept(ban -> {
+                    
+                    if (finalDuration != null) {
+                        plugin.getMessagesManager().send(sender, "ban.success-temp",
+                                "player", finalName,
+                                "duration", TimeUtil.formatDuration(finalDuration));
+                    } else {
+                        plugin.getMessagesManager().send(sender, "ban.success", "player", finalName);
+                    }
+                });
             });
         });
+        
+        return true;
     }
-    
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return Bukkit.getOnlinePlayers().stream()
-                    .map(Player::getName)
-                    .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
-                    .collect(Collectors.toList());
+            String partial = args[0].toLowerCase();
+            List<String> matches = new ArrayList<>();
+            
+            // Online players
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.getName().toLowerCase().startsWith(partial)) {
+                    matches.add(p.getName());
+                }
+            }
+            
+            // Offline players (limit to 50 for performance)
+            if (matches.size() < 50) {
+                 for (OfflinePlayer p : Bukkit.getOfflinePlayers()) {
+                     String name = p.getName();
+                     if (name != null && name.toLowerCase().startsWith(partial)) {
+                         if (!matches.contains(name)) matches.add(name);
+                     }
+                     if (matches.size() >= 50) break;
+                 }
+            }
+            
+            return matches;
         } else if (args.length == 2) {
             List<String> completions = new ArrayList<>();
             completions.addAll(Arrays.asList("1h", "1d", "7d", "30d", "permanent", "-s"));

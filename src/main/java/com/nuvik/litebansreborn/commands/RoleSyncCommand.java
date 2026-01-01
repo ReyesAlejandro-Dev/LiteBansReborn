@@ -78,11 +78,13 @@ public class RoleSyncCommand implements CommandExecutor, TabCompleter {
             }
 
             plugin.getRoleSyncManager().fullSync(target.getUniqueId()).thenAccept(success -> {
-                if (success) {
-                    sender.sendMessage(ColorUtil.translate("&aSynced roles for &e" + args[1]));
-                } else {
-                    sender.sendMessage(ColorUtil.translate("&cFailed to sync roles."));
-                }
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    if (success) {
+                        sender.sendMessage(ColorUtil.translate("&aSynced roles for &e" + args[1]));
+                    } else {
+                        sender.sendMessage(ColorUtil.translate("&cFailed to sync roles."));
+                    }
+                });
             });
         }
     }

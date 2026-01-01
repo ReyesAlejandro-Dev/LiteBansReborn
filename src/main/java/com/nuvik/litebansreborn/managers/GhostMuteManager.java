@@ -83,7 +83,7 @@ public class GhostMuteManager {
             // providing a "recipients" list only controls WHO gets it, not WHAT they get.
             // So we will send a manual message to staff and exclude them from the normal event recipient list (which we already cleared)
             
-            String format = String.format(player.getDisplayName() + ": " + message); // Simple format for now
+            String format = player.getDisplayName() + ": " + message; // Simple concatenation, no String.format to avoid % issues
             // Better: use the event's format if possible, but async chat is tricky.
             
             for (Player p : plugin.getServer().getOnlinePlayers()) {

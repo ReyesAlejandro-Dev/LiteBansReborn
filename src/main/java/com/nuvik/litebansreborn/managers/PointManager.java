@@ -120,12 +120,14 @@ public class PointManager {
             // Calculate hourly decay (since this runs hourly)
             double hourlyDecay = decayPerDay / 24.0;
             
+            // Use CASE WHEN for cross-database compatibility instead of GREATEST/MAX
             String sql = "UPDATE " + plugin.getDatabaseManager().getTable("players") +
-                    " SET punishment_points = GREATEST(0, punishment_points - ?) " +
+                    " SET punishment_points = CASE WHEN punishment_points - ? < 0 THEN 0 ELSE punishment_points - ? END " +
                     "WHERE punishment_points > 0";
             
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setDouble(1, hourlyDecay);
+                stmt.setDouble(2, hourlyDecay);
                 int affected = stmt.executeUpdate();
                 
                 if (affected > 0) {
