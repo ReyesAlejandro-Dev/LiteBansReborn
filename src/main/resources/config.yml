@@ -1079,7 +1079,7 @@ ai:
   enabled: true
   
   # Groq API Key (get from https://console.groq.com)
-  groq-api-key: "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"
+  groq-api-key: ""
   
   # Model to use (llama-3.3-70b-versatile recommended)
   model: "llama-3.3-70b-versatile"
